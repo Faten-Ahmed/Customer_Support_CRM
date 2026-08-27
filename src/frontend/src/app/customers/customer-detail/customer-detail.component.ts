@@ -50,7 +50,7 @@ export class CustomerDetailComponent implements OnInit {
     this.customerService.getById(id).subscribe({
       next: c => {
         this.customer.set(c);
-        this.editForm.patchValue({ phone: c.phone, companyName: (c as any).companyName });
+        this.editForm.patchValue({ phone: c.phone, companyName: c.companyName });
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
@@ -63,7 +63,7 @@ export class CustomerDetailComponent implements OnInit {
 
   cancelEdit(): void {
     const c = this.customer();
-    if (c) this.editForm.patchValue({ phone: c.phone, companyName: (c as any).companyName });
+    if (c) this.editForm.patchValue({ phone: c.phone, companyName: c.companyName });
     this.editing.set(false);
   }
 

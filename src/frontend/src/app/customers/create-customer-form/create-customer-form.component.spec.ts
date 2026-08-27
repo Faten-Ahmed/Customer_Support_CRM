@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { CreateCustomerFormComponent } from './create-customer-form.component';
-import { CustomerService } from '../customer.service';
+import { CustomerService } from '../services/customer.service';
 
 describe('CreateCustomerFormComponent', () => {
   let fixture: ComponentFixture<CreateCustomerFormComponent>;

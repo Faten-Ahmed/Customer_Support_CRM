@@ -56,11 +56,6 @@
         </mat-cell>
       </ng-container>
 
-      <ng-container matColumnDef="tickets">
-        <mat-header-cell *matHeaderCellDef>Tickets</mat-header-cell>
-        <mat-cell *matCellDef="let c">{{ c.ticketCount }}</mat-cell>
-      </ng-container>
-
       <ng-container matColumnDef="createdAt">
         <mat-header-cell *matHeaderCellDef>Created</mat-header-cell>
         <mat-cell *matCellDef="let c">{{ c.createdAt | date:'mediumDate' }}</mat-cell>

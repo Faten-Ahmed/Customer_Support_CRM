@@ -45,7 +45,7 @@ export class CustomerListComponent implements OnInit, OnDestroy {
 
   page = 1;
   pageSize = 20;
-  displayedColumns = ['fullName', 'email', 'phone', 'vip', 'status', 'tickets', 'createdAt'];
+  displayedColumns = ['fullName', 'email', 'phone', 'vip', 'status', 'createdAt'];
 
   ngOnInit(): void {
     this.loadCustomers();
@@ -70,12 +70,12 @@ export class CustomerListComponent implements OnInit, OnDestroy {
       page: this.page,
       pageSize: this.pageSize,
       search: this.searchControl.value || undefined,
-      vipOnly: this.vipOnly() || undefined,
-      activeOnly: this.activeOnly() || undefined,
+      isVip: this.vipOnly() || undefined,
+      isActive: this.activeOnly() || undefined,
     }).subscribe({
       next: res => {
-        this.customers.set(res.data);
-        this.total.set(res.total);
+        this.customers.set(res.items);
+        this.total.set(res.meta.totalCount);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

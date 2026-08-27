@@ -31,10 +31,6 @@
                 <dd>{{ customer()!.phone || '—' }}</dd>
               </div>
               <div class="detail-item">
-                <dt>Tickets</dt>
-                <dd>{{ customer()!.ticketCount }}</dd>
-              </div>
-              <div class="detail-item">
                 <dt>Member Since</dt>
                 <dd>{{ customer()!.createdAt | date:'mediumDate' }}</dd>
               </div>

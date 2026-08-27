@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export interface Customer {
   id: string;
@@ -10,48 +11,77 @@ export interface Customer {
   companyName?: string;
   isVip: boolean;
   isActive: boolean;
-  ticketCount: number;
   createdAt: string;
+}
+
+export interface CreateCustomerDto {
+  fullName: string;
+  email: string;
+  phone?: string;
+  companyName?: string;
+}
+
+export interface UpdateCustomerDto {
+  fullName?: string;
+  phone?: string;
+  companyName?: string;
 }
 
 export interface CustomerListQuery {
   page: number;
   pageSize: number;
   search?: string;
-  vipOnly?: boolean;
-  activeOnly?: boolean;
+  isVip?: boolean;
+  isActive?: boolean;
+}
+
+export interface CustomerMeta {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
 }
 
 export interface CustomerPage {
-  data: Customer[];
-  total: number;
-  page: number;
-  pageSize: number;
+  items: Customer[];
+  meta: CustomerMeta;
 }
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
   private readonly http = inject(HttpClient);
+  private readonly baseUrl = '/api/v1/customers';
 
   list(query: CustomerListQuery): Observable<CustomerPage> {
     let params = new HttpParams()
       .set('page', String(query.page))
       .set('pageSize', String(query.pageSize));
     if (query.search) params = params.set('search', query.search);
-    if (query.vipOnly !== undefined) params = params.set('vipOnly', String(query.vipOnly));
-    if (query.activeOnly !== undefined) params = params.set('activeOnly', String(query.activeOnly));
-    return this.http.get<CustomerPage>('/api/v1/customers', { params });
+    if (query.isVip !== undefined) params = params.set('isVip', String(query.isVip));
+    if (query.isActive !== undefined) params = params.set('isActive', String(query.isActive));
+    return this.http.get<CustomerPage>(this.baseUrl, { params });
   }
 
   getById(id: string): Observable<Customer> {
-    return this.http.get<Customer>(`/api/v1/customers/${id}`);
+    return this.http.get<Customer>(`${this.baseUrl}/${id}`);
   }
 
-  update(id: string, changes: Partial<Customer>): Observable<Customer> {
-    return this.http.patch<Customer>(`/api/v1/customers/${id}`, changes);
+  create(dto: CreateCustomerDto): Observable<Customer> {
+    return this.http.post<Customer>(this.baseUrl, dto).pipe(
+      catchError((err: HttpErrorResponse) => {
+        if (err.status === 409) {
+          return throwError(() => ({ code: 'EMAIL_ALREADY_EXISTS', message: err.error?.errors?.[0]?.message ?? 'Email already exists' }));
+        }
+        return throwError(() => err);
+      })
+    );
+  }
+
+  update(id: string, dto: UpdateCustomerDto): Observable<Customer> {
+    return this.http.put<Customer>(`${this.baseUrl}/${id}`, dto);
   }
 
   deactivate(id: string): Observable<void> {
-    return this.http.delete<void>(`/api/v1/customers/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

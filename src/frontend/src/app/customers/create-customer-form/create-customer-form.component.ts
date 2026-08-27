@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { CustomerService } from '../customer.service';
+import { CustomerService, CreateCustomerDto } from '../services/customer.service';
 
 @Component({
   selector: 'app-create-customer-form',
@@ -101,7 +101,9 @@ export class CreateCustomerFormComponent {
       return;
     }
     this.submitting.set(true);
-    this.customerService.create(this.form.getRawValue()).subscribe({
+    const { fullName, email, phone, companyName } = this.form.getRawValue();
+    const dto: CreateCustomerDto = { fullName, email, ...(phone ? { phone } : {}), ...(companyName ? { companyName } : {}) };
+    this.customerService.create(dto).subscribe({
       next: customer => {
         this.submitting.set(false);
         this.snackBar.open('Customer created successfully.', 'Close', { duration: 4000 });

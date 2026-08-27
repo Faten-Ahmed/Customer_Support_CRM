@@ -16,7 +16,6 @@ const mockCustomer: Customer = {
   phone: '050-111-2222',
   isVip: true,
   isActive: true,
-  ticketCount: 5,
   createdAt: '2025-01-01',
 };
 

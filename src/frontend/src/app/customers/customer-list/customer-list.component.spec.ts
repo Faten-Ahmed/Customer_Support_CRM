@@ -7,13 +7,11 @@ import { CustomerListComponent } from './customer-list.component';
 import { CustomerService, CustomerPage } from '../services/customer.service';
 
 const mockPage: CustomerPage = {
-  data: [
-    { id: '1', fullName: 'Ali Hassan', email: 'ali@example.com', isVip: true, isActive: true, ticketCount: 3, createdAt: '2025-01-01' },
-    { id: '2', fullName: 'Sara Omar', email: 'sara@example.com', isVip: false, isActive: false, ticketCount: 0, createdAt: '2025-02-01' },
+  items: [
+    { id: '1', fullName: 'Ali Hassan', email: 'ali@example.com', isVip: true, isActive: true, createdAt: '2025-01-01' },
+    { id: '2', fullName: 'Sara Omar', email: 'sara@example.com', isVip: false, isActive: false, createdAt: '2025-02-01' },
   ],
-  total: 2,
-  page: 1,
-  pageSize: 20,
+  meta: { page: 1, pageSize: 20, totalCount: 2, totalPages: 1 },
 };
 
 describe('CustomerListComponent', () => {
@@ -54,7 +52,10 @@ describe('CustomerListComponent', () => {
   });
 
   it('should show empty state when total is 0', async () => {
-    mockCustomerService.list.mockReturnValue(of({ ...mockPage, data: [], total: 0 }));
+    mockCustomerService.list.mockReturnValue(of({
+      items: [],
+      meta: { page: 1, pageSize: 20, totalCount: 0, totalPages: 0 },
+    }));
     component.loadCustomers();
     fixture.detectChanges();
     await fixture.whenStable();
