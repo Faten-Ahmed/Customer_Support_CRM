@@ -235,13 +235,8 @@ public class CustomersController : ControllerBase
         var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
             ?? User.FindFirst("role")?.Value ?? string.Empty;
 
-        var requestingRole = roleClaim switch
-        {
-            "Admin" => UserRole.Admin,
-            "Manager" => UserRole.Manager,
-            "Agent" => UserRole.Agent,
-            _ => UserRole.Agent
-        };
+        if (!Enum.TryParse<UserRole>(roleClaim, ignoreCase: true, out var requestingRole))
+            return Forbid();
 
         try
         {

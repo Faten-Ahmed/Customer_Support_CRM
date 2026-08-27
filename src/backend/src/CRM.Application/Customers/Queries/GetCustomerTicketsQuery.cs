@@ -35,8 +35,9 @@ public class GetCustomerTicketsQueryHandler
     public async Task<PagedResult<CustomerTicketDto>> Handle(
         GetCustomerTicketsQuery query, CancellationToken ct)
     {
-        var customer = await _customers.FindByIdAsync(query.CustomerId, ct)
-            ?? throw new KeyNotFoundException($"Customer {query.CustomerId} not found.");
+        var customer = await _customers.FindByIdAsync(query.CustomerId, ct);
+        if (customer is null || !customer.IsActive)
+            throw new KeyNotFoundException($"Customer {query.CustomerId} not found.");
 
         IReadOnlyList<Guid>? departmentIds = null;
         if (query.RequestingUserRole == UserRole.Agent)

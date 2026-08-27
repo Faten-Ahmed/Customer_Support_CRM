@@ -80,6 +80,10 @@ public class GetCustomerTicketsQueryHandlerTests
             default);
 
         _users.Verify(u => u.GetDepartmentIdsAsync(agentId, default), Times.Once);
+        _tickets.Verify(r => r.ListByCustomerAsync(
+            customerId, null,
+            It.Is<IReadOnlyList<Guid>?>(ids => ids != null && ids.Contains(deptId)),
+            1, 20, default), Times.Once);
     }
 
     [Fact]
