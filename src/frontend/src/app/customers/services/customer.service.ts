@@ -42,4 +42,16 @@ export class CustomerService {
     if (query.activeOnly !== undefined) params = params.set('activeOnly', String(query.activeOnly));
     return this.http.get<CustomerPage>('/api/v1/customers', { params });
   }
+
+  getById(id: string): Observable<Customer> {
+    return this.http.get<Customer>(`/api/v1/customers/${id}`);
+  }
+
+  update(id: string, changes: Partial<Customer>): Observable<Customer> {
+    return this.http.patch<Customer>(`/api/v1/customers/${id}`, changes);
+  }
+
+  deactivate(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/v1/customers/${id}`);
+  }
 }
