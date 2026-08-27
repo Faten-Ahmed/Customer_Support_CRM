@@ -1,76 +1,65 @@
-<div class="flex flex-col h-screen overflow-hidden">
+<!-- Top progress bar -->
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" color="accent" class="progress-bar"></mat-progress-bar>
+}
 
-  <!-- Top progress bar -->
-  @if (loading()) {
-    <mat-progress-bar mode="indeterminate" color="accent" class="absolute top-0 left-0 right-0 z-50"></mat-progress-bar>
-  }
+<!-- Top toolbar -->
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="toggleSidenav()" [matTooltip]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+    <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
+  </button>
 
-  <!-- Top toolbar -->
-  <mat-toolbar color="primary" class="flex items-center gap-3 z-10 shadow">
-    <button mat-icon-button (click)="toggleSidenav()" [matTooltip]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
-      <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
-    </button>
+  <span class="toolbar-brand">CRM Support</span>
 
-    <span class="font-bold text-lg mr-auto">CRM Support</span>
+  <button mat-icon-button (click)="toggleAi()" matTooltip="AI Assistant">
+    <mat-icon>auto_awesome</mat-icon>
+  </button>
 
-    <!-- AI assistant toggle -->
-    <button mat-icon-button (click)="toggleAi()" matTooltip="AI Assistant">
-      <mat-icon>auto_awesome</mat-icon>
-    </button>
+  <button mat-icon-button matTooltip="Notifications">
+    <mat-icon matBadge="3" matBadgeColor="warn">notifications</mat-icon>
+  </button>
 
-    <!-- Notification bell -->
-    <button mat-icon-button matTooltip="Notifications">
-      <mat-icon matBadge="3" matBadgeColor="warn">notifications</mat-icon>
-    </button>
+  <button mat-button [matMenuTriggerFor]="userMenu">
+    <mat-icon>account_circle</mat-icon>
+    <span>{{ user?.fullName }}</span>
+    <span class="role-badge">{{ user?.role }}</span>
+  </button>
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item routerLink="/app/profile"><mat-icon>person</mat-icon> My Profile</button>
+    <button mat-menu-item routerLink="/app/settings"><mat-icon>settings</mat-icon> Settings</button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
+  </mat-menu>
+</mat-toolbar>
 
-    <!-- User menu -->
-    <button mat-button [matMenuTriggerFor]="userMenu" class="flex items-center gap-2">
-      <mat-icon>account_circle</mat-icon>
-      <span>{{ user?.fullName }}</span>
-      <span class="text-xs bg-white text-blue-700 font-semibold rounded px-1">{{ user?.role }}</span>
-    </button>
-    <mat-menu #userMenu="matMenu">
-      <button mat-menu-item routerLink="/app/profile"><mat-icon>person</mat-icon> My Profile</button>
-      <button mat-menu-item routerLink="/app/settings"><mat-icon>settings</mat-icon> Settings</button>
-      <mat-divider></mat-divider>
-      <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
-    </mat-menu>
-  </mat-toolbar>
+<!-- Sidenav + content -->
+<mat-sidenav-container>
+  <mat-sidenav mode="side" opened [style.width]="collapsed() ? '56px' : '220px'">
+    <nav class="sidenav-nav">
+      @for (item of visibleNavItems(); track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active-link"
+           class="nav-link"
+           [matTooltip]="collapsed() ? item.label : ''" matTooltipPosition="right">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (!collapsed()) {
+            <span>{{ item.label }}</span>
+          }
+        </a>
+      }
+    </nav>
+  </mat-sidenav>
 
-  <!-- Sidenav + content -->
-  <mat-sidenav-container class="flex-1 overflow-hidden">
-    <mat-sidenav
-      mode="side"
-      opened
-      [style.width]="collapsed() ? '56px' : '220px'"
-      class="transition-all duration-200 border-r bg-gray-900 text-white overflow-hidden">
-
-      <nav class="flex flex-col gap-1 pt-3">
-        @for (item of visibleNavItems(); track item.route) {
-          <a [routerLink]="item.route" routerLinkActive="bg-blue-700"
-             class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-700 rounded-lg mx-2 transition"
-             [matTooltip]="collapsed() ? item.label : ''" matTooltipPosition="right">
-            <mat-icon class="flex-shrink-0">{{ item.icon }}</mat-icon>
-            @if (!collapsed()) {
-              <span>{{ item.label }}</span>
-            }
-          </a>
-        }
-      </nav>
-    </mat-sidenav>
-
-    <mat-sidenav-content class="flex overflow-hidden">
-      <!-- Main content -->
-      <div class="flex-1 overflow-y-auto bg-gray-50">
+  <mat-sidenav-content>
+    <div class="content-wrap">
+      <div class="main-content">
         <router-outlet></router-outlet>
       </div>
 
-      <!-- AI assistant panel -->
       @if (aiOpen()) {
-        <div class="w-80 border-l flex-shrink-0 overflow-hidden">
+        <div class="ai-panel">
           <app-agent-ai-assistant></app-agent-ai-assistant>
         </div>
       }
-    </mat-sidenav-content>
-  </mat-sidenav-container>
-</div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

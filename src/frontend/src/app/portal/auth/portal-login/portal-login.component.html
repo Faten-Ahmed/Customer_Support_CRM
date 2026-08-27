@@ -1,0 +1,54 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+  @if (errorCode() === 'EMAIL_NOT_VERIFIED') {
+    <div data-testid="email-not-verified-msg" class="info-banner" role="alert">
+      Please verify your email before logging in.
+      @if (!resendSent()) {
+        <button mat-button type="button" data-testid="resend-verification-btn" (click)="resendVerification()">
+          Resend verification email
+        </button>
+      } @else {
+        <span> Verification email sent!</span>
+      }
+    </div>
+  }
+
+  @if (errorCode() && errorCode() !== 'EMAIL_NOT_VERIFIED') {
+    <div class="error-banner" data-testid="error-banner" role="alert">
+      Invalid email or password. Please try again.
+    </div>
+  }
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Email</mat-label>
+    <input matInput type="email" formControlName="email" autocomplete="email" />
+    @if (loginForm.controls['email'].hasError('required') && loginForm.controls['email'].touched) {
+      <mat-error>Email is required.</mat-error>
+    }
+    @if (loginForm.controls['email'].hasError('email') && loginForm.controls['email'].touched) {
+      <mat-error>Enter a valid email address.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Password</mat-label>
+    <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" autocomplete="current-password" />
+    <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
+      <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+    </button>
+    @if (loginForm.controls['password'].hasError('required') && loginForm.controls['password'].touched) {
+      <mat-error>Password is required.</mat-error>
+    }
+    @if (loginForm.controls['password'].hasError('minlength') && loginForm.controls['password'].touched) {
+      <mat-error>Password must be at least 8 characters.</mat-error>
+    }
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="loading()">
+    @if (loading()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      Sign In
+    }
+  </button>
+</form>

@@ -58,7 +58,7 @@ describe('ChangePasswordComponent', () => {
     expect(component.form.errors?.['mismatch']).toBeTruthy();
   });
 
-  it('should call changePassword() on valid submit and navigate to /dashboard', async () => {
+  it('should call changePassword() on valid submit and navigate to /app', async () => {
     authServiceSpy.changePassword.mockReturnValue(of({ message: 'Password changed successfully.' }));
     component.form.setValue({
       currentPassword: 'OldPass1!',
@@ -69,7 +69,7 @@ describe('ChangePasswordComponent', () => {
     await fixture.whenStable();
 
     expect(authServiceSpy.changePassword).toHaveBeenCalledWith('OldPass1!', 'NewPass2@', 'NewPass2@');
-    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/app']);
   });
 
   it('should show inline error on 422 INVALID_CURRENT_PASSWORD', async () => {

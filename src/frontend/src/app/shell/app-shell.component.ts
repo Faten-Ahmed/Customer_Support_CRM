@@ -43,6 +43,7 @@ const NAV_ITEMS: NavItem[] = [
     AgentAiAssistantComponent,
   ],
   templateUrl: './app-shell.component.html',
+  styleUrl: './app-shell.component.scss',
 })
 export class AppShellComponent implements OnInit, OnDestroy {
   readonly authStore = inject(AuthStore);

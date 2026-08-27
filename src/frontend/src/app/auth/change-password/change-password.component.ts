@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../auth.service';
@@ -24,8 +23,9 @@ function confirmMatchValidator(group: AbstractControl) {
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
   templateUrl: './change-password.component.html',
+  styleUrl: './change-password.component.scss',
 })
 export class ChangePasswordComponent {
   private readonly fb = inject(FormBuilder);
@@ -52,7 +52,7 @@ export class ChangePasswordComponent {
       confirmPassword: string;
     };
     this.authService.changePassword(currentPassword, newPassword, confirmPassword).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigate(['/app']),
       error: (err: { error?: { code?: string } }) => {
         this.submitting = false;
         if (err.error?.code === 'INVALID_CURRENT_PASSWORD') {

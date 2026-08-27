@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { AppShellComponent } from './app-shell.component';
@@ -26,6 +26,8 @@ describe('AppShellComponent', () => {
         { provide: AuthStore, useValue: mockAuthStore },
       ],
     }).compileComponents();
+
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     fixture = TestBed.createComponent(AppShellComponent);
     component = fixture.componentInstance;

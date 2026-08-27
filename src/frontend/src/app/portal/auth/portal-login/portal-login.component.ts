@@ -1,37 +1,33 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-portal-login',
   standalone: true,
-  styleUrl: './login.component.scss',
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
+    CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule,
+    MatButtonModule, MatIconModule, MatProgressSpinnerModule,
   ],
-  templateUrl: './login.component.html',
+  templateUrl: './portal-login.component.html',
+  styleUrl: './portal-login.component.scss',
 })
-export class LoginComponent implements OnInit {
+export class PortalLoginComponent {
   loginForm: FormGroup;
   loading = signal(false);
   errorCode = signal<string | null>(null);
   hidePassword = signal(true);
+  unverifiedEmail = signal<string | null>(null);
+  resendSent = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -40,14 +36,8 @@ export class LoginComponent implements OnInit {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(8)]],
     });
-  }
-
-  ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/app']);
-    }
   }
 
   onSubmit(): void {
@@ -55,25 +45,30 @@ export class LoginComponent implements OnInit {
       this.loginForm.markAllAsTouched();
       return;
     }
-
     this.errorCode.set(null);
     this.loading.set(true);
     const { email, password } = this.loginForm.value;
 
     this.authService
-      .login(email, password)
+      .portalLogin(email, password)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: () => this.router.navigate(['/app']),
+        next: () => this.router.navigate(['/portal/dashboard']),
         error: (err: HttpErrorResponse) => {
-          if (err.status === 423) {
-            this.router.navigate(['/change-password']);
-          } else if (err.status === 401) {
-            this.errorCode.set(err.error?.code ?? 'INVALID_CREDENTIALS');
-          } else {
-            this.errorCode.set('SERVER_ERROR');
+          const code = err.error?.code ?? 'SERVER_ERROR';
+          this.errorCode.set(code);
+          if (code === 'EMAIL_NOT_VERIFIED') {
+            this.unverifiedEmail.set(email);
           }
         },
       });
+  }
+
+  resendVerification(): void {
+    const email = this.unverifiedEmail();
+    if (!email) return;
+    this.authService.resendVerificationEmail(email).subscribe(() => {
+      this.resendSent.set(true);
+    });
   }
 }

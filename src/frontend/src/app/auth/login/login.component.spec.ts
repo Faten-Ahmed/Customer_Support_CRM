@@ -82,7 +82,7 @@ describe('LoginComponent', () => {
     await fixture.whenStable();
 
     expect(authServiceSpy.login).toHaveBeenCalledWith('staff@azmsquad.com', 'Password1!');
-    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/app']);
   });
 
   it('should set loading to true while request is in flight', async () => {
@@ -134,12 +134,12 @@ describe('LoginComponent', () => {
     expect(authServiceSpy.login).not.toHaveBeenCalled();
   });
 
-  it('should redirect to /dashboard if already authenticated', () => {
+  it('should redirect to /app if already authenticated', () => {
     authServiceSpy.isAuthenticated.mockReturnValue(true);
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/app']);
   });
 });

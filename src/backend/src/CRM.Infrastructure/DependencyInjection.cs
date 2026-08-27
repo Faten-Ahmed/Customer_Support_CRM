@@ -1,6 +1,8 @@
+using CRM.Domain.Common;
 using CRM.Domain.Auth;
 using CRM.Domain.Customers;
 using CRM.Domain.Users;
+using CRM.Infrastructure.Email;
 using CRM.Infrastructure.Identity;
 using CRM.Infrastructure.Persistence;
 using CRM.Infrastructure.Persistence.Repositories;
@@ -49,6 +51,10 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>(); // stub until US-BE-009
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+
+        // Email service
+        services.AddScoped<IEmailService, EmailService>(); // stub until email provider is configured
 
         // JWT token service
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));

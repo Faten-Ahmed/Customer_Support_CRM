@@ -1,7 +1,8 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { AuthStore } from './auth.store';
 
 export interface AuthUser {
   id: string;
@@ -28,12 +29,11 @@ export interface MessageResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly _accessToken = signal<string | null>(null);
+  private readonly authStore = inject(AuthStore);
   private readonly _currentUser = signal<AuthUser | null>(null);
 
-  readonly accessToken = this._accessToken.asReadonly();
   readonly currentUser = this._currentUser.asReadonly();
-  readonly isAuthenticated = computed(() => this._accessToken() !== null);
+  readonly isAuthenticated = computed(() => this.authStore.isAuthenticated());
 
   constructor(private http: HttpClient) {}
 
@@ -42,14 +42,14 @@ export class AuthService {
       .post<LoginResponse>('/api/v1/auth/login', { email, password })
       .pipe(
         tap(res => {
-          this._accessToken.set(res.accessToken);
+          this.authStore.setToken(res.accessToken);
           this._currentUser.set(res.user);
         })
       );
   }
 
   logout(): void {
-    this._accessToken.set(null);
+    this.authStore.clearToken();
     this._currentUser.set(null);
     this.http.post('/api/v1/auth/logout', {}).subscribe();
   }
@@ -57,7 +57,7 @@ export class AuthService {
   refreshToken(): Observable<LoginResponse> {
     return this.http.post<LoginResponse>('/api/v1/auth/refresh', {}).pipe(
       tap(res => {
-        this._accessToken.set(res.accessToken);
+        this.authStore.setToken(res.accessToken);
         this._currentUser.set(res.user);
       })
     );
@@ -65,21 +65,21 @@ export class AuthService {
 
   portalLogin(email: string, password: string): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>('/api/v1/portal/auth/login', { email, password })
+      .post<LoginResponse>('/api/v1/auth/login', { email, password })
       .pipe(
         tap(res => {
-          this._accessToken.set(res.accessToken);
+          this.authStore.setToken(res.accessToken);
           this._currentUser.set(res.user);
         })
       );
   }
 
   portalRegister(payload: PortalRegisterPayload): Observable<MessageResponse> {
-    return this.http.post<MessageResponse>('/api/v1/portal/auth/register', payload);
+    return this.http.post<MessageResponse>('/api/v1/auth/portal/register', payload);
   }
 
   resendVerificationEmail(email: string): Observable<MessageResponse> {
-    return this.http.post<MessageResponse>('/api/v1/portal/auth/resend-verification', { email });
+    return this.http.post<MessageResponse>('/api/v1/auth/portal/resend-verification', { email });
   }
 
   refresh(): Observable<{ accessToken: string }> {

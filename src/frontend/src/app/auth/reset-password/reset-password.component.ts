@@ -9,7 +9,6 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,7 +33,6 @@ export type PasswordStrength = 'weak' | 'medium' | 'strong';
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -42,6 +40,7 @@ export type PasswordStrength = 'weak' | 'medium' | 'strong';
     MatProgressSpinnerModule,
   ],
   templateUrl: './reset-password.component.html',
+  styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent implements OnInit {
   resetForm: FormGroup;

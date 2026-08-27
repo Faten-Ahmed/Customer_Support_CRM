@@ -1,0 +1,103 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.toolbar-brand {
+  font-weight: 700;
+  font-size: 1.125rem;
+  flex: 1 1 auto;
+}
+
+.role-badge {
+  font-size: 0.7rem;
+  background: white;
+  color: var(--mat-sys-primary);
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 2px 6px;
+  line-height: 1.4;
+}
+
+mat-sidenav-container {
+  flex: 1;
+  overflow: hidden;
+}
+
+mat-sidenav {
+  background: #1f2937;
+  color: white;
+  transition: width 0.2s ease;
+  overflow: hidden;
+  border-right: none !important;
+}
+
+.sidenav-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0 0;
+  gap: 2px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin: 0 8px;
+  font-size: 0.875rem;
+  color: #d1d5db;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+
+  &.active-link {
+    background: var(--mat-sys-primary);
+    color: white;
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
+
+:host ::ng-deep .mat-drawer-content {
+  overflow: hidden;
+}
+
+.content-wrap {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f9fafb;
+}
+
+.ai-panel {
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--mat-sys-outline-variant);
+  overflow: hidden;
+}

@@ -8,13 +8,30 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [RouterModule, MatButtonModule, MatIconModule],
   template: `
-    <div class="flex flex-col items-center justify-center min-h-screen gap-4 text-center">
-      <mat-icon class="text-8xl text-red-300">block</mat-icon>
-      <h1 class="text-6xl font-bold text-red-300">403</h1>
-      <p class="text-xl text-gray-500">Access Denied</p>
-      <p class="text-gray-400">You don't have permission to view this page.</p>
+    <div class="error-page">
+      <mat-icon class="error-icon">block</mat-icon>
+      <h1 class="error-code">403</h1>
+      <p class="error-title">Access Denied</p>
+      <p class="error-desc">You don't have permission to view this page.</p>
       <a mat-raised-button color="warn" routerLink="/app">Go to Dashboard</a>
     </div>
   `,
+  styles: [`
+    :host { display: block; }
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 1rem;
+      text-align: center;
+      padding: 2rem;
+    }
+    .error-icon { font-size: 6rem; width: 6rem; height: 6rem; color: #fca5a5; }
+    .error-code { font-size: 4rem; font-weight: 700; color: #fca5a5; margin: 0; }
+    .error-title { font-size: 1.25rem; color: #6b7280; margin: 0; }
+    .error-desc { color: #9ca3af; margin: 0; }
+  `],
 })
 export class ForbiddenComponent {}
