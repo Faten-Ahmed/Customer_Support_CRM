@@ -1,0 +1,122 @@
+// src/app/customers/edit-customer-form/edit-customer-form.component.ts
+import { Component, inject, signal, Input, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Customer, CustomerService, UpdateCustomerDto } from '../customer.service';
+
+@Component({
+  selector: 'app-edit-customer-form',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule, MatFormFieldModule, MatInputModule,
+    MatButtonModule, MatProgressSpinnerModule, MatSnackBarModule,
+  ],
+  template: `
+    <div class="form-container">
+      <h2>Edit Customer</h2>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name *</mat-label>
+          <input matInput formControlName="fullName" />
+          @if (form.get('fullName')?.hasError('required') && form.get('fullName')?.touched) {
+            <mat-error>Full name is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email (read-only)</mat-label>
+          <input matInput formControlName="email" type="email" />
+          <mat-hint>Email cannot be changed after account creation.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Company Name</mat-label>
+          <input matInput formControlName="companyName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Country</mat-label>
+          <input matInput formControlName="country" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>City</mat-label>
+          <input matInput formControlName="city" />
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="router.navigate(['/app/customers', customer.id])">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="submitting() || form.invalid">
+            @if (submitting()) { <mat-spinner diameter="20" /> } @else { Save Changes }
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [`
+    :host { display: block; }
+    .form-container { padding: 24px; max-width: 560px; }
+    .full-width { width: 100%; }
+    .form-actions { display: flex; gap: 8px; margin-top: 8px; }
+  `],
+})
+export class EditCustomerFormComponent implements OnInit {
+  @Input() customer!: Customer;
+
+  protected readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly customerService = inject(CustomerService);
+  private readonly snackBar = inject(MatSnackBar);
+
+  readonly submitting = signal(false);
+  form!: FormGroup;
+
+  ngOnInit(): void {
+    this.form = this.fb.group({
+      fullName: [this.customer.fullName, [Validators.required]],
+      email: [{ value: this.customer.email, disabled: true }],
+      phone: [this.customer.phone ?? ''],
+      companyName: [this.customer.companyName ?? ''],
+      country: [this.customer.country ?? ''],
+      city: [this.customer.city ?? ''],
+    });
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const dto: UpdateCustomerDto = {
+      fullName: this.form.get('fullName')!.value,
+      phone: this.form.get('phone')!.value,
+      companyName: this.form.get('companyName')!.value,
+      country: this.form.get('country')!.value,
+      city: this.form.get('city')!.value,
+    };
+
+    this.submitting.set(true);
+    this.customerService.update(this.customer.id, dto).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.snackBar.open('Customer updated successfully.', 'Close', { duration: 4000 });
+        this.router.navigate(['/app/customers', this.customer.id]);
+      },
+      error: () => {
+        this.submitting.set(false);
+        this.snackBar.open('An error occurred. Please try again.', 'Close', { duration: 4000 });
+      },
+    });
+  }
+}
