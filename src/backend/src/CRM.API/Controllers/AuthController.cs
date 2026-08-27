@@ -138,37 +138,6 @@ public class AuthController : ControllerBase
         }
     }
 
-    public sealed class PortalRegisterRequest
-    {
-        public string FullName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string? Phone { get; set; }
-        public string Password { get; set; } = string.Empty;
-        public string ConfirmPassword { get; set; } = string.Empty;
-    }
-
-    [HttpPost("portal/register")]
-    public IActionResult PortalRegister([FromBody] PortalRegisterRequest request)
-    {
-        if (request.Password != request.ConfirmPassword)
-            return BadRequest(new { code = "PASSWORD_MISMATCH" });
-
-        // TODO: implement portal registration (US-BE-009)
-        return StatusCode(501, new { code = "NOT_IMPLEMENTED", message = "Portal registration is not yet implemented." });
-    }
-
-    [HttpPost("portal/resend-verification")]
-    public IActionResult PortalResendVerification([FromBody] ResendVerificationRequest request)
-    {
-        // TODO: implement email verification resend (US-BE-009)
-        return StatusCode(501, new { code = "NOT_IMPLEMENTED", message = "Email verification resend is not yet implemented." });
-    }
-
-    public sealed class ResendVerificationRequest
-    {
-        public string Email { get; set; } = string.Empty;
-    }
-
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh(CancellationToken ct)
     {
