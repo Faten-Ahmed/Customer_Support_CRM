@@ -8,23 +8,23 @@ export const AUTH_ROUTES: Routes = [
   },
   {
     path: 'forgot-password',
-    loadChildren: () =>
-      import('./forgot-password/forgot-password.routes').then(
-        m => m.FORGOT_PASSWORD_ROUTES
+    loadComponent: () =>
+      import('./forgot-password/forgot-password.component').then(
+        m => m.ForgotPasswordComponent
       ),
   },
   {
     path: 'reset-password',
-    loadChildren: () =>
-      import('./reset-password/reset-password.routes').then(
-        m => m.RESET_PASSWORD_ROUTES
+    loadComponent: () =>
+      import('./reset-password/reset-password.component').then(
+        m => m.ResetPasswordComponent
       ),
   },
   {
     path: 'change-password',
-    loadChildren: () =>
-      import('./change-password/change-password.routes').then(
-        m => m.CHANGE_PASSWORD_ROUTES
+    loadComponent: () =>
+      import('./change-password/change-password.component').then(
+        m => m.ChangePasswordComponent
       ),
   },
 ];
