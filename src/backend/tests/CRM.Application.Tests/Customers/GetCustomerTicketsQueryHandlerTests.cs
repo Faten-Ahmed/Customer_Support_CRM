@@ -81,4 +81,25 @@ public class GetCustomerTicketsQueryHandlerTests
 
         _users.Verify(u => u.GetDepartmentIdsAsync(agentId, default), Times.Once);
     }
+
+    [Fact]
+    public async Task Handle_StatusFilter_PassedToRepository()
+    {
+        var customerId = Guid.NewGuid();
+        var adminId = Guid.NewGuid();
+
+        _customers.Setup(r => r.FindByIdAsync(customerId, default))
+                  .ReturnsAsync(Customer.Create("Carol", "carol@example.com", null, null));
+        _tickets.Setup(r => r.ListByCustomerAsync(
+            customerId, "Open", null, 1, 20, default))
+            .ReturnsAsync(new PagedResult<CustomerTicketProjection>(
+                new List<CustomerTicketProjection>(), 0, 1, 20));
+
+        await _handler.Handle(
+            new GetCustomerTicketsQuery(customerId, adminId, UserRole.Admin, "Open", 1, 20),
+            default);
+
+        _tickets.Verify(r => r.ListByCustomerAsync(
+            customerId, "Open", null, 1, 20, default), Times.Once);
+    }
 }
