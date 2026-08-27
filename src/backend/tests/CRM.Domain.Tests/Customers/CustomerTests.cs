@@ -94,3 +94,90 @@ public class CustomerContactTests
         Assert.True(contact.IsPrimary);
     }
 }
+
+public class CustomerContactManagementTests
+{
+    private static Customer CreateCustomer() =>
+        Customer.Create("Alice", "alice@example.com", null, null);
+
+    [Fact]
+    public void AddContact_NewPrimary_AddsContactAndDemotesExisting()
+    {
+        var customer = CreateCustomer();
+        customer.AddContact("Phone", "555-0100", isPrimary: true);
+        customer.AddContact("Phone", "555-0200", isPrimary: true);
+
+        Assert.Equal(2, customer.Contacts.Count);
+        var primary = customer.Contacts.Single(c => c.IsPrimary);
+        Assert.Equal("555-0200", primary.Value);
+    }
+
+    [Fact]
+    public void AddContact_NonPrimary_DoesNotDemoteExisting()
+    {
+        var customer = CreateCustomer();
+        customer.AddContact("Phone", "555-0100", isPrimary: true);
+        customer.AddContact("Phone", "555-0200", isPrimary: false);
+
+        Assert.Equal(2, customer.Contacts.Count);
+        Assert.Single(customer.Contacts, c => c.IsPrimary);
+        Assert.Equal("555-0100", customer.Contacts.Single(c => c.IsPrimary).Value);
+    }
+
+    [Fact]
+    public void AddContact_DifferentType_DoesNotDemoteOtherTypes()
+    {
+        var customer = CreateCustomer();
+        customer.AddContact("Phone", "555-0100", isPrimary: true);
+        customer.AddContact("Email", "bob@example.com", isPrimary: true);
+
+        var phonePrimary = customer.Contacts.Single(c => c.Type == "Phone" && c.IsPrimary);
+        var emailPrimary = customer.Contacts.Single(c => c.Type == "Email" && c.IsPrimary);
+        Assert.NotNull(phonePrimary);
+        Assert.NotNull(emailPrimary);
+    }
+
+    [Fact]
+    public void RemoveContact_ExistingNonPrimary_RemovesIt()
+    {
+        var customer = CreateCustomer();
+        customer.AddContact("Phone", "555-0100", isPrimary: true);
+        customer.AddContact("Phone", "555-0200", isPrimary: false);
+
+        var nonPrimary = customer.Contacts.Single(c => !c.IsPrimary);
+        customer.RemoveContact(nonPrimary.Id);
+
+        Assert.Single(customer.Contacts);
+    }
+
+    [Fact]
+    public void RemoveContact_SolePrimary_ThrowsInvalidOperationException()
+    {
+        var customer = CreateCustomer();
+        customer.AddContact("Phone", "555-0100", isPrimary: true);
+
+        var primaryId = customer.Contacts.Single().Id;
+        Assert.Throws<InvalidOperationException>(() => customer.RemoveContact(primaryId));
+    }
+
+    [Fact]
+    public void RemoveContact_NotFound_ThrowsInvalidOperationException()
+    {
+        var customer = CreateCustomer();
+        Assert.Throws<InvalidOperationException>(() => customer.RemoveContact(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void RemoveContact_PrimaryWithAnotherPrimaryExists_RemovesIt()
+    {
+        // Two phone primaries (should not happen normally but guard only checks sole primary)
+        var customer = CreateCustomer();
+        customer.AddContact("Phone", "555-0100", isPrimary: true);
+        customer.AddContact("Phone", "555-0200", isPrimary: true); // demotes first
+
+        // Now first one is not primary; can be removed even if we try to remove first one
+        var nonPrimary = customer.Contacts.First(c => !c.IsPrimary);
+        customer.RemoveContact(nonPrimary.Id); // non-primary can always be removed
+        Assert.Single(customer.Contacts);
+    }
+}

@@ -63,4 +63,31 @@ public class Customer
         PasswordHash = hash;
     }
     public void VerifyEmail() => EmailVerified = true;
+
+    public void AddContact(string type, string value, bool isPrimary)
+    {
+        if (isPrimary)
+        {
+            foreach (var existing in _contacts.Where(c => c.Type == type))
+                existing.DemotePrimary();
+        }
+
+        var contact = CustomerContact.Create(Id, type, value, isPrimary);
+        _contacts.Add(contact);
+    }
+
+    public void RemoveContact(Guid contactId)
+    {
+        var contact = _contacts.FirstOrDefault(c => c.Id == contactId)
+            ?? throw new InvalidOperationException($"Contact {contactId} not found.");
+
+        if (contact.IsPrimary)
+        {
+            var othersOfSameType = _contacts.Where(c => c.Type == contact.Type && c.Id != contactId).ToList();
+            if (!othersOfSameType.Any(c => c.IsPrimary))
+                throw new InvalidOperationException("Cannot remove the sole primary contact of its type.");
+        }
+
+        _contacts.Remove(contact);
+    }
 }
