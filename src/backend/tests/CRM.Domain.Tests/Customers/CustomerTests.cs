@@ -38,6 +38,17 @@ public class CustomerTests
         var customer = Customer.Create("Alice", "alice@example.com", null, null);
         customer.Deactivate();
         Assert.False(customer.IsActive);
+        Assert.NotNull(customer.DeletedAt);
+    }
+
+    [Fact]
+    public void Deactivate_AlreadyInactive_DoesNotResetDeletedAt()
+    {
+        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        customer.Deactivate();
+        var firstDeletedAt = customer.DeletedAt;
+        customer.Deactivate(); // second call
+        Assert.Equal(firstDeletedAt, customer.DeletedAt);
     }
 
     [Fact]
@@ -56,5 +67,30 @@ public class CustomerTests
         Assert.Equal("Bob", customer.FullName);
         Assert.Equal("0501234567", customer.Phone);
         Assert.Equal("Acme", customer.CompanyName);
+    }
+
+    [Fact]
+    public void Update_WithNullName_ThrowsArgumentException()
+    {
+        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        Assert.Throws<ArgumentException>(() => customer.Update(null!, "0501234567", "Acme"));
+    }
+}
+
+public class CustomerContactTests
+{
+    [Fact]
+    public void Create_WithInvalidType_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            CustomerContact.Create(Guid.NewGuid(), "Fax", "555-0100", false));
+    }
+
+    [Fact]
+    public void Create_WithValidType_Succeeds()
+    {
+        var contact = CustomerContact.Create(Guid.NewGuid(), "Phone", "555-0100", true);
+        Assert.Equal("Phone", contact.Type);
+        Assert.True(contact.IsPrimary);
     }
 }

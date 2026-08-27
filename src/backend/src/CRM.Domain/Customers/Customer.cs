@@ -13,7 +13,8 @@ public class Customer
     public bool IsActive { get; private set; } = true;
     public DateTime CreatedAt { get; private set; }
     public DateTime? DeletedAt { get; private set; }
-    public List<CustomerContact> Contacts { get; private set; } = new();
+    private readonly List<CustomerContact> _contacts = new();
+    public IReadOnlyCollection<CustomerContact> Contacts => _contacts.AsReadOnly();
 
     private Customer() { }
 
@@ -49,12 +50,17 @@ public class Customer
 
     public void Deactivate()
     {
+        if (!IsActive) return;
         IsActive = false;
         DeletedAt = DateTime.UtcNow;
     }
 
     public void SetVip(bool isVip) => IsVip = isVip;
 
-    public void SetPassword(string hash) => PasswordHash = hash;
+    public void SetPassword(string hash)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(hash);
+        PasswordHash = hash;
+    }
     public void VerifyEmail() => EmailVerified = true;
 }
