@@ -1,3 +1,4 @@
+using CRM.Application.Common;
 using CRM.Domain.Customers;
 
 namespace CRM.Infrastructure.Persistence.Repositories;
@@ -19,4 +20,8 @@ public class CustomerRepository : ICustomerRepository
 
     public Task SaveChangesAsync(CancellationToken ct = default)
         => Task.CompletedTask;
+
+    public Task<PagedResult<CustomerSummaryProjection>> ListAsync(CustomerFilter filter, CancellationToken ct = default)
+        => Task.FromResult(new PagedResult<CustomerSummaryProjection>(
+            new List<CustomerSummaryProjection>(), 0, filter.Page, filter.PageSize));
 }
