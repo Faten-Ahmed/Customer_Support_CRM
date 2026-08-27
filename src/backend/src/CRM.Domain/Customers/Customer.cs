@@ -64,7 +64,7 @@ public class Customer
     }
     public void VerifyEmail() => EmailVerified = true;
 
-    public void AddContact(string type, string value, bool isPrimary)
+    public CustomerContact AddContact(string type, string value, bool isPrimary)
     {
         if (isPrimary)
         {
@@ -74,6 +74,7 @@ public class Customer
 
         var contact = CustomerContact.Create(Id, type, value, isPrimary);
         _contacts.Add(contact);
+        return contact;
     }
 
     public void RemoveContact(Guid contactId)

@@ -19,10 +19,9 @@ public class AddCustomerContactCommandHandler : IRequestHandler<AddCustomerConta
         var customer = await _repo.FindByIdWithContactsAsync(cmd.CustomerId, ct)
             ?? throw new KeyNotFoundException($"Customer {cmd.CustomerId} not found.");
 
-        customer.AddContact(cmd.Type, cmd.Value, cmd.IsPrimary);
+        var added = customer.AddContact(cmd.Type, cmd.Value, cmd.IsPrimary);
         await _repo.SaveChangesAsync(ct);
 
-        var added = customer.Contacts.Last();
         return new ContactDto(added.Id, added.Type, added.Value, added.IsPrimary);
     }
 }
