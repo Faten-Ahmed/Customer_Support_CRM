@@ -200,6 +200,52 @@ describe('AuthService — portal methods', () => {
   });
 });
 
+describe('AuthService — changePassword', () => {
+  let service: AuthService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        AuthService,
+      ],
+    });
+    service = TestBed.inject(AuthService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('should POST to /api/v1/auth/change-password-first-login with correct body', () => {
+    service.changePassword('OldPass1!', 'NewPass2@', 'NewPass2@').subscribe(res => {
+      expect(res.message).toContain('changed');
+    });
+
+    const req = httpMock.expectOne('/api/v1/auth/change-password-first-login');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      currentPassword: 'OldPass1!',
+      newPassword: 'NewPass2@',
+      confirmPassword: 'NewPass2@',
+    });
+    req.flush({ message: 'Password changed successfully.' });
+  });
+
+  it('should propagate 422 INVALID_CURRENT_PASSWORD error', () => {
+    let errorCode = '';
+    service.changePassword('wrong', 'NewPass2@', 'NewPass2@').subscribe({
+      error: (err: { error?: { code?: string } }) => (errorCode = err.error?.code ?? ''),
+    });
+
+    const req = httpMock.expectOne('/api/v1/auth/change-password-first-login');
+    req.flush({ code: 'INVALID_CURRENT_PASSWORD' }, { status: 422, statusText: 'Unprocessable Entity' });
+    expect(errorCode).toBe('INVALID_CURRENT_PASSWORD');
+  });
+});
+
 describe('AuthService — password reset methods', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;

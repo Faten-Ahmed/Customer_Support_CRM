@@ -82,6 +82,14 @@ export class AuthService {
     return this.http.post<MessageResponse>('/api/v1/portal/auth/resend-verification', { email });
   }
 
+  changePassword(currentPassword: string, newPassword: string, confirmPassword: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>('/api/v1/auth/change-password-first-login', {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+  }
+
   forgotPassword(email: string): Observable<MessageResponse> {
     return this.http.post<MessageResponse>('/api/v1/auth/forgot-password', { email });
   }
