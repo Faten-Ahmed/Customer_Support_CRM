@@ -1,5 +1,6 @@
 using CRM.Application.Customers.Commands;
 using CRM.Application.Customers.Queries;
+using CRM.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -207,6 +208,61 @@ public class CustomersController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return UnprocessableEntity(new { errors = new[] { new { code = "SOLE_PRIMARY_CONTACT", message = ex.Message } } });
+        }
+    }
+
+    /// <summary>
+    /// Returns paginated ticket history for a specific customer.
+    /// Agents see only tickets from their own departments.
+    /// Returns 200 with paged result.
+    /// Returns 404 if customer not found.
+    /// </summary>
+    [HttpGet("{id:guid}/tickets")]
+    [Authorize(Roles = "Admin,Manager,Agent")]
+    public async Task<IActionResult> GetTickets(
+        Guid id,
+        [FromQuery] string? status,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var requestingUserId))
+            return Unauthorized();
+
+        var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+            ?? User.FindFirst("role")?.Value ?? string.Empty;
+
+        var requestingRole = roleClaim switch
+        {
+            "Admin" => UserRole.Admin,
+            "Manager" => UserRole.Manager,
+            "Agent" => UserRole.Agent,
+            _ => UserRole.Agent
+        };
+
+        try
+        {
+            var result = await _mediator.Send(
+                new GetCustomerTicketsQuery(id, requestingUserId, requestingRole, status, page, pageSize), ct);
+
+            return Ok(new
+            {
+                items = result.Items,
+                meta = new
+                {
+                    page = result.Page,
+                    pageSize = result.PageSize,
+                    totalCount = result.TotalCount,
+                    totalPages = result.TotalPages
+                }
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { errors = new[] { new { code = "CUSTOMER_NOT_FOUND", message = ex.Message } } });
         }
     }
 }

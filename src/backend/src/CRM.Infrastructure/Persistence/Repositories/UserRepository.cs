@@ -16,4 +16,8 @@ public class UserRepository : IUserRepository
 
     public Task SaveChangesAsync(CancellationToken ct = default)
         => _db.SaveChangesAsync(ct);
+
+    // Stub until agent-department assignment domain is implemented (US-BE-063+)
+    public Task<IReadOnlyList<Guid>> GetDepartmentIdsAsync(Guid userId, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<Guid>>(new List<Guid>());
 }
