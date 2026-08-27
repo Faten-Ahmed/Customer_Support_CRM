@@ -1,6 +1,7 @@
 using CRM.Application.Auth.Commands;
 using CRM.Application.Auth.DTOs;
 using CRM.Domain.Auth;
+using CRM.Domain.Customers;
 using CRM.Domain.Users;
 using CRM.Infrastructure.Identity;
 using Moq;
@@ -11,6 +12,7 @@ namespace CRM.Application.Tests.Auth;
 public class LoginInternalCommandHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepo = new();
+    private readonly Mock<ICustomerRepository> _customerRepo = new();
     private readonly Mock<ITokenService> _tokenService = new();
     private readonly Mock<IRefreshTokenRepository> _refreshRepo = new();
     private readonly LoginInternalCommandHandler _handler;
@@ -18,7 +20,7 @@ public class LoginInternalCommandHandlerTests
     public LoginInternalCommandHandlerTests()
     {
         _handler = new LoginInternalCommandHandler(
-            _userRepo.Object, _tokenService.Object, _refreshRepo.Object);
+            _userRepo.Object, _customerRepo.Object, _tokenService.Object, _refreshRepo.Object);
     }
 
     private static User MakeUser(bool isActive = true, bool requiresPasswordChange = false)

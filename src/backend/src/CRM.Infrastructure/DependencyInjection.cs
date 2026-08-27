@@ -1,5 +1,9 @@
+using CRM.Domain.Auth;
+using CRM.Domain.Customers;
+using CRM.Domain.Users;
 using CRM.Infrastructure.Identity;
 using CRM.Infrastructure.Persistence;
+using CRM.Infrastructure.Persistence.Repositories;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,12 +24,18 @@ public static class DependencyInjection
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
-        // Redis
+        // Redis — AbortOnConnectFail=false so the app starts even when Redis is not yet running
         var redisConnection = configuration.GetConnectionString("Redis") ?? "localhost:6379";
-        services.AddSingleton<IConnectionMultiplexer>(
-            ConnectionMultiplexer.Connect(redisConnection));
+        services.AddSingleton<IConnectionMultiplexer>(_ =>
+        {
+            var opts = ConfigurationOptions.Parse(redisConnection);
+            opts.AbortOnConnectFail = false;
+            return ConnectionMultiplexer.Connect(opts);
+        });
         services.AddStackExchangeRedisCache(options =>
-            options.Configuration = redisConnection);
+        {
+            options.Configuration = redisConnection + ",abortConnect=false";
+        });
 
         // Hangfire
         services.AddHangfire(cfg => cfg
@@ -34,6 +44,11 @@ public static class DependencyInjection
             .UseRecommendedSerializerSettings()
             .UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection")));
         services.AddHangfireServer();
+
+        // Repositories
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>(); // stub until US-BE-009
 
         // JWT token service
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
