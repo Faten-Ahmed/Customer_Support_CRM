@@ -15,6 +15,17 @@ export interface LoginResponse {
   user: AuthUser;
 }
 
+export interface PortalRegisterPayload {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface MessageResponse {
+  message: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly _accessToken = signal<string | null>(null);
@@ -50,5 +61,36 @@ export class AuthService {
         this._currentUser.set(res.user);
       })
     );
+  }
+
+  portalLogin(email: string, password: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>('/api/v1/portal/auth/login', { email, password })
+      .pipe(
+        tap(res => {
+          this._accessToken.set(res.accessToken);
+          this._currentUser.set(res.user);
+        })
+      );
+  }
+
+  portalRegister(payload: PortalRegisterPayload): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>('/api/v1/portal/auth/register', payload);
+  }
+
+  resendVerificationEmail(email: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>('/api/v1/portal/auth/resend-verification', { email });
+  }
+
+  forgotPassword(email: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>('/api/v1/auth/forgot-password', { email });
+  }
+
+  resetPassword(token: string, password: string, confirmPassword: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>('/api/v1/auth/reset-password', {
+      token,
+      password,
+      confirmPassword,
+    });
   }
 }
