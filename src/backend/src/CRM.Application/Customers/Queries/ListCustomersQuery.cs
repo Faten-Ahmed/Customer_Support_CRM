@@ -1,4 +1,4 @@
-using CRM.Application.Common;
+using CRM.Domain.Common;
 using CRM.Domain.Customers;
 using MediatR;
 

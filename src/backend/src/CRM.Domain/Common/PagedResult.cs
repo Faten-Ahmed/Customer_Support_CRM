@@ -1,4 +1,4 @@
-namespace CRM.Application.Common;
+namespace CRM.Domain.Common;
 
 public record PagedResult<T>(
     IReadOnlyList<T> Items,

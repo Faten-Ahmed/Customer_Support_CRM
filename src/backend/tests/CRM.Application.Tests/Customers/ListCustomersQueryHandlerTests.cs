@@ -1,4 +1,4 @@
-using CRM.Application.Common;
+using CRM.Domain.Common;
 using CRM.Application.Customers.Queries;
 using CRM.Domain.Customers;
 using Moq;

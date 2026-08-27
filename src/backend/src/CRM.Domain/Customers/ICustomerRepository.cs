@@ -1,4 +1,4 @@
-using CRM.Application.Common;
+using CRM.Domain.Common;
 
 namespace CRM.Domain.Customers;
 
