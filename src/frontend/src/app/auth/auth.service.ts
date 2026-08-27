@@ -82,6 +82,10 @@ export class AuthService {
     return this.http.post<MessageResponse>('/api/v1/portal/auth/resend-verification', { email });
   }
 
+  refresh(): Observable<{ accessToken: string }> {
+    return this.http.post<{ accessToken: string }>('/api/v1/auth/refresh', {});
+  }
+
   changePassword(currentPassword: string, newPassword: string, confirmPassword: string): Observable<MessageResponse> {
     return this.http.post<MessageResponse>('/api/v1/auth/change-password-first-login', {
       currentPassword,
