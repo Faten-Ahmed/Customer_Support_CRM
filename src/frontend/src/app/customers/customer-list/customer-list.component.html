@@ -1,0 +1,82 @@
+<div class="customer-list-container">
+  <div class="list-header">
+    <h1 class="mat-headline-5">Customers</h1>
+    <button mat-raised-button color="primary" routerLink="new">
+      <mat-icon>add</mat-icon> New Customer
+    </button>
+  </div>
+
+  <div class="filter-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search by name, email, phone or company</mat-label>
+      <input matInput [formControl]="searchControl" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-chip-listbox>
+      <mat-chip-option [selected]="vipOnly()" (click)="toggleVipFilter()">VIP Only</mat-chip-option>
+      <mat-chip-option [selected]="activeOnly()" (click)="toggleActiveFilter()">Active Only</mat-chip-option>
+    </mat-chip-listbox>
+  </div>
+
+  @if (loading()) {
+    <p class="state-message">Loading…</p>
+  } @else if (customers().length === 0) {
+    <p class="state-message">No customers found</p>
+  } @else {
+    <mat-table [dataSource]="customers()" class="customer-table">
+      <ng-container matColumnDef="fullName">
+        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+        <mat-cell *matCellDef="let c">{{ c.fullName }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+        <mat-cell *matCellDef="let c">{{ c.email }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="phone">
+        <mat-header-cell *matHeaderCellDef>Phone</mat-header-cell>
+        <mat-cell *matCellDef="let c">{{ c.phone || '—' }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="vip">
+        <mat-header-cell *matHeaderCellDef>VIP</mat-header-cell>
+        <mat-cell *matCellDef="let c">
+          @if (c.isVip) { <span class="vip-badge">VIP</span> }
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+        <mat-cell *matCellDef="let c">
+          <span [class.status-active]="c.isActive" [class.status-inactive]="!c.isActive">
+            {{ c.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="tickets">
+        <mat-header-cell *matHeaderCellDef>Tickets</mat-header-cell>
+        <mat-cell *matCellDef="let c">{{ c.ticketCount }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <mat-header-cell *matHeaderCellDef>Created</mat-header-cell>
+        <mat-cell *matCellDef="let c">{{ c.createdAt | date:'mediumDate' }}</mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"
+               (click)="navigateToCustomer(row.id)" class="clickable-row">
+      </mat-row>
+    </mat-table>
+
+    <mat-paginator
+      [length]="total()"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[10, 20, 50]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  }
+</div>

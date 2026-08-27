@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.customer-list-container {
+  padding: 24px;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.search-field {
+  flex: 1;
+}
+
+.state-message {
+  text-align: center;
+  padding: 32px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.customer-table {
+  width: 100%;
+}
+
+.clickable-row {
+  cursor: pointer;
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.vip-badge {
+  background: #fbbf24;
+  color: #78350f;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-active {
+  color: #166534;
+}
+
+.status-inactive {
+  color: #991b1b;
+}
