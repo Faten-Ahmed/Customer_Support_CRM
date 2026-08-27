@@ -1,6 +1,7 @@
-using CRM.Domain.Common;
+using CRM.Application.Common;
 using CRM.Domain.Auth;
 using CRM.Domain.Customers;
+using CRM.Domain.Tickets;
 using CRM.Domain.Users;
 using CRM.Infrastructure.Email;
 using CRM.Infrastructure.Identity;
@@ -50,8 +51,11 @@ public static class DependencyInjection
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-        services.AddScoped<ICustomerRepository, CustomerRepository>(); // stub until US-BE-009
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+        services.AddScoped<ICustomerCredentialRepository, CustomerCredentialRepository>();
+        services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+        services.AddScoped<ITicketRepository, TicketRepository>();
 
         // Email service
         services.AddScoped<IEmailService, EmailService>(); // stub until email provider is configured

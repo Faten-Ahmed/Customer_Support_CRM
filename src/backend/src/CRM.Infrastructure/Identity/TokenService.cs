@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using CRM.Application.Common;
 using CRM.Domain.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

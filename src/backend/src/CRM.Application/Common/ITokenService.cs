@@ -1,6 +1,6 @@
 using CRM.Domain.Users;
 
-namespace CRM.Infrastructure.Identity;
+namespace CRM.Application.Common;
 
 public interface ITokenService
 {

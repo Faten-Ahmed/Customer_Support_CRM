@@ -3,7 +3,7 @@ using CRM.Application.Auth.DTOs;
 using CRM.Domain.Auth;
 using CRM.Domain.Customers;
 using CRM.Domain.Users;
-using CRM.Infrastructure.Identity;
+using CRM.Application.Common;
 using Moq;
 using Xunit;
 
