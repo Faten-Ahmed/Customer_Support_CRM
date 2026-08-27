@@ -1,0 +1,73 @@
+@if (loading()) {
+  <p class="state-message">Loading…</p>
+} @else if (customer()) {
+  <div class="customer-detail">
+    <div class="detail-header">
+      <div class="header-info">
+        <h1 class="customer-name">{{ customer()!.fullName }}</h1>
+        <p class="customer-email">{{ customer()!.email }}</p>
+        @if (customer()!.isVip) { <span class="vip-badge">VIP</span> }
+        <span class="status-badge" [class.status-active]="customer()!.isActive" [class.status-inactive]="!customer()!.isActive">
+          {{ customer()!.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" [routerLink]="['/app/tickets/new']" [queryParams]="{ customerId: customer()!.id }">
+          New Ticket
+        </button>
+        @if (isAdmin && customer()!.isActive) {
+          <button mat-stroked-button color="warn" (click)="confirmDeactivate()">Deactivate</button>
+        }
+      </div>
+    </div>
+
+    <mat-tab-group>
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          @if (!editing()) {
+            <dl class="detail-list">
+              <div class="detail-item">
+                <dt>Phone</dt>
+                <dd>{{ customer()!.phone || '—' }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Tickets</dt>
+                <dd>{{ customer()!.ticketCount }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Member Since</dt>
+                <dd>{{ customer()!.createdAt | date:'mediumDate' }}</dd>
+              </div>
+            </dl>
+            <button mat-icon-button (click)="enterEditMode()">
+              <mat-icon>edit</mat-icon>
+            </button>
+          } @else {
+            <form [formGroup]="editForm" class="edit-form">
+              <mat-form-field appearance="outline">
+                <mat-label>Phone</mat-label>
+                <input matInput formControlName="phone" />
+              </mat-form-field>
+              <div class="form-actions">
+                <button mat-raised-button color="primary" type="button" (click)="saveChanges()">Save</button>
+                <button mat-stroked-button type="button" (click)="cancelEdit()">Cancel</button>
+              </div>
+            </form>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Contacts">
+        <div class="tab-content state-message">Contacts management — coming in US-BE-017.</div>
+      </mat-tab>
+
+      <mat-tab label="Tickets">
+        <div class="tab-content state-message">Ticket list filtered by customer — coming in US-FE-009.</div>
+      </mat-tab>
+
+      <mat-tab label="Audit">
+        <div class="tab-content state-message">Audit log — coming soon.</div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

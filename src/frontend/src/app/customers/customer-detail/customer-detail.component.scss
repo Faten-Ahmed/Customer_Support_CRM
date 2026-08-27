@@ -1,0 +1,83 @@
+:host {
+  display: block;
+}
+
+.state-message {
+  text-align: center;
+  padding: 32px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.customer-detail {
+  padding: 24px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.customer-name {
+  margin: 0 0 4px;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.customer-email {
+  margin: 0 0 8px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.vip-badge {
+  display: inline-block;
+  background: #fbbf24;
+  color: #78350f;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.status-badge {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-active { color: #166534; }
+.status-inactive { color: #991b1b; }
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-content {
+  padding: 16px 0;
+}
+
+.detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.detail-item {
+  dt { font-size: 12px; color: rgba(0, 0, 0, 0.54); margin-bottom: 4px; }
+  dd { margin: 0; font-weight: 500; }
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 400px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
