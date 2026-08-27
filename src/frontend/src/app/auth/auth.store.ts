@@ -4,6 +4,7 @@ export interface JwtUser {
   sub: string;
   role: 'Admin' | 'Manager' | 'Agent' | 'Customer';
   passwordMustChange: boolean;
+  fullName?: string;
   [key: string]: unknown;
 }
 
