@@ -215,6 +215,17 @@ public class TicketsController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
 
+    [HttpGet("{id:guid}/history")]
+    public async Task<IActionResult> GetHistory(
+        Guid id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(new GetTicketHistoryQuery(id, page, pageSize), ct);
+        return Ok(result);
+    }
+
     [HttpDelete("{id:guid}/attachments/{attachmentId:guid}")]
     public async Task<IActionResult> DeleteAttachment(
         Guid id, Guid attachmentId, CancellationToken ct)
