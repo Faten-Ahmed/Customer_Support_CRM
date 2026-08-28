@@ -195,4 +195,23 @@ public class TicketsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
     }
+
+    [HttpPost("{id:guid}/attachments")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadAttachment(
+        Guid id, IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { error = "No file provided." });
+
+        try
+        {
+            var result = await _mediator.Send(new UploadAttachmentCommand(
+                id, file.FileName, file.ContentType, file.Length,
+                file.OpenReadStream(), CurrentUserId), ct);
+            return StatusCode(201, result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
 }
