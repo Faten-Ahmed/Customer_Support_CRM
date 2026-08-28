@@ -38,7 +38,7 @@ public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCo
 
         var customer = Customer.Create(cmd.FullName, cmd.Email, null, null);
 
-        var passwordHash = HashString(cmd.Password);
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(cmd.Password);
         var credential = CustomerCredential.Create(customer.Id, passwordHash);
 
         var rawToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
