@@ -65,6 +65,52 @@ describe('TicketService', () => {
     req.flush(emptyPage);
   });
 
+  describe('attachment methods', () => {
+    const TICKET_ID = 'ticket-001';
+    const ATTACHMENT_ID = 'att-abc';
+
+    const mockAttachment = {
+      id: ATTACHMENT_ID,
+      ticketId: TICKET_ID,
+      fileName: 'report.pdf',
+      contentType: 'application/pdf',
+      fileSize: 204800,
+      uploaderName: 'Alice Agent',
+      uploadedAt: '2026-08-01T10:00:00Z',
+      presignedUrl: 'https://cdn.example.com/report.pdf?sig=abc',
+    };
+
+    it('getAttachments should GET /api/v1/tickets/{id}/attachments', () => {
+      service.getAttachments(TICKET_ID).subscribe(list => {
+        expect(list.length).toBe(1);
+        expect(list[0].fileName).toBe('report.pdf');
+      });
+      const req = httpMock.expectOne(`/api/v1/tickets/${TICKET_ID}/attachments`);
+      expect(req.request.method).toBe('GET');
+      req.flush([mockAttachment]);
+    });
+
+    it('uploadAttachment should POST multipart FormData and return Attachment', () => {
+      const file = new File(['hello'], 'hello.txt', { type: 'text/plain' });
+      service.uploadAttachment(TICKET_ID, file).subscribe(att => {
+        expect(att.fileName).toBe('hello.txt');
+      });
+      const req = httpMock.expectOne(`/api/v1/tickets/${TICKET_ID}/attachments`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body instanceof FormData).toBe(true);
+      req.flush({ ...mockAttachment, fileName: 'hello.txt' });
+    });
+
+    it('deleteAttachment should DELETE /api/v1/tickets/{ticketId}/attachments/{attId}', () => {
+      service.deleteAttachment(TICKET_ID, ATTACHMENT_ID).subscribe(res => {
+        expect(res).toBe(null);
+      });
+      const req = httpMock.expectOne(`/api/v1/tickets/${TICKET_ID}/attachments/${ATTACHMENT_ID}`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+  });
+
   describe('addMessage()', () => {
     it('should POST /api/v1/tickets/{id}/messages with body and isInternal', () => {
       service.addMessage('t1', 'Hello customer', false).subscribe();
@@ -157,5 +203,63 @@ describe('TicketService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(mock);
     });
+  });
+});
+
+describe('TicketService — getHistory()', () => {
+  let service: TicketService;
+  let httpMock: HttpTestingController;
+
+  const TICKET_ID = 'ticket-42';
+
+  const mockEntries = [
+    {
+      fieldChanged: 'Status',
+      oldValue: 'New',
+      newValue: 'InProgress',
+      changedByName: 'Alice Agent',
+      changedAt: '2026-08-01T09:00:00Z',
+    },
+    {
+      fieldChanged: 'Priority',
+      oldValue: 'Medium',
+      newValue: 'High',
+      changedByName: 'Bob Manager',
+      changedAt: '2026-08-01T10:30:00Z',
+    },
+  ];
+
+  const mockPage = { items: mockEntries, totalCount: 2, page: 1, pageSize: 20, totalPages: 1 };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), TicketService],
+    });
+    service = TestBed.inject(TicketService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('should GET /api/v1/tickets/{id}/history with page params', () => {
+    service.getHistory(TICKET_ID).subscribe(page => {
+      expect(page.items.length).toBe(2);
+      expect(page.items[0].fieldChanged).toBe('Status');
+      expect(page.items[1].fieldChanged).toBe('Priority');
+    });
+
+    const req = httpMock.expectOne(r => r.url === `/api/v1/tickets/${TICKET_ID}/history`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('page')).toBe('1');
+    expect(req.request.params.get('pageSize')).toBe('20');
+    req.flush(mockPage);
+  });
+
+  it('should return empty items array when no history exists', () => {
+    service.getHistory(TICKET_ID).subscribe(page => {
+      expect(page.items).toEqual([]);
+    });
+    const req = httpMock.expectOne(r => r.url === `/api/v1/tickets/${TICKET_ID}/history`);
+    req.flush({ items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 });
   });
 });

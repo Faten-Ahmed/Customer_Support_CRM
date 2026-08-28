@@ -44,6 +44,18 @@ export interface TicketPage {
   totalPages: number;
 }
 
+export interface Attachment {
+  id: string;
+  ticketId: string;
+  messageId?: string;
+  fileName: string;
+  contentType: string;
+  fileSize: number;
+  presignedUrl?: string;
+  uploaderName?: string;
+  uploadedAt: string;
+}
+
 export interface TicketMessage {
   id: string;
   ticketId: string;
@@ -90,6 +102,22 @@ export interface TicketDetail extends TicketSummary {
   sla?: SlaInfo;
   resolvedAt?: string;
   closedAt?: string;
+}
+
+export interface TicketHistoryEntry {
+  fieldChanged: string;
+  oldValue?: string | null;
+  newValue?: string | null;
+  changedByName: string;
+  changedAt: string;
+}
+
+export interface TicketHistoryPage {
+  items: TicketHistoryEntry[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -142,6 +170,20 @@ export class TicketService {
     return this.http.patch<void>(`${this.baseUrl}/${ticketId}/status`, { status, resolutionText });
   }
 
+  getAttachments(ticketId: string): Observable<Attachment[]> {
+    return this.http.get<Attachment[]>(`${this.baseUrl}/${ticketId}/attachments`);
+  }
+
+  uploadAttachment(ticketId: string, file: File): Observable<Attachment> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<Attachment>(`${this.baseUrl}/${ticketId}/attachments`, form);
+  }
+
+  deleteAttachment(ticketId: string, attachmentId: string): Observable<null> {
+    return this.http.delete<null>(`${this.baseUrl}/${ticketId}/attachments/${attachmentId}`);
+  }
+
   addMessage(ticketId: string, body: string, isInternal: boolean): Observable<TicketMessage> {
     return this.http.post<TicketMessage>(`${this.baseUrl}/${ticketId}/messages`, { body, isInternal });
   }
@@ -151,5 +193,12 @@ export class TicketService {
       .set('page', String(page))
       .set('pageSize', String(pageSize));
     return this.http.get<TicketMessagePage>(`${this.baseUrl}/${ticketId}/messages`, { params });
+  }
+
+  getHistory(ticketId: string, page = 1, pageSize = 20): Observable<TicketHistoryPage> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+    return this.http.get<TicketHistoryPage>(`${this.baseUrl}/${ticketId}/history`, { params });
   }
 }
