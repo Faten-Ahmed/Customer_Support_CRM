@@ -3,6 +3,13 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
+export interface Contact {
+  id: string;
+  type: 'Phone' | 'Email' | 'WhatsApp';
+  value: string;
+  isPrimary: boolean;
+}
+
 export interface Customer {
   id: string;
   fullName: string;
@@ -12,6 +19,19 @@ export interface Customer {
   isVip: boolean;
   isActive: boolean;
   createdAt: string;
+}
+
+export interface CustomerDetail extends Customer {
+  contacts: Contact[];
+}
+
+export interface CustomerTicket {
+  ticketNumber: string;
+  subject: string;
+  status: string;
+  priority: string;
+  createdAt: string;
+  category?: string;
 }
 
 export interface CreateCustomerDto {
@@ -27,6 +47,12 @@ export interface UpdateCustomerDto {
   companyName?: string;
 }
 
+export interface AddContactDto {
+  type: string;
+  value: string;
+  isPrimary: boolean;
+}
+
 export interface CustomerListQuery {
   page: number;
   pageSize: number;
@@ -35,7 +61,7 @@ export interface CustomerListQuery {
   isActive?: boolean;
 }
 
-export interface CustomerMeta {
+export interface PageMeta {
   page: number;
   pageSize: number;
   totalCount: number;
@@ -44,7 +70,12 @@ export interface CustomerMeta {
 
 export interface CustomerPage {
   items: Customer[];
-  meta: CustomerMeta;
+  meta: PageMeta;
+}
+
+export interface CustomerTicketPage {
+  items: CustomerTicket[];
+  meta: PageMeta;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -62,8 +93,8 @@ export class CustomerService {
     return this.http.get<CustomerPage>(this.baseUrl, { params });
   }
 
-  getById(id: string): Observable<Customer> {
-    return this.http.get<Customer>(`${this.baseUrl}/${id}`);
+  getById(id: string): Observable<CustomerDetail> {
+    return this.http.get<CustomerDetail>(`${this.baseUrl}/${id}`);
   }
 
   create(dto: CreateCustomerDto): Observable<Customer> {
@@ -77,11 +108,33 @@ export class CustomerService {
     );
   }
 
-  update(id: string, dto: UpdateCustomerDto): Observable<Customer> {
-    return this.http.put<Customer>(`${this.baseUrl}/${id}`, dto);
+  update(id: string, dto: UpdateCustomerDto): Observable<CustomerDetail> {
+    return this.http.put<CustomerDetail>(`${this.baseUrl}/${id}`, dto);
   }
 
   deactivate(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  reactivate(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/reactivate`, {});
+  }
+
+  setVip(id: string, isVip: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/vip`, { isVip });
+  }
+
+  addContact(id: string, dto: AddContactDto): Observable<Contact> {
+    return this.http.post<Contact>(`${this.baseUrl}/${id}/contacts`, dto);
+  }
+
+  removeContact(id: string, contactId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/contacts/${contactId}`);
+  }
+
+  getTickets(id: string, page = 1, pageSize = 10, status?: string): Observable<CustomerTicketPage> {
+    let params = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+    if (status) params = params.set('status', status);
+    return this.http.get<CustomerTicketPage>(`${this.baseUrl}/${id}/tickets`, { params });
   }
 }

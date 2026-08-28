@@ -11,17 +11,30 @@ public record AddCustomerContactCommand(
 public class AddCustomerContactCommandHandler : IRequestHandler<AddCustomerContactCommand, ContactDto>
 {
     private readonly ICustomerRepository _repo;
+    private readonly ICustomerContactRepository _contactRepo;
 
-    public AddCustomerContactCommandHandler(ICustomerRepository repo) => _repo = repo;
+    public AddCustomerContactCommandHandler(ICustomerRepository repo, ICustomerContactRepository contactRepo)
+    {
+        _repo = repo;
+        _contactRepo = contactRepo;
+    }
 
     public async Task<ContactDto> Handle(AddCustomerContactCommand cmd, CancellationToken ct)
     {
-        var customer = await _repo.FindByIdWithContactsAsync(cmd.CustomerId, ct)
+        _ = await _repo.FindByIdAsync(cmd.CustomerId, ct)
             ?? throw new KeyNotFoundException($"Customer {cmd.CustomerId} not found.");
 
-        var added = customer.AddContact(cmd.Type, cmd.Value, cmd.IsPrimary);
-        await _repo.SaveChangesAsync(ct);
+        if (cmd.IsPrimary)
+        {
+            var existing = await _contactRepo.FindByCustomerIdAsync(cmd.CustomerId, ct);
+            foreach (var c in existing.Where(c => c.Type == cmd.Type && c.IsPrimary))
+                c.DemotePrimary();
+        }
 
-        return new ContactDto(added.Id, added.Type, added.Value, added.IsPrimary);
+        var contact = CustomerContact.Create(cmd.CustomerId, cmd.Type, cmd.Value, cmd.IsPrimary);
+        await _contactRepo.AddAsync(contact, ct);
+        await _contactRepo.SaveChangesAsync(ct);
+
+        return new ContactDto(contact.Id, contact.Type, contact.Value, contact.IsPrimary);
     }
 }

@@ -14,20 +14,49 @@ public class User
 
     private User() { }
 
+    public void SetPassword(string newPasswordHash)
+    {
+        PasswordHash = newPasswordHash;
+        RequiresPasswordChange = false;
+    }
+
+    public static User CreateSeeded(
+        string email,
+        string passwordHash,
+        string firstName,
+        string lastName,
+        UserRole role,
+        bool requiresPasswordChange)
+        => new()
+        {
+            Id = Guid.NewGuid(),
+            Email = email,
+            PasswordHash = passwordHash,
+            FirstName = firstName,
+            LastName = lastName,
+            Role = role,
+            IsActive = true,
+            RequiresPasswordChange = requiresPasswordChange,
+            CreatedAt = DateTime.UtcNow
+        };
+
     // Factory used only in tests — allows setting arbitrary state
     public static User CreateForTest(
         string email,
         string passwordHash,
         UserRole role,
         bool isActive = true,
-        bool requiresPasswordChange = false)
+        bool requiresPasswordChange = false,
+        Guid? id = null,
+        string firstName = "Test",
+        string lastName = "User")
         => new()
         {
-            Id = Guid.NewGuid(),
+            Id = id ?? Guid.NewGuid(),
             Email = email,
             PasswordHash = passwordHash,
-            FirstName = "Test",
-            LastName = "User",
+            FirstName = firstName,
+            LastName = lastName,
             Role = role,
             IsActive = isActive,
             RequiresPasswordChange = requiresPasswordChange,

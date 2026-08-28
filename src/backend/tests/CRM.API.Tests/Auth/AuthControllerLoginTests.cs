@@ -53,7 +53,7 @@ public class AuthControllerLoginTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new LoginResponse(
                 "jwt", "raw-refresh", false,
-                Guid.NewGuid(), "Ali Hassan", "Agent"));
+                Guid.NewGuid(), "agent@crm.test", "Ali Hassan", "Agent"));
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class AuthControllerLoginTests
         SetupLoginSuccess();
 
         var client = BuildClient();
-        var response = await client.PostAsJsonAsync("/api/auth/login-internal",
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login",
             new { email = "agent@crm.test", password = "P@ssw0rd!" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -80,7 +80,7 @@ public class AuthControllerLoginTests
             .ThrowsAsync(new UnauthorizedAccessException("Invalid credentials."));
 
         var client = BuildClient();
-        var response = await client.PostAsJsonAsync("/api/auth/login-internal",
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login",
             new { email = "agent@crm.test", password = "wrong" });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -92,7 +92,7 @@ public class AuthControllerLoginTests
         SetupLoginSuccess();
 
         var client = BuildClient();
-        var response = await client.PostAsJsonAsync("/api/auth/login-internal",
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login",
             new { email = "agent@crm.test", password = "P@ssw0rd!" });
 
         Assert.True(response.Headers.TryGetValues("Set-Cookie", out var cookies));

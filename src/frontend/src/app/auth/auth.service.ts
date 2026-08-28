@@ -78,6 +78,10 @@ export class AuthService {
     return this.http.post<MessageResponse>('/api/v1/auth/portal/register', payload);
   }
 
+  portalVerifyEmail(token: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>('/api/v1/auth/portal/verify-email', { token });
+  }
+
   resendVerificationEmail(email: string): Observable<MessageResponse> {
     return this.http.post<MessageResponse>('/api/v1/auth/portal/resend-verification', { email });
   }

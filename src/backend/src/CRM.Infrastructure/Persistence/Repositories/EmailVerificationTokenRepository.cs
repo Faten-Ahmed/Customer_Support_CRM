@@ -16,6 +16,14 @@ public class EmailVerificationTokenRepository : IEmailVerificationTokenRepositor
     public async Task AddAsync(EmailVerificationToken token, CancellationToken ct = default)
         => await _context.EmailVerificationTokens.AddAsync(token, ct);
 
+    public async Task DeleteUnusedByCustomerIdAsync(Guid customerId, CancellationToken ct = default)
+    {
+        var tokens = await _context.EmailVerificationTokens
+            .Where(t => t.CustomerId == customerId && !t.IsUsed)
+            .ToListAsync(ct);
+        _context.EmailVerificationTokens.RemoveRange(tokens);
+    }
+
     public async Task SaveChangesAsync(CancellationToken ct = default)
         => await _context.SaveChangesAsync(ct);
 }

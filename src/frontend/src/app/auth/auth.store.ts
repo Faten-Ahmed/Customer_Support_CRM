@@ -36,8 +36,16 @@ export class AuthStore {
   private _decodeToken(token: string | null): JwtUser | null {
     if (!token) return null;
     try {
-      const payload = token.split('.')[1];
-      return JSON.parse(atob(payload)) as JwtUser;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // ASP.NET Core emits role as the long-form URI claim key
+      const ROLE_URI = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+      const role = payload['role'] ?? payload[ROLE_URI];
+      // fullName may come as a single claim or as firstName+lastName
+      const fullName = payload['fullName']
+        ?? (payload['firstName'] && payload['lastName']
+            ? `${payload['firstName']} ${payload['lastName']}`
+            : undefined);
+      return { ...payload, role, fullName } as JwtUser;
     } catch {
       return null;
     }

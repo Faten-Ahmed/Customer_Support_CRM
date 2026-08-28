@@ -25,9 +25,11 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.HasIndex(c => c.IsActive);
         builder.HasIndex(c => c.IsVip);
 
+        builder.Navigation(c => c.Contacts).HasField("_contacts");
+
         builder.HasMany(c => c.Contacts)
                .WithOne()
-               .HasForeignKey("CustomerId")
+               .HasForeignKey(cc => cc.CustomerId)
                .OnDelete(DeleteBehavior.Cascade);
     }
 }

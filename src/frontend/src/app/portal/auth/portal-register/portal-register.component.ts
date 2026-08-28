@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../auth/auth.service';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -32,7 +33,7 @@ export class PortalRegisterComponent {
   hidePassword = signal(true);
   hideConfirm = signal(true);
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.registerForm = this.fb.group(
       {
         fullName: ['', Validators.required],
@@ -56,7 +57,10 @@ export class PortalRegisterComponent {
       .portalRegister(this.registerForm.value)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: res => this.successMessage.set(res.message),
+        next: () => {
+          const email = this.registerForm.value.email;
+          this.router.navigate(['/portal/verify-email'], { queryParams: { email } });
+        },
         error: (err: HttpErrorResponse) => {
           this.errorCode.set(err.error?.code ?? 'SERVER_ERROR');
         },

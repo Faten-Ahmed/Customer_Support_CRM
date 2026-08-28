@@ -55,6 +55,13 @@ public class Customer
         DeletedAt = DateTime.UtcNow;
     }
 
+    public void Reactivate()
+    {
+        if (IsActive) return;
+        IsActive = true;
+        DeletedAt = null;
+    }
+
     public void SetVip(bool isVip) => IsVip = isVip;
 
     public void SetPassword(string hash)

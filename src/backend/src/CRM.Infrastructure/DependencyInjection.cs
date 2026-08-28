@@ -54,11 +54,13 @@ public static class DependencyInjection
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<ICustomerCredentialRepository, CustomerCredentialRepository>();
+        services.AddScoped<ICustomerContactRepository, CustomerContactRepository>();
         services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
 
         // Email service
-        services.AddScoped<IEmailService, EmailService>(); // stub until email provider is configured
+        services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
+        services.AddScoped<IEmailService, EmailService>();
 
         // JWT token service
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));

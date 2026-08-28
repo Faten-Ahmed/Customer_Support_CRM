@@ -141,6 +141,26 @@ public class CustomersController : ControllerBase
     }
 
     /// <summary>
+    /// Reactivates a previously deactivated customer (Admin only).
+    /// Returns 204 No Content.
+    /// Returns 404 if not found.
+    /// </summary>
+    [HttpPatch("{id:guid}/reactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Reactivate(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(new ReactivateCustomerCommand(id), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { errors = new[] { new { code = "CUSTOMER_NOT_FOUND", message = ex.Message } } });
+        }
+    }
+
+    /// <summary>
     /// Sets or clears the VIP flag on a customer (Admin/Manager only).
     /// Returns 204 No Content.
     /// Returns 404 if not found.

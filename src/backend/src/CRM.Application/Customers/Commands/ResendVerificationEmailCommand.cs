@@ -6,19 +6,16 @@ using MediatR;
 
 namespace CRM.Application.Customers.Commands;
 
-public record RegisterCustomerCommand(
-    string FullName,
-    string Email,
-    string Password) : IRequest;
+public record ResendVerificationEmailCommand(string Email) : IRequest;
 
-public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCommand>
+public class ResendVerificationEmailCommandHandler : IRequestHandler<ResendVerificationEmailCommand>
 {
     private readonly ICustomerRepository _customers;
     private readonly ICustomerCredentialRepository _credentials;
     private readonly IEmailVerificationTokenRepository _tokens;
     private readonly IEmailService _email;
 
-    public RegisterCustomerCommandHandler(
+    public ResendVerificationEmailCommandHandler(
         ICustomerRepository customers,
         ICustomerCredentialRepository credentials,
         IEmailVerificationTokenRepository tokens,
@@ -30,31 +27,27 @@ public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCo
         _email = email;
     }
 
-    public async Task Handle(RegisterCustomerCommand cmd, CancellationToken ct)
+    public async Task Handle(ResendVerificationEmailCommand cmd, CancellationToken ct)
     {
-        var existing = await _customers.FindByEmailAsync(cmd.Email, ct);
-        if (existing is not null)
-            throw new InvalidOperationException($"Email '{cmd.Email}' is already registered.");
+        var customer = await _customers.FindByEmailAsync(cmd.Email, ct);
+        if (customer is null)
+            return; // don't reveal whether the email exists
 
-        var customer = Customer.Create(cmd.FullName, cmd.Email, null, null);
+        var credential = await _credentials.FindByCustomerIdAsync(customer.Id, ct);
+        if (credential is null || credential.EmailVerified)
+            return; // already verified or no credential — nothing to do
 
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(cmd.Password);
-        var credential = CustomerCredential.Create(customer.Id, passwordHash);
+        await _tokens.DeleteUnusedByCustomerIdAsync(customer.Id, ct);
+        await _tokens.SaveChangesAsync(ct);
 
-        // 6-digit OTP — short enough to type, long enough for a 24-hour window
         var rawToken = Random.Shared.Next(100_000, 1_000_000).ToString();
         var tokenHash = HashString(rawToken);
         var verificationToken = EmailVerificationToken.Create(customer.Id, tokenHash);
 
-        await _customers.AddAsync(customer, ct);
-        await _credentials.AddAsync(credential, ct);
         await _tokens.AddAsync(verificationToken, ct);
-
-        await _customers.SaveChangesAsync(ct);
-        await _credentials.SaveChangesAsync(ct);
         await _tokens.SaveChangesAsync(ct);
 
-        await _email.SendVerificationEmailAsync(cmd.Email, cmd.FullName, rawToken, ct);
+        await _email.SendVerificationEmailAsync(cmd.Email, customer.FullName, rawToken, ct);
     }
 
     private static string HashString(string input)

@@ -16,7 +16,7 @@ public class GetCustomerQueryHandler : IRequestHandler<GetCustomerQuery, Custome
     {
         var customer = await _repo.FindByIdWithContactsAsync(query.CustomerId, ct);
 
-        if (customer is null || !customer.IsActive)
+        if (customer is null)
             throw new KeyNotFoundException($"Customer {query.CustomerId} not found.");
 
         var contacts = customer.Contacts

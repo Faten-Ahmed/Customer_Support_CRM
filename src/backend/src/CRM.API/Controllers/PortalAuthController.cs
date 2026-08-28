@@ -1,11 +1,13 @@
 using CRM.Application.Customers.Commands;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.API.Controllers;
 
 public record PortalRegisterRequest(string FullName, string Email, string Password);
 public record PortalVerifyEmailRequest(string Token);
+public record ResendVerificationRequest(string Email);
 
 /// <summary>
 /// Handles unauthenticated customer portal registration and email verification.
@@ -62,5 +64,17 @@ public class PortalAuthController : ControllerBase
         {
             return UnprocessableEntity(new { errors = new[] { new { code = "TOKEN_INVALID", message = ex.Message } } });
         }
+    }
+
+    /// <summary>
+    /// Resends the verification email for an unverified account.
+    /// Always returns 200 to avoid leaking whether an email is registered.
+    /// </summary>
+    [HttpPost("resend-verification")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResendVerification([FromBody] ResendVerificationRequest req, CancellationToken ct)
+    {
+        await _mediator.Send(new ResendVerificationEmailCommand(req.Email), ct);
+        return Ok(new { message = "If your email is registered and unverified, a new code has been sent." });
     }
 }

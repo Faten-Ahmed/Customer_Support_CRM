@@ -2,50 +2,100 @@
   <p class="state-message">Loading…</p>
 } @else if (customer()) {
   <div class="customer-detail">
+
+    <!-- ── Header ── -->
     <div class="detail-header">
       <div class="header-info">
         <h1 class="customer-name">{{ customer()!.fullName }}</h1>
         <p class="customer-email">{{ customer()!.email }}</p>
-        @if (customer()!.isVip) { <span class="vip-badge">VIP</span> }
-        <span class="status-badge" [class.status-active]="customer()!.isActive" [class.status-inactive]="!customer()!.isActive">
-          {{ customer()!.isActive ? 'Active' : 'Inactive' }}
-        </span>
+        <div class="badges">
+          @if (customer()!.isVip) { <span class="vip-badge">⭐ VIP</span> }
+          <span class="status-badge" [class.status-active]="customer()!.isActive" [class.status-inactive]="!customer()!.isActive">
+            {{ customer()!.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
       </div>
       <div class="header-actions">
         <button mat-raised-button color="primary" [routerLink]="['/app/tickets/new']" [queryParams]="{ customerId: customer()!.id }">
-          New Ticket
+          <mat-icon>add</mat-icon> New Ticket
         </button>
+        @if (isAdminOrManager) {
+          <button mat-stroked-button [color]="customer()!.isVip ? 'accent' : 'primary'"
+                  [disabled]="vipLoading()" (click)="toggleVip()"
+                  [matTooltip]="customer()!.isVip ? 'Remove VIP status' : 'Mark as VIP'">
+            @if (vipLoading()) { <mat-spinner diameter="18" /> }
+            @else { <mat-icon>{{ customer()!.isVip ? 'star' : 'star_border' }}</mat-icon> }
+            {{ customer()!.isVip ? 'Remove VIP' : 'Mark VIP' }}
+          </button>
+        }
         @if (isAdmin && customer()!.isActive) {
-          <button mat-stroked-button color="warn" (click)="confirmDeactivate()">Deactivate</button>
+          <button mat-stroked-button color="warn" [disabled]="deactivating()" (click)="confirmDeactivate()">
+            @if (deactivating()) { <mat-spinner diameter="18" /> } @else { Deactivate }
+          </button>
+        }
+        @if (isAdmin && !customer()!.isActive) {
+          <button mat-stroked-button color="primary" [disabled]="reactivating()" (click)="confirmReactivate()">
+            @if (reactivating()) { <mat-spinner diameter="18" /> } @else { Reactivate }
+          </button>
         }
       </div>
     </div>
 
     <mat-tab-group>
+
+      <!-- ── Overview ── -->
       <mat-tab label="Overview">
         <div class="tab-content">
           @if (!editing()) {
             <dl class="detail-list">
               <div class="detail-item">
+                <dt>Full Name</dt>
+                <dd>{{ customer()!.fullName }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Email</dt>
+                <dd>{{ customer()!.email }}</dd>
+              </div>
+              <div class="detail-item">
                 <dt>Phone</dt>
                 <dd>{{ customer()!.phone || '—' }}</dd>
+              </div>
+              <div class="detail-item">
+                <dt>Company</dt>
+                <dd>{{ customer()!.companyName || '—' }}</dd>
               </div>
               <div class="detail-item">
                 <dt>Member Since</dt>
                 <dd>{{ customer()!.createdAt | date:'mediumDate' }}</dd>
               </div>
             </dl>
-            <button mat-icon-button (click)="enterEditMode()">
-              <mat-icon>edit</mat-icon>
+            <button mat-stroked-button (click)="enterEditMode()">
+              <mat-icon>edit</mat-icon> Edit Profile
             </button>
           } @else {
             <form [formGroup]="editForm" class="edit-form">
               <mat-form-field appearance="outline">
+                <mat-label>Full Name</mat-label>
+                <input matInput formControlName="fullName" />
+                @if (editForm.get('fullName')?.hasError('required') && editForm.get('fullName')?.touched) {
+                  <mat-error>Full name is required.</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline">
                 <mat-label>Phone</mat-label>
-                <input matInput formControlName="phone" />
+                <input matInput formControlName="phone" placeholder="+966 5x xxx xxxx" />
+                @if (editForm.get('phone')?.hasError('phone') && editForm.get('phone')?.touched) {
+                  <mat-error>Enter a valid phone number (digits, spaces, +, -, parentheses).</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Company Name</mat-label>
+                <input matInput formControlName="companyName" />
               </mat-form-field>
               <div class="form-actions">
-                <button mat-raised-button color="primary" type="button" (click)="saveChanges()">Save</button>
+                <button mat-raised-button color="primary" type="button" [disabled]="savingEdit()" (click)="saveChanges()">
+                  @if (savingEdit()) { <mat-spinner diameter="18" /> } @else { Save }
+                </button>
                 <button mat-stroked-button type="button" (click)="cancelEdit()">Cancel</button>
               </div>
             </form>
@@ -53,17 +103,123 @@
         </div>
       </mat-tab>
 
+      <!-- ── Contacts ── -->
       <mat-tab label="Contacts">
-        <div class="tab-content state-message">Contacts management — coming in US-BE-017.</div>
+        <div class="tab-content">
+          @if (customer()!.contacts.length > 0) {
+            <div class="contacts-list">
+              @for (contact of customer()!.contacts; track contact.id) {
+                <div class="contact-row">
+                  <div class="contact-info">
+                    <span class="contact-type-badge">{{ contact.type }}</span>
+                    <span class="contact-value">{{ contact.value }}</span>
+                    @if (contact.isPrimary) {
+                      <span class="primary-badge">Primary</span>
+                    }
+                  </div>
+                  <button mat-icon-button color="warn"
+                          [disabled]="removingContactId() === contact.id"
+                          (click)="removeContact(contact.id)"
+                          matTooltip="Remove contact">
+                    @if (removingContactId() === contact.id) {
+                      <mat-spinner diameter="18" />
+                    } @else {
+                      <mat-icon>delete_outline</mat-icon>
+                    }
+                  </button>
+                </div>
+              }
+            </div>
+            <mat-divider class="contact-divider" />
+          } @else {
+            <p class="empty-hint">No contacts yet. Add one below.</p>
+          }
+
+          <h3 class="section-title">Add Contact</h3>
+          <form [formGroup]="contactForm" class="contact-form" (ngSubmit)="addContact()">
+            <mat-form-field appearance="outline" class="type-field">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type">
+                @for (t of contactTypes; track t) {
+                  <mat-option [value]="t">{{ t }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="value-field">
+              <mat-label>Value</mat-label>
+              <input matInput formControlName="value" [placeholder]="contactValuePlaceholder"
+                     [type]="contactForm.get('type')?.value === 'Email' ? 'email' : 'tel'" />
+              @if (contactForm.get('value')?.hasError('required') && contactForm.get('value')?.touched) {
+                <mat-error>Value is required.</mat-error>
+              }
+              @if (contactForm.get('value')?.hasError('email') && contactForm.get('value')?.touched) {
+                <mat-error>Enter a valid email address.</mat-error>
+              }
+              @if (contactForm.get('value')?.hasError('phone') && contactForm.get('value')?.touched) {
+                <mat-error>Enter a valid phone number (digits, spaces, +, -, parentheses).</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-checkbox formControlName="isPrimary" class="primary-check">Primary</mat-checkbox>
+
+            <button mat-raised-button color="primary" type="submit" [disabled]="contactSubmitting()">
+              @if (contactSubmitting()) { <mat-spinner diameter="18" /> } @else { Add }
+            </button>
+          </form>
+        </div>
       </mat-tab>
 
+      <!-- ── Tickets ── -->
       <mat-tab label="Tickets">
-        <div class="tab-content state-message">Ticket list filtered by customer — coming in US-FE-009.</div>
+        <div class="tab-content">
+          @if (ticketsLoading()) {
+            <p class="state-message">Loading tickets…</p>
+          } @else if (tickets().length === 0) {
+            <p class="state-message">No tickets for this customer.</p>
+          } @else {
+            <mat-table [dataSource]="tickets()" class="tickets-table">
+              <ng-container matColumnDef="ticketNumber">
+                <mat-header-cell *matHeaderCellDef>#</mat-header-cell>
+                <mat-cell *matCellDef="let t">{{ t.ticketNumber }}</mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="subject">
+                <mat-header-cell *matHeaderCellDef>Subject</mat-header-cell>
+                <mat-cell *matCellDef="let t">{{ t.subject }}</mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                <mat-cell *matCellDef="let t">
+                  <span class="status-chip status-{{ t.status.toLowerCase() }}">{{ t.status }}</span>
+                </mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="priority">
+                <mat-header-cell *matHeaderCellDef>Priority</mat-header-cell>
+                <mat-cell *matCellDef="let t">{{ t.priority }}</mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="category">
+                <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
+                <mat-cell *matCellDef="let t">{{ t.category || '—' }}</mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="createdAt">
+                <mat-header-cell *matHeaderCellDef>Created</mat-header-cell>
+                <mat-cell *matCellDef="let t">{{ t.createdAt | date:'mediumDate' }}</mat-cell>
+              </ng-container>
+
+              <mat-header-row *matHeaderRowDef="ticketColumns"></mat-header-row>
+              <mat-row *matRowDef="let row; columns: ticketColumns;"></mat-row>
+            </mat-table>
+
+            <mat-paginator
+              [length]="ticketsTotal()"
+              [pageSize]="ticketsPageSize"
+              [pageSizeOptions]="[10, 20, 50]"
+              (page)="onTicketsPage($event)">
+            </mat-paginator>
+          }
+        </div>
       </mat-tab>
 
-      <mat-tab label="Audit">
-        <div class="tab-content state-message">Audit log — coming soon.</div>
-      </mat-tab>
     </mat-tab-group>
   </div>
 }

@@ -5,5 +5,6 @@ public record LoginResponse(
     string RefreshToken,
     bool RequiresPasswordChange,
     Guid UserId,
+    string Email,
     string FullName,
     string Role);

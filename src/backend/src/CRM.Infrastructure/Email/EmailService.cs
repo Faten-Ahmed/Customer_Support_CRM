@@ -1,30 +1,89 @@
 using CRM.Application.Common;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace CRM.Infrastructure.Email;
 
-// Stub until a real email provider (SendGrid / SMTP) is wired up.
 public class EmailService : IEmailService
 {
+    private readonly SmtpSettings _smtp;
     private readonly ILogger<EmailService> _logger;
 
-    public EmailService(ILogger<EmailService> logger) => _logger = logger;
-
-    public Task SendVerificationEmailAsync(
-        string toEmail, string toName, string verificationToken, CancellationToken ct = default)
+    public EmailService(IOptions<SmtpSettings> smtp, ILogger<EmailService> logger)
     {
-        _logger.LogWarning(
-            "[DEV] Verification token for {Email}: {Token} — POST /api/v1/auth/portal/verify-email with {{\"token\":\"{Token}\"}}",
-            toEmail, verificationToken, verificationToken);
-        return Task.CompletedTask;
+        _smtp = smtp.Value;
+        _logger = logger;
     }
 
-    public Task SendPasswordResetEmailAsync(
+    public async Task SendVerificationEmailAsync(
+        string toEmail, string toName, string verificationToken, CancellationToken ct = default)
+    {
+        var subject = "Your CRM Portal verification code";
+        var verifyUrl = $"http://localhost:4200/portal/verify-email?email={Uri.EscapeDataString(toEmail)}";
+        var body = $"""
+            <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+              <h2 style="color:#1976d2;">Verify your email address</h2>
+              <p>Hello {toName},</p>
+              <p>Enter this 6-digit code on the verification page to activate your account:</p>
+              <div style="font-size:2.5rem;font-weight:700;letter-spacing:0.4em;text-align:center;
+                          background:#f5f5f5;border-radius:8px;padding:16px 0;margin:24px 0;">
+                {verificationToken}
+              </div>
+              <p style="text-align:center;">
+                <a href="{verifyUrl}" style="background:#1976d2;color:#fff;padding:12px 28px;
+                   border-radius:6px;text-decoration:none;font-weight:600;">
+                  Go to verification page
+                </a>
+              </p>
+              <p style="color:#666;font-size:0.875rem;">This code expires in 24 hours. If you didn't create an account, ignore this email.</p>
+            </div>
+            """;
+
+        await SendAsync(toEmail, toName, subject, body, ct);
+    }
+
+    public async Task SendPasswordResetEmailAsync(
         string toEmail, string toName, string resetToken, CancellationToken ct = default)
     {
-        _logger.LogWarning(
-            "[DEV] Password reset token for {Email}: {Token}",
-            toEmail, resetToken);
-        return Task.CompletedTask;
+        var subject = "Reset your CRM Portal password";
+        var body = $"""
+            <p>Hello {toName},</p>
+            <p>Use the token below to reset your password:</p>
+            <p style="font-size:1.2em;letter-spacing:2px;font-weight:bold;">{resetToken}</p>
+            <p>POST to <code>/api/v1/auth/portal/reset-password</code> with the token and your new password.</p>
+            <p>This token expires in 1 hour.</p>
+            """;
+
+        await SendAsync(toEmail, toName, subject, body, ct);
+    }
+
+    private async Task SendAsync(string toEmail, string toName, string subject, string htmlBody, CancellationToken ct)
+    {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(_smtp.FromName, _smtp.FromAddress));
+        message.To.Add(new MailboxAddress(toName, toEmail));
+        message.Subject = subject;
+        message.Body = new TextPart("html") { Text = htmlBody };
+
+        using var client = new SmtpClient();
+        try
+        {
+            await client.ConnectAsync(_smtp.Host, _smtp.Port, SecureSocketOptions.StartTls, ct);
+            await client.AuthenticateAsync(_smtp.Username, _smtp.Password, ct);
+            await client.SendAsync(message, ct);
+            _logger.LogInformation("Email sent to {Email}: {Subject}", toEmail, subject);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send email to {Email}: {Subject}", toEmail, subject);
+            throw;
+        }
+        finally
+        {
+            await client.DisconnectAsync(true, ct);
+        }
     }
 }
