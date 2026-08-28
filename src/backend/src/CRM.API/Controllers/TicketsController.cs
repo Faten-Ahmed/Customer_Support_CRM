@@ -167,4 +167,20 @@ public class TicketsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
+
+    public record AddMessageRequest(string Body, bool IsInternal);
+
+    [HttpPost("{id:guid}/messages")]
+    public async Task<IActionResult> AddMessage(
+        Guid id, [FromBody] AddMessageRequest request, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new AddTicketMessageCommand(
+                id, request.Body, request.IsInternal, CurrentUserId, null), ct);
+            return StatusCode(201, result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
+    }
 }
