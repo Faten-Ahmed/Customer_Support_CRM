@@ -65,6 +65,16 @@ describe('TicketService', () => {
     req.flush(emptyPage);
   });
 
+  describe('getMessages()', () => {
+    it('should GET /api/v1/tickets/{id}/messages with page params', () => {
+      service.getMessages('t1', 1, 20).subscribe();
+      const req = httpMock.expectOne(r => r.url === '/api/v1/tickets/t1/messages');
+      expect(req.request.params.get('page')).toBe('1');
+      expect(req.request.params.get('pageSize')).toBe('20');
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 });
+    });
+  });
+
   describe('action methods', () => {
     it('assign() should PATCH /api/v1/tickets/{id}/assign', () => {
       service.assign('t1', 'agent-1').subscribe();

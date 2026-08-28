@@ -44,6 +44,25 @@ export interface TicketPage {
   totalPages: number;
 }
 
+export interface TicketMessage {
+  id: string;
+  ticketId: string;
+  body: string;
+  isInternal: boolean;
+  authorUserId?: string;
+  authorName?: string;
+  authorCustomerId?: string;
+  createdAt: string;
+}
+
+export interface TicketMessagePage {
+  items: TicketMessage[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface CreateTicketPayload {
   customerId: string;
   departmentId: string;
@@ -121,5 +140,12 @@ export class TicketService {
 
   changeStatus(ticketId: string, status: string, resolutionText: string | undefined): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${ticketId}/status`, { status, resolutionText });
+  }
+
+  getMessages(ticketId: string, page: number, pageSize: number): Observable<TicketMessagePage> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+    return this.http.get<TicketMessagePage>(`${this.baseUrl}/${ticketId}/messages`, { params });
   }
 }
