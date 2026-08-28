@@ -214,4 +214,21 @@ public class TicketsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
+
+    [HttpDelete("{id:guid}/attachments/{attachmentId:guid}")]
+    public async Task<IActionResult> DeleteAttachment(
+        Guid id, Guid attachmentId, CancellationToken ct)
+    {
+        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
+        Enum.TryParse<UserRole>(roleClaim, out var role);
+
+        try
+        {
+            await _mediator.Send(
+                new DeleteAttachmentCommand(id, attachmentId, CurrentUserId, role), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (UnauthorizedAccessException ex) { return StatusCode(403, new { error = ex.Message }); }
+    }
 }
