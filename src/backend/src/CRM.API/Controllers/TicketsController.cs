@@ -81,4 +81,24 @@ public class TicketsController : ControllerBase
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
     }
+
+    public record UpdateTicketRequest(
+        string Subject, string Description, TicketPriority Priority,
+        Guid? CategoryId, Guid? DepartmentId, string? CustomFieldValues);
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(
+        Guid id, [FromBody] UpdateTicketRequest request, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new UpdateTicketCommand(
+                id, request.Subject, request.Description, request.Priority,
+                request.CategoryId, request.DepartmentId, request.CustomFieldValues,
+                CurrentUserId), ct);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
+    }
 }
