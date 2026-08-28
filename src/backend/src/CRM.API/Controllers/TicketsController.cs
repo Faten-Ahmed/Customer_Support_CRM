@@ -117,4 +117,20 @@ public class TicketsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
+
+    public record ChangeStatusRequest(TicketStatus Status);
+
+    [HttpPatch("{id:guid}/status")]
+    public async Task<IActionResult> ChangeStatus(
+        Guid id, [FromBody] ChangeStatusRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(
+                new ChangeTicketStatusCommand(id, request.Status, CurrentUserId), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
 }
