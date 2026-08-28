@@ -65,6 +65,39 @@ describe('TicketService', () => {
     req.flush(emptyPage);
   });
 
+  describe('action methods', () => {
+    it('assign() should PATCH /api/v1/tickets/{id}/assign', () => {
+      service.assign('t1', 'agent-1').subscribe();
+      const req = httpMock.expectOne('/api/v1/tickets/t1/assign');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ agentId: 'agent-1' });
+      req.flush({});
+    });
+
+    it('transfer() should PATCH /api/v1/tickets/{id}/transfer', () => {
+      service.transfer('t1', 'd2', 'Needs billing').subscribe();
+      const req = httpMock.expectOne('/api/v1/tickets/t1/transfer');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ departmentId: 'd2', note: 'Needs billing' });
+      req.flush({});
+    });
+
+    it('escalate() should PATCH /api/v1/tickets/{id}/escalate', () => {
+      service.escalate('t1', 'Customer VIP and very upset').subscribe();
+      const req = httpMock.expectOne('/api/v1/tickets/t1/escalate');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ reason: 'Customer VIP and very upset' });
+      req.flush({});
+    });
+
+    it('changeStatus() should PATCH /api/v1/tickets/{id}/status', () => {
+      service.changeStatus('t1', 'OnHold', undefined).subscribe();
+      const req = httpMock.expectOne('/api/v1/tickets/t1/status');
+      expect(req.request.method).toBe('PATCH');
+      req.flush({});
+    });
+  });
+
   describe('create()', () => {
     it('should POST to /api/v1/tickets and return the new ticket', () => {
       const payload = {

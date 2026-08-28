@@ -106,4 +106,20 @@ export class TicketService {
   create(payload: CreateTicketPayload): Observable<TicketDetail> {
     return this.http.post<TicketDetail>(this.baseUrl, payload);
   }
+
+  assign(ticketId: string, agentId: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${ticketId}/assign`, { agentId });
+  }
+
+  transfer(ticketId: string, departmentId: string, note: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${ticketId}/transfer`, { departmentId, note });
+  }
+
+  escalate(ticketId: string, reason: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${ticketId}/escalate`, { reason });
+  }
+
+  changeStatus(ticketId: string, status: string, resolutionText: string | undefined): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${ticketId}/status`, { status, resolutionText });
+  }
 }
