@@ -7,6 +7,8 @@ public class Customer
     public string Email { get; private set; } = string.Empty;
     public string? Phone { get; private set; }
     public string? CompanyName { get; private set; }
+    public string? Country { get; private set; }
+    public string? City { get; private set; }
     public string? PasswordHash { get; private set; }
     public bool EmailVerified { get; private set; }
     public bool IsVip { get; private set; }
@@ -47,6 +49,15 @@ public class Customer
         Phone = phone;
         CompanyName = companyName;
     }
+
+    public void UpdateProfile(string? fullName, string? phone, string? city)
+    {
+        if (fullName is not null) FullName = fullName;
+        if (phone is not null) Phone = phone;
+        if (city is not null) City = city;
+    }
+
+    public void UpdateCity(string city) => City = city;
 
     public void Deactivate()
     {

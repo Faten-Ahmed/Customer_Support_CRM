@@ -1,6 +1,8 @@
 using CRM.Application.Tickets.DTOs;
+using CRM.Domain.Customers;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
+using CRM.Domain.Users;
 using MediatR;
 
 namespace CRM.Application.Tickets.Commands;
@@ -17,12 +19,19 @@ public class AddTicketMessageCommandHandler
 {
     private readonly ITicketRepository _tickets;
     private readonly ITicketMessageRepository _messages;
+    private readonly IUserRepository _users;
+    private readonly ICustomerRepository _customers;
 
     public AddTicketMessageCommandHandler(
-        ITicketRepository tickets, ITicketMessageRepository messages)
+        ITicketRepository tickets,
+        ITicketMessageRepository messages,
+        IUserRepository users,
+        ICustomerRepository customers)
     {
         _tickets = tickets;
         _messages = messages;
+        _users = users;
+        _customers = customers;
     }
 
     public async Task<TicketMessageDto> Handle(
@@ -41,8 +50,21 @@ public class AddTicketMessageCommandHandler
         await _messages.AddAsync(message, ct);
         await _messages.SaveChangesAsync(ct);
 
+        string? authorName = null;
+        if (cmd.AuthorUserId.HasValue)
+        {
+            var user = await _users.FindByIdAsync(cmd.AuthorUserId.Value, ct);
+            if (user is not null)
+                authorName = $"{user.FirstName} {user.LastName}";
+        }
+        else if (cmd.AuthorCustomerId.HasValue)
+        {
+            var customer = await _customers.FindByIdAsync(cmd.AuthorCustomerId.Value, ct);
+            authorName = customer?.FullName;
+        }
+
         return new TicketMessageDto(
             message.Id, message.TicketId, message.Body, message.IsInternal,
-            message.AuthorUserId, null, message.AuthorCustomerId, message.CreatedAt);
+            message.AuthorUserId, authorName, message.AuthorCustomerId, message.CreatedAt);
     }
 }

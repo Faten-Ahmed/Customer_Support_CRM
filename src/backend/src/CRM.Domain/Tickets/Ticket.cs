@@ -142,6 +142,13 @@ public class Ticket
         _history.Add(TicketHistory.Create(Id, "TransferReason", null, reason, transferredBy));
     }
 
+    public void CloseByCustomer()
+    {
+        Status = TicketStatus.Closed;
+        ClosedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void RecordEscalationReason(string reason, Guid escalatedBy)
     {
         _history.Add(TicketHistory.Create(Id, "EscalationReason", null, reason, escalatedBy));

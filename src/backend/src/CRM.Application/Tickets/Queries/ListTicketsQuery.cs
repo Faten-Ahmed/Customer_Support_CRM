@@ -31,13 +31,13 @@ public class ListTicketsQueryHandler
     public async Task<PagedResult<TicketSummaryDto>> Handle(
         ListTicketsQuery query, CancellationToken ct)
     {
-        var assignedToFilter = query.RequestingUserRole == UserRole.Agent
-            ? query.RequestingUserId
-            : query.AssignedToUserId;
+        var isAgent = query.RequestingUserRole == UserRole.Agent;
 
         var filter = new TicketFilter(
             query.Status, query.Priority, query.CustomerId,
-            assignedToFilter, query.CategoryId, query.Search,
+            AssignedToUserId: isAgent ? null : query.AssignedToUserId,
+            AgentQueueUserId: isAgent ? query.RequestingUserId : null,
+            query.CategoryId, query.Search,
             query.Page, query.PageSize, query.SortBy, query.SortDesc);
 
         var projected = await _tickets.ListAsync(filter, ct);

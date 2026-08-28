@@ -38,10 +38,10 @@ describe('TransferModalComponent', () => {
   });
 
   it('should call transfer() and close dialog on submit', () => {
-    component.form.get('departmentId')!.setValue('d2');
-    component.form.get('note')!.setValue('Needs billing team attention');
+    component.form.get('targetAgentId')!.setValue('a1');
+    component.form.get('reason')!.setValue('Needs billing team attention');
     component.onSubmit();
-    expect(mockTicketService.transfer).toHaveBeenCalledWith('t1', 'd2', 'Needs billing team attention');
+    expect(mockTicketService.transfer).toHaveBeenCalledWith('t1', 'a1', 'Needs billing team attention');
     expect(mockDialogRef.close).toHaveBeenCalledWith(true);
   });
 });

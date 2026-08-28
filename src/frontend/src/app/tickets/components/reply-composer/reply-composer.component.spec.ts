@@ -49,8 +49,9 @@ describe('ReplyComposerComponent', () => {
   it('should create', () => expect(component).toBeTruthy());
 
   it('should disable send button when textarea is empty', () => {
-    const btn = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
-    expect(btn.disabled).toBe(true);
+    const btns = fixture.nativeElement.querySelectorAll('.composer-footer button') as NodeListOf<HTMLButtonElement>;
+    const sendBtn = btns[btns.length - 1];
+    expect(sendBtn.disabled).toBe(true);
   });
 
   it('should toggle isInternal flag', () => {

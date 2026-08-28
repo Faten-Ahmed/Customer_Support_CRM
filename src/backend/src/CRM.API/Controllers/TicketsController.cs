@@ -104,11 +104,13 @@ public class TicketsController : ControllerBase
 
     public record AssignTicketRequest(Guid AgentId);
 
-    [Authorize(Roles = "Admin,Manager")]
     [HttpPatch("{id:guid}/assign")]
     public async Task<IActionResult> Assign(
         Guid id, [FromBody] AssignTicketRequest request, CancellationToken ct)
     {
+        if (User.IsInRole("Agent") && request.AgentId != CurrentUserId)
+            return Forbid();
+
         try
         {
             await _mediator.Send(new AssignTicketCommand(id, request.AgentId, CurrentUserId), ct);
@@ -194,6 +196,13 @@ public class TicketsController : ControllerBase
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
+    }
+
+    [HttpGet("{id:guid}/attachments")]
+    public async Task<IActionResult> GetAttachments(Guid id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetTicketAttachmentsQuery(id), ct);
+        return Ok(result);
     }
 
     [HttpPost("{id:guid}/attachments")]

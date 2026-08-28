@@ -68,15 +68,15 @@ describe('MessageThreadComponent', () => {
     expect(mockConnection.start).toHaveBeenCalled();
   });
 
-  it('should show "Load more" button when more messages exist', () => {
+  it('should show "Load earlier messages" button when more messages exist', () => {
     component.totalCount.set(10);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Load more');
+    expect(el.textContent).toContain('Load earlier messages');
   });
 
   it('should not show load-more when all messages loaded', () => {
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).not.toContain('Load more');
+    expect(el.textContent).not.toContain('Load earlier messages');
   });
 });

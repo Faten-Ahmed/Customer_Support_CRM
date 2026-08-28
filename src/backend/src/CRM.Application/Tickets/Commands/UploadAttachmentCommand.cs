@@ -1,6 +1,8 @@
 using CRM.Application.Common;
 using CRM.Application.Tickets.DTOs;
+using CRM.Domain.Customers;
 using CRM.Domain.Tickets;
+using CRM.Domain.Users;
 using MediatR;
 
 namespace CRM.Application.Tickets.Commands;
@@ -32,15 +34,21 @@ public class UploadAttachmentCommandHandler
     private readonly ITicketRepository _tickets;
     private readonly IAttachmentRepository _attachments;
     private readonly IStorageService _storage;
+    private readonly IUserRepository _users;
+    private readonly ICustomerRepository _customers;
 
     public UploadAttachmentCommandHandler(
         ITicketRepository tickets,
         IAttachmentRepository attachments,
-        IStorageService storage)
+        IStorageService storage,
+        IUserRepository users,
+        ICustomerRepository customers)
     {
         _tickets = tickets;
         _attachments = attachments;
         _storage = storage;
+        _users = users;
+        _customers = customers;
     }
 
     public async Task<AttachmentDto> Handle(UploadAttachmentCommand cmd, CancellationToken ct)
@@ -65,9 +73,19 @@ public class UploadAttachmentCommandHandler
 
         var presignedUrl = await _storage.GetPresignedUrlAsync(storageKey, ct);
 
+        string? uploaderName = null;
+        var user = await _users.FindByIdAsync(cmd.UploadedByUserId, ct);
+        if (user is not null)
+            uploaderName = $"{user.FirstName} {user.LastName}";
+        else
+        {
+            var customer = await _customers.FindByIdAsync(cmd.UploadedByUserId, ct);
+            uploaderName = customer?.FullName;
+        }
+
         return new AttachmentDto(
             attachment.Id, attachment.TicketId, null,
             attachment.FileName, attachment.ContentType, attachment.FileSize,
-            presignedUrl, null, attachment.UploadedAt);
+            presignedUrl, uploaderName, attachment.UploadedAt);
     }
 }

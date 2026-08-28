@@ -1,7 +1,9 @@
 using CRM.Application.Common;
 using CRM.Application.Tickets.Commands;
+using CRM.Domain.Customers;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
+using CRM.Domain.Users;
 using Moq;
 using Xunit;
 
@@ -12,12 +14,15 @@ public class UploadAttachmentCommandHandlerTests
     private readonly Mock<ITicketRepository> _ticketRepo = new();
     private readonly Mock<IAttachmentRepository> _attachmentRepo = new();
     private readonly Mock<IStorageService> _storage = new();
+    private readonly Mock<IUserRepository> _users = new();
+    private readonly Mock<ICustomerRepository> _customers = new();
     private readonly UploadAttachmentCommandHandler _handler;
 
     public UploadAttachmentCommandHandlerTests()
     {
         _handler = new UploadAttachmentCommandHandler(
-            _ticketRepo.Object, _attachmentRepo.Object, _storage.Object);
+            _ticketRepo.Object, _attachmentRepo.Object, _storage.Object,
+            _users.Object, _customers.Object);
     }
 
     [Fact]

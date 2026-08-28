@@ -10,6 +10,83 @@ import * as signalR from '@microsoft/signalr';
   standalone: true,
   imports: [CommonModule, MatButtonModule],
   templateUrl: './message-thread.component.html',
+  styles: [`
+    :host { display: block; }
+
+    .thread-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px;
+      min-height: 200px;
+      max-height: 520px;
+      overflow-y: auto;
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+    }
+
+    .load-more { text-align: center; margin-bottom: 8px; }
+
+    .empty-thread { color: #aaa; text-align: center; margin: auto; }
+
+    /* Internal note */
+    .msg-internal {
+      background: #fffde7;
+      border: 1px solid #f9a825;
+      border-left: 4px solid #f9a825;
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .msg-internal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .internal-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #f57f17;
+      letter-spacing: 0.4px;
+    }
+
+    /* Row layouts */
+    .msg-row { display: flex; }
+    .msg-row-right { justify-content: flex-end; }
+    .msg-row-left { justify-content: flex-start; }
+
+    /* Bubbles */
+    .bubble {
+      max-width: 68%;
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+    .bubble-agent {
+      background: #1976d2;
+      color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+    .bubble-agent .msg-meta,
+    .bubble-agent .msg-time { color: rgba(255,255,255,0.75); }
+
+    .bubble-customer {
+      background: #f0f0f0;
+      color: #212121;
+      border-bottom-left-radius: 3px;
+    }
+
+    .msg-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .msg-meta { font-size: 12px; font-weight: 600; }
+    .msg-time { font-size: 11px; margin-left: auto; }
+    .msg-body { margin: 0; font-size: 14px; line-height: 1.5; }
+  `],
 })
 export class MessageThreadComponent implements OnInit, OnDestroy {
   @Input() ticketId!: string;
@@ -55,12 +132,13 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
     return this.messages().length < this.totalCount();
   }
 
-  isAgentMessage(msg: TicketMessage): boolean {
-    return !!msg.authorUserId && !msg.isInternal;
+  appendMessage(msg: TicketMessage): void {
+    this.messages.update(list => [...list, msg]);
+    this.totalCount.update(t => t + 1);
   }
 
-  isCustomerMessage(msg: TicketMessage): boolean {
-    return !!msg.authorCustomerId && !msg.isInternal;
+  isAgentMessage(msg: TicketMessage): boolean {
+    return !!msg.authorUserId && !msg.isInternal;
   }
 
   private connectSignalR(): void {
@@ -72,6 +150,6 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
           this.totalCount.update(t => t + 1);
         }
       });
-    });
+    }).catch(() => { /* SignalR not yet fully wired */ });
   }
 }

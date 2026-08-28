@@ -10,7 +10,7 @@ public class TicketHistoryConfiguration : IEntityTypeConfiguration<TicketHistory
     {
         builder.ToTable("TicketHistory");
         builder.HasKey(h => h.Id);
-        builder.Property(h => h.Id).ValueGeneratedOnAdd();
+        builder.Property(h => h.Id).ValueGeneratedNever();
 
         builder.Property(h => h.FieldChanged).IsRequired().HasMaxLength(100);
         builder.Property(h => h.OldValue).HasMaxLength(500);

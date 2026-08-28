@@ -38,7 +38,7 @@ public class CreateTicketPortalCommandHandlerTests
 
         await _handler.Handle(new CreateTicketPortalCommand(
             "My screen is black", "Description here", TicketPriority.Medium,
-            null, null, customerId), default);
+            null, null, null, customerId), default);
 
         Assert.NotNull(captured);
         Assert.Equal(TicketChannel.Portal, captured!.Channel);
@@ -57,7 +57,7 @@ public class CreateTicketPortalCommandHandlerTests
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _handler.Handle(new CreateTicketPortalCommand(
-                "Subj", "Desc", TicketPriority.Low, null, null, customerId), default));
+                "Subj", "Desc", TicketPriority.Low, null, null, null, customerId), default));
     }
 
     [Fact]
@@ -68,6 +68,6 @@ public class CreateTicketPortalCommandHandlerTests
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _handler.Handle(new CreateTicketPortalCommand(
-                "Subj", "Desc", TicketPriority.Low, null, null, Guid.NewGuid()), default));
+                "Subj", "Desc", TicketPriority.Low, null, null, null, Guid.NewGuid()), default));
     }
 }

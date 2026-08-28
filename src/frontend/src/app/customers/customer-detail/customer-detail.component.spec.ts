@@ -17,16 +17,23 @@ const mockCustomer: Customer = {
   isVip: true,
   isActive: true,
   createdAt: '2025-01-01',
-};
+  contacts: [],
+} as unknown as Customer;
 
 describe('CustomerDetailComponent', () => {
   let fixture: ComponentFixture<CustomerDetailComponent>;
   let component: CustomerDetailComponent;
 
+  const emptyTicketPage = { items: [], meta: { totalCount: 0, page: 1, pageSize: 10, totalPages: 0 } };
   const mockCustomerService = {
     getById: vi.fn().mockReturnValue(of(mockCustomer)),
-    update: vi.fn(),
-    deactivate: vi.fn(),
+    update: vi.fn().mockReturnValue(of(mockCustomer)),
+    deactivate: vi.fn().mockReturnValue(of({})),
+    reactivate: vi.fn().mockReturnValue(of({})),
+    setVip: vi.fn().mockReturnValue(of({})),
+    addContact: vi.fn().mockReturnValue(of({})),
+    removeContact: vi.fn().mockReturnValue(of({})),
+    getTickets: vi.fn().mockReturnValue(of(emptyTicketPage)),
   };
 
   const mockAuthStore = {

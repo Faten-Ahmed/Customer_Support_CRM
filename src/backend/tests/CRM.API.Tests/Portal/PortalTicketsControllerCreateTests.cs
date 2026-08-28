@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
+using CRM.Application.Common;
 using CRM.Application.Portal.Tickets.Commands;
 using CRM.Application.Tickets.DTOs;
+using CRM.Domain.Tickets;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +16,9 @@ namespace CRM.API.Tests.Portal;
 public class PortalTicketsControllerCreateTests
 {
     private readonly Mock<IMediator> _mediator = new();
+    private readonly Mock<ITicketRepository> _tickets = new();
+    private readonly Mock<IAttachmentRepository> _attachments = new();
+    private readonly Mock<IStorageService> _storage = new();
 
     private HttpClient BuildClient()
     {
@@ -25,6 +30,12 @@ public class PortalTicketsControllerCreateTests
                 {
                     services.RemoveAll<IMediator>();
                     services.AddSingleton<IMediator>(_mediator.Object);
+                    services.RemoveAll<ITicketRepository>();
+                    services.AddSingleton<ITicketRepository>(_tickets.Object);
+                    services.RemoveAll<IAttachmentRepository>();
+                    services.AddSingleton<IAttachmentRepository>(_attachments.Object);
+                    services.RemoveAll<IStorageService>();
+                    services.AddSingleton<IStorageService>(_storage.Object);
                     services.RemoveAll<Microsoft.EntityFrameworkCore.DbContextOptions>();
                     services.RemoveAll<Microsoft.EntityFrameworkCore.DbContextOptions<CRM.Infrastructure.Persistence.AppDbContext>>();
                     services.RemoveAll<CRM.Infrastructure.Persistence.AppDbContext>();

@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { TicketDetailComponent } from './ticket-detail.component';
 import { TicketService, TicketDetail } from '../ticket.service';
+import { SignalRService } from '../../shared/services/signalr.service';
 
 const mockTicket: TicketDetail = {
   id: 't-1',
@@ -22,10 +24,35 @@ const mockTicket: TicketDetail = {
   updatedAt: '2025-01-01T10:00:00Z',
 };
 
+const emptyPage = { items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 };
+
 describe('TicketDetailComponent', () => {
   let fixture: ComponentFixture<TicketDetailComponent>;
   let component: TicketDetailComponent;
-  const mockTicketService = { getById: vi.fn().mockReturnValue(of(mockTicket)) };
+  const mockTicketService = {
+    getById: vi.fn().mockReturnValue(of(mockTicket)),
+    getMessages: vi.fn().mockReturnValue(of(emptyPage)),
+    getHistory: vi.fn().mockReturnValue(of(emptyPage)),
+    getAttachments: vi.fn().mockReturnValue(of([])),
+    addMessage: vi.fn().mockReturnValue(of({})),
+    uploadAttachment: vi.fn().mockReturnValue(of({})),
+    deleteAttachment: vi.fn().mockReturnValue(of(null)),
+    getAgents: vi.fn().mockReturnValue(of([])),
+    list: vi.fn().mockReturnValue(of(emptyPage)),
+  };
+
+  const mockHubConnection = {
+    start: vi.fn().mockResolvedValue(undefined),
+    on: vi.fn(),
+    invoke: vi.fn().mockResolvedValue(undefined),
+    stop: vi.fn().mockResolvedValue(undefined),
+    off: vi.fn(),
+    state: 'Disconnected',
+  };
+
+  const mockSignalRService = {
+    getConnection: vi.fn().mockReturnValue(mockHubConnection),
+  };
 
   const activatedRouteStub = {
     snapshot: { paramMap: { get: (k: string) => (k === 'id' ? 't-1' : null) } },
@@ -34,12 +61,18 @@ describe('TicketDetailComponent', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mockTicketService.getById.mockReturnValue(of(mockTicket));
+    mockTicketService.getMessages.mockReturnValue(of(emptyPage));
+    mockTicketService.getHistory.mockReturnValue(of(emptyPage));
+    mockTicketService.getAttachments.mockReturnValue(of([]));
+    mockTicketService.getById.mockReturnValue(of(mockTicket));
 
     await TestBed.configureTestingModule({
       imports: [TicketDetailComponent, NoopAnimationsModule],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         { provide: TicketService, useValue: mockTicketService },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
+        { provide: SignalRService, useValue: mockSignalRService },
       ],
     }).compileComponents();
 

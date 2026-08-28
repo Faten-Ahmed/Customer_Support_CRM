@@ -10,6 +10,7 @@ public record CreateTicketPortalCommand(
     string Subject,
     string Description,
     TicketPriority Priority,
+    Guid? DepartmentId,
     Guid? CategoryId,
     string? CustomFieldValues,
     Guid PortalCustomerId) : IRequest<TicketSummaryDto>;
@@ -49,6 +50,7 @@ public class CreateTicketPortalCommandHandler
             priority: cmd.Priority,
             channel: TicketChannel.Portal,
             createdByUserId: cmd.PortalCustomerId,
+            departmentId: cmd.DepartmentId,
             categoryId: cmd.CategoryId,
             customFieldValues: cmd.CustomFieldValues);
 

@@ -9,6 +9,7 @@ using CRM.Infrastructure.Jobs;
 using CRM.Infrastructure.Persistence;
 using CRM.Infrastructure.Persistence.Repositories;
 using CRM.Infrastructure.Storage;
+using Minio;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -63,6 +64,7 @@ public static class DependencyInjection
         services.AddScoped<ITicketMessageRepository, TicketMessageRepository>();
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
         services.AddScoped<ITicketJobScheduler, TicketJobScheduler>();
+        services.Configure<MinIOSettings>(configuration.GetSection("MinIO"));
         services.AddScoped<IStorageService, StorageService>();
 
         // Email service

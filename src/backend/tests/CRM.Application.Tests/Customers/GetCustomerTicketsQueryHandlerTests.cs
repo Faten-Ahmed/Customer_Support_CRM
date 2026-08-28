@@ -34,7 +34,7 @@ public class GetCustomerTicketsQueryHandlerTests
             .ReturnsAsync(new PagedResult<CustomerTicketProjection>(
                 new List<CustomerTicketProjection>
                 {
-                    new("TKT-001", "Login issue", "Open", "High", DateTime.UtcNow, "Technical")
+                    new(Guid.NewGuid(), "TKT-001", "Login issue", "Open", "High", DateTime.UtcNow, "Technical")
                 }, 1, 1, 20));
 
         var result = await _handler.Handle(

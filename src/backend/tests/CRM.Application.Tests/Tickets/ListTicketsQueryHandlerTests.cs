@@ -37,7 +37,7 @@ public class ListTicketsQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_AgentRole_ForcesAssigneeFilterToSelf()
+    public async Task Handle_AgentRole_SetsAgentQueueUserIdToSelf()
     {
         var agentId = Guid.NewGuid();
         _repo.Setup(r => r.ListAsync(It.IsAny<TicketFilter>(), default))
@@ -48,7 +48,8 @@ public class ListTicketsQueryHandlerTests
             agentId, UserRole.Agent), default);
 
         _repo.Verify(r => r.ListAsync(
-            It.Is<TicketFilter>(f => f.AssignedToUserId == agentId), default), Times.Once);
+            It.Is<TicketFilter>(f => f.AgentQueueUserId == agentId && f.AssignedToUserId == null),
+            default), Times.Once);
     }
 
     [Fact]

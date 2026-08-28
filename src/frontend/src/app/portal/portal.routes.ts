@@ -23,9 +23,24 @@ export const PORTAL_ROUTES: Routes = [
           import('./dashboard/portal-dashboard.component').then(m => m.PortalDashboardComponent),
       },
       {
+        path: 'tickets',
+        loadComponent: () =>
+          import('./ticket-list/portal-ticket-list.component').then(m => m.PortalTicketListComponent),
+      },
+      {
         path: 'tickets/new',
         loadComponent: () =>
           import('./submit-ticket/portal-submit-ticket.component').then(m => m.PortalSubmitTicketComponent),
+      },
+      {
+        path: 'tickets/:id',
+        loadComponent: () =>
+          import('./ticket-detail/portal-ticket-detail.component').then(m => m.PortalTicketDetailComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./profile/portal-profile.component').then(m => m.PortalProfileComponent),
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

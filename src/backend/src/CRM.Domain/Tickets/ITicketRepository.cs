@@ -4,6 +4,7 @@ using CRM.Domain.Tickets.Enums;
 namespace CRM.Domain.Tickets;
 
 public record CustomerTicketProjection(
+    Guid Id,
     string TicketNumber,
     string Subject,
     string Status,
@@ -30,6 +31,7 @@ public record TicketFilter(
     TicketPriority? Priority,
     Guid? CustomerId,
     Guid? AssignedToUserId,
+    Guid? AgentQueueUserId,
     Guid? CategoryId,
     string? Search,
     int Page,

@@ -14,6 +14,12 @@ public class UserRepository : IUserRepository
     public Task<User?> FindByIdAsync(Guid id, CancellationToken ct = default)
         => _db.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
 
+    public Task<List<User>> ListAgentsAsync(CancellationToken ct = default)
+        => _db.Users
+            .Where(u => u.IsActive && (u.Role == UserRole.Agent || u.Role == UserRole.Manager || u.Role == UserRole.Admin))
+            .OrderBy(u => u.FirstName).ThenBy(u => u.LastName)
+            .ToListAsync(ct);
+
     public Task SaveChangesAsync(CancellationToken ct = default)
         => _db.SaveChangesAsync(ct);
 

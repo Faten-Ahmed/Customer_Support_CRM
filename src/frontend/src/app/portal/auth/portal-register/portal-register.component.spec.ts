@@ -6,7 +6,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -14,9 +14,11 @@ describe('PortalRegisterComponent', () => {
   let component: PortalRegisterComponent;
   let fixture: ComponentFixture<PortalRegisterComponent>;
   let authServiceMock: { portalRegister: ReturnType<typeof vi.fn> };
+  let routerMock: { navigate: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     authServiceMock = { portalRegister: vi.fn() };
+    routerMock = { navigate: vi.fn().mockResolvedValue(true) };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -30,6 +32,7 @@ describe('PortalRegisterComponent', () => {
       providers: [
         provideRouter([]),
         { provide: AuthService, useValue: authServiceMock },
+        { provide: Router, useValue: routerMock },
       ],
     }).compileComponents();
 
@@ -98,7 +101,7 @@ describe('PortalRegisterComponent', () => {
     });
   });
 
-  it('should show success message after registration', async () => {
+  it('should navigate to verify-email after registration', async () => {
     authServiceMock.portalRegister.mockReturnValue(
       of({ message: 'Check your email to activate your account' })
     );
@@ -111,11 +114,11 @@ describe('PortalRegisterComponent', () => {
     });
     component.onSubmit();
     await fixture.whenStable();
-    fixture.detectChanges();
 
-    expect(component.successMessage()).toContain('Check your email');
-    const successEl = fixture.nativeElement.querySelector('[data-testid="register-success"]');
-    expect(successEl).toBeTruthy();
+    expect(routerMock.navigate).toHaveBeenCalledWith(
+      ['/portal/verify-email'],
+      { queryParams: { email: 'jane@example.com' } }
+    );
   });
 
   it('should show error on duplicate email (409)', async () => {

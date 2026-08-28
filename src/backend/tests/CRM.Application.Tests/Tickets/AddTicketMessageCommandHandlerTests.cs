@@ -1,6 +1,8 @@
 using CRM.Application.Tickets.Commands;
+using CRM.Domain.Customers;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
+using CRM.Domain.Users;
 using Moq;
 using Xunit;
 
@@ -10,11 +12,15 @@ public class AddTicketMessageCommandHandlerTests
 {
     private readonly Mock<ITicketRepository> _ticketRepo = new();
     private readonly Mock<ITicketMessageRepository> _messageRepo = new();
+    private readonly Mock<IUserRepository> _users = new();
+    private readonly Mock<ICustomerRepository> _customers = new();
     private readonly AddTicketMessageCommandHandler _handler;
 
     public AddTicketMessageCommandHandlerTests()
     {
-        _handler = new AddTicketMessageCommandHandler(_ticketRepo.Object, _messageRepo.Object);
+        _handler = new AddTicketMessageCommandHandler(
+            _ticketRepo.Object, _messageRepo.Object,
+            _users.Object, _customers.Object);
     }
 
     [Fact]
