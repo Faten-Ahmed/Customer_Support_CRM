@@ -5,6 +5,7 @@ using CRM.Domain.Tickets;
 using CRM.Domain.Users;
 using CRM.Infrastructure.Email;
 using CRM.Infrastructure.Identity;
+using CRM.Infrastructure.Jobs;
 using CRM.Infrastructure.Persistence;
 using CRM.Infrastructure.Persistence.Repositories;
 using Hangfire;
@@ -57,6 +58,10 @@ public static class DependencyInjection
         services.AddScoped<ICustomerContactRepository, CustomerContactRepository>();
         services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
+        services.AddScoped<ITicketHistoryRepository, TicketHistoryRepository>();
+        services.AddScoped<ITicketMessageRepository, TicketMessageRepository>();
+        services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+        services.AddScoped<ITicketJobScheduler, TicketJobScheduler>();
 
         // Email service
         services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
