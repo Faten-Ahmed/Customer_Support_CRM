@@ -65,6 +65,23 @@ describe('TicketService', () => {
     req.flush(emptyPage);
   });
 
+  describe('create()', () => {
+    it('should POST to /api/v1/tickets and return the new ticket', () => {
+      const payload = {
+        customerId: 'c1', departmentId: 'd1', categoryId: 'cat1',
+        subject: 'Test', description: 'Desc', priority: 'High',
+        customFields: [{ definitionId: 'f1', value: 'val' }],
+      };
+
+      service.create(payload).subscribe(t => expect(t.id).toBeTruthy());
+
+      const req = httpMock.expectOne('/api/v1/tickets');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.subject).toBe('Test');
+      req.flush({ id: 'ticket-1', ...payload });
+    });
+  });
+
   describe('getById()', () => {
     it('should GET /api/v1/tickets/:id and return a TicketDetail', () => {
       const mock: TicketDetail = {

@@ -1,0 +1,81 @@
+<div class="p-6 max-w-2xl mx-auto">
+  <h1 class="text-2xl font-semibold mb-6">New Ticket</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <!-- Customer -->
+    <mat-form-field appearance="outline">
+      <mat-label>Customer</mat-label>
+      <input matInput formControlName="customerId" [matAutocomplete]="autoCustomer" />
+      <mat-autocomplete #autoCustomer="matAutocomplete">
+        @for (c of customerSuggestions; track c.id) {
+          <mat-option [value]="c.id">{{ c.label }}</mat-option>
+        }
+      </mat-autocomplete>
+      @if (form.get('customerId')?.hasError('required')) {
+        <mat-error>Customer is required</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Department -->
+    <mat-form-field appearance="outline">
+      <mat-label>Department</mat-label>
+      <mat-select formControlName="departmentId">
+        <mat-option value="">-- Select --</mat-option>
+      </mat-select>
+      @if (form.get('departmentId')?.hasError('required')) {
+        <mat-error>Department is required</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Subject -->
+    <mat-form-field appearance="outline">
+      <mat-label>Subject</mat-label>
+      <input matInput formControlName="subject" />
+      @if (form.get('subject')?.hasError('required')) {
+        <mat-error>Subject is required</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Description -->
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="4"></textarea>
+      @if (form.get('description')?.hasError('required')) {
+        <mat-error>Description is required</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Priority -->
+    <mat-form-field appearance="outline">
+      <mat-label>Priority</mat-label>
+      <mat-select formControlName="priority">
+        <mat-option value="Low">Low</mat-option>
+        <mat-option value="Medium">Medium</mat-option>
+        <mat-option value="High">High</mat-option>
+        <mat-option value="Critical">Critical</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Dynamic Custom Fields -->
+    @if (customFieldDefs.length > 0) {
+      <h3 class="font-medium">Additional Fields</h3>
+      <ng-container formArrayName="customFields">
+        @for (def of customFieldDefs; track def.id; let i = $index) {
+          <mat-form-field appearance="outline" [formGroupName]="i">
+            <mat-label>{{ def.label }}{{ def.required ? ' *' : '' }}</mat-label>
+            <input matInput formControlName="value" />
+          </mat-form-field>
+        }
+      </ng-container>
+    }
+
+    <div class="flex gap-3 justify-end">
+      <button mat-stroked-button type="button" (click)="router.navigate(['/app/tickets'])">
+        Cancel
+      </button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || submitting">
+        {{ submitting ? 'Creating…' : 'Create Ticket' }}
+      </button>
+    </div>
+  </form>
+</div>

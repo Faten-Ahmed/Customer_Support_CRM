@@ -44,6 +44,17 @@ export interface TicketPage {
   totalPages: number;
 }
 
+export interface CreateTicketPayload {
+  customerId: string;
+  departmentId: string;
+  categoryId?: string;
+  subject: string;
+  description: string;
+  priority: TicketPriority | string;
+  channel?: TicketChannel;
+  customFields?: { definitionId: string; value: string }[];
+}
+
 export interface SlaInfo {
   firstResponseDue?: string;
   resolutionDue?: string;
@@ -90,5 +101,9 @@ export class TicketService {
 
   getById(id: string): Observable<TicketDetail> {
     return this.http.get<TicketDetail>(`${this.baseUrl}/${id}`);
+  }
+
+  create(payload: CreateTicketPayload): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(this.baseUrl, payload);
   }
 }
