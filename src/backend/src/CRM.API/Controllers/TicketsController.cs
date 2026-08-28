@@ -1,6 +1,7 @@
 using CRM.Application.Tickets.Commands;
 using CRM.Application.Tickets.Queries;
 using CRM.Domain.Tickets.Enums;
+using CRM.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +45,30 @@ public class TicketsController : ControllerBase
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> List(
+        [FromQuery] TicketStatus? status,
+        [FromQuery] TicketPriority? priority,
+        [FromQuery] Guid? customerId,
+        [FromQuery] Guid? assignedToUserId,
+        [FromQuery] Guid? categoryId,
+        [FromQuery] string? search,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string sortBy = "createdAt",
+        [FromQuery] bool sortDesc = false,
+        CancellationToken ct = default)
+    {
+        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
+        Enum.TryParse<UserRole>(roleClaim, out var role);
+
+        var result = await _mediator.Send(new ListTicketsQuery(
+            status, priority, customerId, assignedToUserId, categoryId,
+            page, pageSize, sortBy, sortDesc, CurrentUserId, role, search), ct);
+
+        return Ok(result);
     }
 
     [HttpGet("{id:guid}")]
