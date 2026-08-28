@@ -65,6 +65,16 @@ describe('TicketService', () => {
     req.flush(emptyPage);
   });
 
+  describe('addMessage()', () => {
+    it('should POST /api/v1/tickets/{id}/messages with body and isInternal', () => {
+      service.addMessage('t1', 'Hello customer', false).subscribe();
+      const req = httpMock.expectOne('/api/v1/tickets/t1/messages');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ body: 'Hello customer', isInternal: false });
+      req.flush({ id: 'm5', body: 'Hello customer' });
+    });
+  });
+
   describe('getMessages()', () => {
     it('should GET /api/v1/tickets/{id}/messages with page params', () => {
       service.getMessages('t1', 1, 20).subscribe();

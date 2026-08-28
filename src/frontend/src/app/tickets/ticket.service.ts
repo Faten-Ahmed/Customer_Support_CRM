@@ -142,6 +142,10 @@ export class TicketService {
     return this.http.patch<void>(`${this.baseUrl}/${ticketId}/status`, { status, resolutionText });
   }
 
+  addMessage(ticketId: string, body: string, isInternal: boolean): Observable<TicketMessage> {
+    return this.http.post<TicketMessage>(`${this.baseUrl}/${ticketId}/messages`, { body, isInternal });
+  }
+
   getMessages(ticketId: string, page: number, pageSize: number): Observable<TicketMessagePage> {
     const params = new HttpParams()
       .set('page', String(page))
