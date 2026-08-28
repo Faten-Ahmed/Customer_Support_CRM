@@ -168,6 +168,18 @@ public class TicketsController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
 
+    [HttpGet("{id:guid}/messages")]
+    public async Task<IActionResult> GetMessages(
+        Guid id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(
+            new GetTicketMessagesQuery(id, page, pageSize, IsCallerCustomer: false), ct);
+        return Ok(result);
+    }
+
     public record AddMessageRequest(string Body, bool IsInternal);
 
     [HttpPost("{id:guid}/messages")]
