@@ -13,15 +13,18 @@ public class LoginInternalCommandHandler : IRequestHandler<LoginInternalCommand,
 {
     private readonly IUserRepository _users;
     private readonly ICustomerRepository _customers;
+    private readonly ICustomerCredentialRepository _credentials;
     private readonly ITokenService _tokens;
     private readonly IRefreshTokenRepository _refreshTokens;
 
     public LoginInternalCommandHandler(
         IUserRepository users, ICustomerRepository customers,
+        ICustomerCredentialRepository credentials,
         ITokenService tokens, IRefreshTokenRepository refreshTokens)
     {
         _users = users;
         _customers = customers;
+        _credentials = credentials;
         _tokens = tokens;
         _refreshTokens = refreshTokens;
     }
@@ -59,10 +62,11 @@ public class LoginInternalCommandHandler : IRequestHandler<LoginInternalCommand,
         if (customer is null)
             throw new UnauthorizedAccessException("Invalid credentials.");
 
-        if (!BCrypt.Net.BCrypt.Verify(cmd.Password, customer.PasswordHash ?? ""))
+        var credential = await _credentials.FindByCustomerIdAsync(customer.Id, ct);
+        if (credential is null || !BCrypt.Net.BCrypt.Verify(cmd.Password, credential.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials.");
 
-        if (!customer.EmailVerified)
+        if (!credential.EmailVerified)
             throw new UnauthorizedAccessException("EMAIL_NOT_VERIFIED: Please verify your email address.");
 
         if (!customer.IsActive)

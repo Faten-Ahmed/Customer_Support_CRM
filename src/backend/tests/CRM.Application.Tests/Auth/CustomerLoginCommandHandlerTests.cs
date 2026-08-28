@@ -13,6 +13,7 @@ public class CustomerLoginCommandHandlerTests
 {
     private readonly Mock<IUserRepository> _users = new();
     private readonly Mock<ICustomerRepository> _customers = new();
+    private readonly Mock<ICustomerCredentialRepository> _credentials = new();
     private readonly Mock<ITokenService> _tokenService = new();
     private readonly Mock<IRefreshTokenRepository> _refreshTokens = new();
     private readonly LoginInternalCommandHandler _handler;
@@ -20,24 +21,33 @@ public class CustomerLoginCommandHandlerTests
     public CustomerLoginCommandHandlerTests()
     {
         _handler = new LoginInternalCommandHandler(
-            _users.Object, _customers.Object, _tokenService.Object, _refreshTokens.Object);
+            _users.Object, _customers.Object, _credentials.Object,
+            _tokenService.Object, _refreshTokens.Object);
     }
 
-    private static Customer MakeCustomer(bool verified = true, bool active = true)
+    private static Customer MakeCustomer(bool active = true)
     {
         var customer = Customer.Create("Alice", "alice@example.com", null, null);
-        customer.SetPassword(BCrypt.Net.BCrypt.HashPassword("CorrectP@ss1!"));
-        if (verified) customer.VerifyEmail();
         if (!active) customer.Deactivate();
         return customer;
+    }
+
+    private static CustomerCredential MakeCredential(Guid customerId, bool verified = true)
+    {
+        var cred = CustomerCredential.Create(customerId, BCrypt.Net.BCrypt.HashPassword("CorrectP@ss1!"));
+        if (verified) cred.VerifyEmail();
+        return cred;
     }
 
     [Fact]
     public async Task Handle_ValidCustomerCredentials_ReturnsTokenWithCustomerRole()
     {
         var customer = MakeCustomer();
+        var credential = MakeCredential(customer.Id);
+
         _users.Setup(r => r.FindByEmailAsync("alice@example.com", default)).ReturnsAsync((User?)null);
         _customers.Setup(r => r.FindByEmailAsync("alice@example.com", default)).ReturnsAsync(customer);
+        _credentials.Setup(r => r.FindByCustomerIdAsync(customer.Id, default)).ReturnsAsync(credential);
         _tokenService.Setup(t => t.CreateAccessToken(customer.Id, "alice@example.com", "Customer", "Alice"))
                      .Returns("customer-jwt-token");
         _tokenService.Setup(t => t.CreateRefreshToken()).Returns(("raw-refresh", "hash"));
@@ -53,9 +63,12 @@ public class CustomerLoginCommandHandlerTests
     [Fact]
     public async Task Handle_EmailNotVerified_ThrowsUnauthorizedWithCode()
     {
-        var customer = MakeCustomer(verified: false);
+        var customer = MakeCustomer();
+        var credential = MakeCredential(customer.Id, verified: false);
+
         _users.Setup(r => r.FindByEmailAsync("alice@example.com", default)).ReturnsAsync((User?)null);
         _customers.Setup(r => r.FindByEmailAsync("alice@example.com", default)).ReturnsAsync(customer);
+        _credentials.Setup(r => r.FindByCustomerIdAsync(customer.Id, default)).ReturnsAsync(credential);
 
         var ex = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _handler.Handle(new LoginInternalCommand("alice@example.com", "CorrectP@ss1!"), default));
@@ -66,9 +79,12 @@ public class CustomerLoginCommandHandlerTests
     [Fact]
     public async Task Handle_AccountInactive_ThrowsUnauthorizedWithCode()
     {
-        var customer = MakeCustomer(verified: true, active: false);
+        var customer = MakeCustomer(active: false);
+        var credential = MakeCredential(customer.Id, verified: true);
+
         _users.Setup(r => r.FindByEmailAsync("alice@example.com", default)).ReturnsAsync((User?)null);
         _customers.Setup(r => r.FindByEmailAsync("alice@example.com", default)).ReturnsAsync(customer);
+        _credentials.Setup(r => r.FindByCustomerIdAsync(customer.Id, default)).ReturnsAsync(credential);
 
         var ex = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _handler.Handle(new LoginInternalCommand("alice@example.com", "CorrectP@ss1!"), default));
@@ -80,8 +96,11 @@ public class CustomerLoginCommandHandlerTests
     public async Task Handle_WrongPassword_ThrowsUnauthorizedAccessException()
     {
         var customer = MakeCustomer();
+        var credential = MakeCredential(customer.Id);
+
         _users.Setup(r => r.FindByEmailAsync("alice@example.com", default)).ReturnsAsync((User?)null);
         _customers.Setup(r => r.FindByEmailAsync("alice@example.com", default)).ReturnsAsync(customer);
+        _credentials.Setup(r => r.FindByCustomerIdAsync(customer.Id, default)).ReturnsAsync(credential);
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _handler.Handle(new LoginInternalCommand("alice@example.com", "WrongPassword!"), default));
