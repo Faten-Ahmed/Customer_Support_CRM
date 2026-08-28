@@ -1,16 +1,21 @@
 using CRM.Domain.Customers;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRM.Infrastructure.Persistence.Repositories;
 
-// Stub until the email verification token storage (US-BE-014) is implemented.
 public class EmailVerificationTokenRepository : IEmailVerificationTokenRepository
 {
-    public Task<EmailVerificationToken?> FindByHashAsync(string tokenHash, CancellationToken ct = default)
-        => Task.FromResult<EmailVerificationToken?>(null);
+    private readonly AppDbContext _context;
 
-    public Task AddAsync(EmailVerificationToken token, CancellationToken ct = default)
-        => Task.CompletedTask;
+    public EmailVerificationTokenRepository(AppDbContext context) => _context = context;
 
-    public Task SaveChangesAsync(CancellationToken ct = default)
-        => Task.CompletedTask;
+    public async Task<EmailVerificationToken?> FindByHashAsync(string tokenHash, CancellationToken ct = default)
+        => await _context.EmailVerificationTokens
+            .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, ct);
+
+    public async Task AddAsync(EmailVerificationToken token, CancellationToken ct = default)
+        => await _context.EmailVerificationTokens.AddAsync(token, ct);
+
+    public async Task SaveChangesAsync(CancellationToken ct = default)
+        => await _context.SaveChangesAsync(ct);
 }
