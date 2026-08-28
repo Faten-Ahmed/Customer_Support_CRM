@@ -152,4 +152,19 @@ public class TicketsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
     }
+
+    public record EscalateTicketRequest(string Reason);
+
+    [HttpPatch("{id:guid}/escalate")]
+    public async Task<IActionResult> Escalate(
+        Guid id, [FromBody] EscalateTicketRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(new EscalateTicketCommand(id, request.Reason, CurrentUserId), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
 }
