@@ -101,4 +101,20 @@ public class TicketsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
     }
+
+    public record AssignTicketRequest(Guid AgentId);
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPatch("{id:guid}/assign")]
+    public async Task<IActionResult> Assign(
+        Guid id, [FromBody] AssignTicketRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(new AssignTicketCommand(id, request.AgentId, CurrentUserId), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
 }
