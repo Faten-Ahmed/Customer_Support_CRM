@@ -6,4 +6,5 @@ public interface IUserRepository
     Task<User?> FindByIdAsync(Guid id, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Guid>> GetDepartmentIdsAsync(Guid userId, CancellationToken ct = default);
+    Task<bool> IsActiveAgentAsync(Guid agentId, CancellationToken ct = default);
 }

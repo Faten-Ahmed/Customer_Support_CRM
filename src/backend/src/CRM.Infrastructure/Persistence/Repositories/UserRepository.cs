@@ -20,4 +20,10 @@ public class UserRepository : IUserRepository
     // Stub until agent-department assignment domain is implemented (US-BE-063+)
     public Task<IReadOnlyList<Guid>> GetDepartmentIdsAsync(Guid userId, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<Guid>>(new List<Guid>());
+
+    public async Task<bool> IsActiveAgentAsync(Guid agentId, CancellationToken ct = default)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == agentId, ct);
+        return user is { IsActive: true, Role: UserRole.Agent };
+    }
 }
