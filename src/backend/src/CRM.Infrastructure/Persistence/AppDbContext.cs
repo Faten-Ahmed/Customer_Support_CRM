@@ -1,5 +1,6 @@
 using CRM.Domain.Auth;
 using CRM.Domain.Customers;
+using CRM.Domain.Tickets;
 using CRM.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,10 @@ public class AppDbContext : DbContext
     public DbSet<CustomerContact> CustomerContacts => Set<CustomerContact>();
     public DbSet<CustomerCredential> CustomerCredentials => Set<CustomerCredential>();
     public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
+    public DbSet<Ticket> Tickets => Set<Ticket>();
+    public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
+    public DbSet<TicketHistory> TicketHistory => Set<TicketHistory>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
