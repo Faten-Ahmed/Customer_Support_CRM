@@ -16,6 +16,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { Subscription } from 'rxjs';
 import { AuthStore } from '../auth/auth.store';
 import { AgentAiAssistantComponent } from '../shared/agent-ai-assistant/agent-ai-assistant.component';
+import { I18nService } from '../shared/services/i18n.service';
 
 interface NavItem {
   label: string;
@@ -47,6 +48,7 @@ const NAV_ITEMS: NavItem[] = [
 })
 export class AppShellComponent implements OnInit, OnDestroy {
   readonly authStore = inject(AuthStore);
+  readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
 
   readonly collapsed = signal(localStorage.getItem('sidenav_collapsed') === 'true');

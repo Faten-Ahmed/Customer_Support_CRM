@@ -11,6 +11,10 @@
 
   <span class="toolbar-brand">CRM Support</span>
 
+  <button mat-button (click)="i18n.toggleLang()" matTooltip="Switch language / تغيير اللغة" class="lang-toggle">
+    {{ i18n.lang() === 'en' ? 'ع' : 'EN' }}
+  </button>
+
   <button mat-icon-button (click)="toggleAi()" matTooltip="AI Assistant">
     <mat-icon>auto_awesome</mat-icon>
   </button>

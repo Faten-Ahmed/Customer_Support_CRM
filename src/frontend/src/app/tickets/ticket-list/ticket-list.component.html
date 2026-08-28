@@ -1,21 +1,21 @@
-<div class="ticket-list-container p-6">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold">Tickets</h1>
+<div class="ticket-list-container">
+  <div class="list-header">
+    <h1 class="page-title">Tickets</h1>
     <button mat-flat-button color="primary" (click)="onNewTicket()">
       <mat-icon>add</mat-icon> New Ticket
     </button>
   </div>
 
-  <div class="flex gap-4">
+  <div class="list-body">
     <!-- Filter sidebar -->
-    <aside class="w-56 shrink-0 flex flex-col gap-3">
-      <mat-form-field appearance="outline" class="w-full">
+    <aside class="filter-sidebar">
+      <mat-form-field appearance="outline" style="width:100%">
         <mat-label>Search</mat-label>
         <mat-icon matPrefix>search</mat-icon>
         <input matInput [(ngModel)]="searchValue" (ngModelChange)="onSearch($event)" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" style="width:100%">
         <mat-label>Status</mat-label>
         <mat-select multiple (selectionChange)="onStatusFilterChange($event.value)">
           @for (s of statusOptions; track s) {
@@ -24,7 +24,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" style="width:100%">
         <mat-label>Priority</mat-label>
         <mat-select (selectionChange)="onPriorityFilterChange($event.value)">
           <mat-option value="">All</mat-option>
@@ -36,13 +36,13 @@
     </aside>
 
     <!-- Table -->
-    <div class="flex-1 min-w-0">
+    <div class="table-wrap">
       @if (loading()) {
-        <div class="flex justify-center py-12">
+        <div class="spinner-wrap">
           <mat-spinner diameter="48" />
         </div>
       } @else {
-        <table mat-table [dataSource]="tickets()" class="w-full mat-elevation-z1">
+        <table mat-table [dataSource]="tickets()" class="mat-elevation-z1 full-width-table">
           <ng-container matColumnDef="ticketNumber">
             <th mat-header-cell *matHeaderCellDef>Ticket #</th>
             <td mat-cell *matCellDef="let row">{{ row.ticketNumber }}</td>
@@ -84,7 +84,7 @@
           <tr
             mat-row
             *matRowDef="let row; columns: displayedColumns"
-            class="cursor-pointer hover:bg-gray-50"
+            class="clickable-row"
             (click)="onRowClick(row.id)"
           ></tr>
         </table>

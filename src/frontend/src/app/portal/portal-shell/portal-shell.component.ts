@@ -3,16 +3,21 @@ import { RouterOutlet, Router } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthStore } from '../../auth/auth.store';
+import { I18nService } from '../../shared/services/i18n.service';
 
 @Component({
   selector: 'app-portal-shell',
   standalone: true,
-  imports: [RouterOutlet, MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [RouterOutlet, MatToolbarModule, MatButtonModule, MatIconModule, MatTooltipModule],
   template: `
     <mat-toolbar color="primary">
       <span class="brand">Customer Portal</span>
       <span class="spacer"></span>
+      <button mat-button (click)="i18n.toggleLang()" matTooltip="Switch language / تغيير اللغة" class="lang-toggle">
+        {{ i18n.lang() === 'en' ? 'ع' : 'EN' }}
+      </button>
       <span class="user-name">{{ user()?.fullName }}</span>
       <button mat-icon-button (click)="logout()" matTooltip="Sign out">
         <mat-icon>logout</mat-icon>
@@ -26,13 +31,15 @@ import { AuthStore } from '../../auth/auth.store';
   styles: [`
     .brand { font-size: 18px; font-weight: 600; }
     .spacer { flex: 1; }
-    .user-name { font-size: 14px; margin-right: 8px; opacity: 0.9; }
+    .lang-toggle { font-size: 15px; font-weight: 700; min-width: 40px; }
+    .user-name { font-size: 14px; margin-inline-end: 8px; opacity: 0.9; }
     .portal-content { max-width: 960px; margin: 24px auto; padding: 0 16px; }
   `],
 })
 export class PortalShellComponent {
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
+  readonly i18n = inject(I18nService);
 
   readonly user = this.authStore.user;
 

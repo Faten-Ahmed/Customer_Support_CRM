@@ -38,6 +38,7 @@ import {
     MatTooltipModule,
   ],
   templateUrl: './ticket-list.component.html',
+  styleUrl: './ticket-list.component.scss',
 })
 export class TicketListComponent implements OnInit, OnDestroy {
   private readonly ticketService = inject(TicketService);
