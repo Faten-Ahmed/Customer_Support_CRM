@@ -1,4 +1,5 @@
 using CRM.Application.Tickets.Commands;
+using CRM.Application.Tickets.Queries;
 using CRM.Domain.Tickets.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -46,5 +47,13 @@ public class TicketsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public IActionResult GetById(Guid id) => Ok(); // Implemented in US-BE-021
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetTicketQuery(id), ct);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+    }
 }
