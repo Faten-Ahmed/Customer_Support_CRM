@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { TicketService, TicketListParams, TicketPage } from './ticket.service';
+import { TicketService, TicketListParams, TicketPage, TicketDetail } from './ticket.service';
 
 const emptyPage: TicketPage = { items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 };
 
@@ -63,5 +63,29 @@ describe('TicketService', () => {
     expect(req.request.params.has('search')).toBe(false);
     expect(req.request.params.has('priority')).toBe(false);
     req.flush(emptyPage);
+  });
+
+  describe('getById()', () => {
+    it('should GET /api/v1/tickets/:id and return a TicketDetail', () => {
+      const mock: TicketDetail = {
+        id: 't-1',
+        ticketNumber: 'TK-0001',
+        subject: 'Login issue',
+        description: 'Cannot log in.',
+        status: 'New',
+        priority: 'High',
+        channel: 'Email',
+        customerId: 'c-1',
+        customerName: 'Alice',
+        departmentName: 'Support',
+        createdAt: '2025-01-01T10:00:00Z',
+        updatedAt: '2025-01-01T10:00:00Z',
+      };
+
+      service.getById('t-1').subscribe(res => expect(res).toEqual(mock));
+      const req = httpMock.expectOne('/api/v1/tickets/t-1');
+      expect(req.request.method).toBe('GET');
+      req.flush(mock);
+    });
   });
 });

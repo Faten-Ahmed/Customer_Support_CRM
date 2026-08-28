@@ -1,0 +1,112 @@
+@if (loading()) {
+  <div class="flex justify-center py-16">
+    <mat-spinner diameter="56" />
+  </div>
+} @else if (ticket()) {
+  <div class="ticket-detail-container p-6 flex flex-col gap-4">
+
+    <!-- Action Bar -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <span class="text-sm text-gray-500 font-mono">{{ ticket()!.ticketNumber }}</span>
+      <h1 class="text-xl font-semibold flex-1 min-w-0 truncate">{{ ticket()!.subject }}</h1>
+      <div class="flex gap-2">
+        <button mat-stroked-button (click)="onAssign()">Assign</button>
+        <button mat-stroked-button (click)="onTransfer()">Transfer</button>
+        <button mat-stroked-button color="warn" (click)="onEscalate()">Escalate</button>
+        <button mat-flat-button [matMenuTriggerFor]="statusMenu">Change Status</button>
+        <mat-menu #statusMenu>
+          @for (s of availableNextStatuses(); track s) {
+            <button mat-menu-item (click)="onChangeStatus(s)">{{ s }}</button>
+          }
+        </mat-menu>
+        <button mat-flat-button color="primary" (click)="onClose()">Close</button>
+      </div>
+      <button mat-icon-button (click)="toggleAiPanel()" matTooltip="AI Assistance">
+        <mat-icon>auto_awesome</mat-icon>
+      </button>
+    </div>
+
+    <!-- Three-panel layout -->
+    <div class="flex gap-4 min-h-0">
+
+      <!-- Left: Metadata -->
+      <aside class="w-56 shrink-0 flex flex-col gap-2">
+        <h3 class="text-sm font-semibold uppercase text-gray-500">Details</h3>
+        <dl class="text-sm grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+          <dt class="text-gray-500">Status</dt>
+          <dd><span class="badge">{{ ticket()!.status }}</span></dd>
+          <dt class="text-gray-500">Priority</dt>
+          <dd>{{ ticket()!.priority }}</dd>
+          <dt class="text-gray-500">SLA</dt>
+          <dd>{{ ticket()!.sla?.breachTier ?? '—' }}</dd>
+          <dt class="text-gray-500">Department</dt>
+          <dd>{{ ticket()!.departmentName ?? '—' }}</dd>
+          <dt class="text-gray-500">Category</dt>
+          <dd>{{ ticket()!.categoryName ?? '—' }}</dd>
+          <dt class="text-gray-500">Agent</dt>
+          <dd>{{ ticket()!.assignedToName ?? 'Unassigned' }}</dd>
+          <dt class="text-gray-500">Customer</dt>
+          <dd>{{ ticket()!.customerName }}</dd>
+          <dt class="text-gray-500">Created</dt>
+          <dd>{{ ticket()!.createdAt | date:'shortDate' }}</dd>
+        </dl>
+
+        @if (ticket()!.customFieldValues) {
+          <mat-divider />
+          <h4 class="text-sm font-semibold uppercase text-gray-500">Custom Fields</h4>
+          <p class="text-sm">{{ ticket()!.customFieldValues }}</p>
+        }
+      </aside>
+
+      <!-- Centre: Thread + Tabs -->
+      <main class="flex-1 min-w-0 flex flex-col gap-3">
+        <div class="flex gap-2 border-b">
+          <button
+            class="px-3 py-2 text-sm font-medium border-b-2 transition-colors"
+            [class.border-primary-500]="activeTab() === 'messages'"
+            [class.border-transparent]="activeTab() !== 'messages'"
+            (click)="setActiveTab('messages')"
+          >Messages</button>
+          <button
+            class="px-3 py-2 text-sm font-medium border-b-2 transition-colors"
+            [class.border-primary-500]="activeTab() === 'history'"
+            [class.border-transparent]="activeTab() !== 'history'"
+            (click)="setActiveTab('history')"
+          >History</button>
+          <button
+            class="px-3 py-2 text-sm font-medium border-b-2 transition-colors"
+            [class.border-primary-500]="activeTab() === 'attachments'"
+            [class.border-transparent]="activeTab() !== 'attachments'"
+            (click)="setActiveTab('attachments')"
+          >Attachments</button>
+        </div>
+
+        <div class="flex-1">
+          @if (activeTab() === 'messages') {
+            <!-- MessageThreadComponent inserted here (US-FE-013) -->
+            <ng-content select="[slot=thread]" />
+          }
+          @if (activeTab() === 'history') {
+            <p class="text-sm text-gray-500 py-4">Audit history will appear here.</p>
+          }
+          @if (activeTab() === 'attachments') {
+            <p class="text-sm text-gray-500 py-4">Attachments will appear here.</p>
+          }
+        </div>
+      </main>
+
+      <!-- Right: AI Assistance -->
+      @if (aiPanelOpen()) {
+        <aside class="w-56 shrink-0 flex flex-col gap-2">
+          <h3 class="text-sm font-semibold uppercase text-gray-500">AI Assistance</h3>
+          <button mat-stroked-button class="w-full">Summarize</button>
+          <button mat-stroked-button class="w-full">Suggest Reply</button>
+          <button mat-stroked-button class="w-full">Suggest Articles</button>
+          <button mat-stroked-button class="w-full">Suggest Category</button>
+        </aside>
+      }
+    </div>
+  </div>
+} @else {
+  <p class="p-6 text-gray-500">Ticket not found.</p>
+}

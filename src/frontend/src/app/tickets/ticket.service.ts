@@ -44,6 +44,24 @@ export interface TicketPage {
   totalPages: number;
 }
 
+export interface SlaInfo {
+  firstResponseDue?: string;
+  resolutionDue?: string;
+  firstResponseBreached: boolean;
+  resolutionBreached: boolean;
+  breachTier: string;
+}
+
+export interface TicketDetail extends TicketSummary {
+  description: string;
+  categoryName?: string;
+  departmentName?: string;
+  customFieldValues?: string;
+  sla?: SlaInfo;
+  resolvedAt?: string;
+  closedAt?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TicketService {
   private readonly http = inject(HttpClient);
@@ -68,5 +86,9 @@ export class TicketService {
     }
 
     return this.http.get<TicketPage>(this.baseUrl, { params: httpParams });
+  }
+
+  getById(id: string): Observable<TicketDetail> {
+    return this.http.get<TicketDetail>(`${this.baseUrl}/${id}`);
   }
 }
