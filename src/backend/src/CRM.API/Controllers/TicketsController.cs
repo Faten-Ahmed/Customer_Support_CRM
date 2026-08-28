@@ -133,4 +133,23 @@ public class TicketsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
+
+    public record TransferTicketRequest(
+        Guid? TargetDepartmentId, Guid? TargetAgentId, string Reason);
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPatch("{id:guid}/transfer")]
+    public async Task<IActionResult> Transfer(
+        Guid id, [FromBody] TransferTicketRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(new TransferTicketCommand(
+                id, request.TargetDepartmentId, request.TargetAgentId,
+                request.Reason, CurrentUserId), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
+    }
 }
