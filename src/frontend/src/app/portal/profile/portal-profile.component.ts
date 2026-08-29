@@ -42,6 +42,11 @@ import { PortalProfileService, PortalProfile } from '../services/portal-profile.
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-width">
+                <mat-label>الاسم الكامل (Arabic)</mat-label>
+                <input matInput formControlName="fullNameAr" dir="rtl" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Email</mat-label>
                 <input matInput formControlName="email" />
                 <mat-icon matSuffix
@@ -101,6 +106,7 @@ export class PortalProfileComponent implements OnInit {
 
   form = this.fb.group({
     fullName: [{ value: '', disabled: true }],
+    fullNameAr: [{ value: '', disabled: true }],
     email: [{ value: '', disabled: true }],
     phone: [{ value: '', disabled: true }],
     city: [{ value: '', disabled: true }],
@@ -114,6 +120,7 @@ export class PortalProfileComponent implements OnInit {
         this.profile.set(p);
         this.form.patchValue({
           fullName: p.fullName,
+          fullNameAr: p.fullNameAr,
           email: p.email,
           phone: p.phone ?? '',
           city: p.city ?? '',
@@ -128,6 +135,7 @@ export class PortalProfileComponent implements OnInit {
   enterEditMode(): void {
     this.editMode.set(true);
     this.form.get('fullName')!.enable();
+    this.form.get('fullNameAr')!.enable();
     this.form.get('phone')!.enable();
     this.form.get('city')!.enable();
   }
@@ -137,6 +145,7 @@ export class PortalProfileComponent implements OnInit {
     if (p) {
       this.form.patchValue({
         fullName: p.fullName,
+        fullNameAr: p.fullNameAr,
         phone: p.phone ?? '',
         city: p.city ?? '',
         companyName: p.companyName ?? '',
@@ -151,6 +160,7 @@ export class PortalProfileComponent implements OnInit {
     const val = this.form.getRawValue();
     this.profileService.update({
       fullName: val.fullName ?? undefined,
+      fullNameAr: val.fullNameAr ?? undefined,
       phone: val.phone ?? undefined,
       city: val.city ?? undefined,
     }).subscribe({
@@ -166,6 +176,7 @@ export class PortalProfileComponent implements OnInit {
 
   private _disableEditableFields(): void {
     this.form.get('fullName')!.disable();
+    this.form.get('fullNameAr')!.disable();
     this.form.get('phone')!.disable();
     this.form.get('city')!.disable();
   }

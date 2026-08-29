@@ -25,7 +25,7 @@ describe('PortalProfileService', () => {
     service.get().subscribe();
     const req = http.expectOne('/api/v1/portal/profile');
     expect(req.request.method).toBe('GET');
-    req.flush({ data: { id: 'c1', fullName: 'Jane Doe', email: 'jane@example.com' } });
+    req.flush({ data: { id: 'c1', fullName: 'Jane Doe', fullNameAr: 'جين دو', email: 'jane@example.com' } });
   });
 
   it('update() PATCHes /api/v1/portal/profile', () => {
@@ -33,6 +33,6 @@ describe('PortalProfileService', () => {
     const req = http.expectOne('/api/v1/portal/profile');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body.fullName).toBe('Jane Smith');
-    req.flush({ data: { id: 'c1', fullName: 'Jane Smith', email: 'jane@example.com', phone: '555-1234' } });
+    req.flush({ data: { id: 'c1', fullName: 'Jane Smith', fullNameAr: 'جين سميث', email: 'jane@example.com', phone: '555-1234' } });
   });
 });

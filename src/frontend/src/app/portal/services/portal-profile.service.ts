@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface PortalProfile {
   id: string;
   fullName: string;
+  fullNameAr: string;
   email: string;
   phone?: string;
   companyName?: string;
@@ -20,7 +21,7 @@ export class PortalProfileService {
     return this.http.get<{ data: PortalProfile }>('/api/v1/portal/profile');
   }
 
-  update(payload: Partial<Pick<PortalProfile, 'fullName' | 'phone' | 'city'>>): Observable<{ data: PortalProfile }> {
+  update(payload: Partial<Pick<PortalProfile, 'fullName' | 'fullNameAr' | 'phone' | 'city'>>): Observable<{ data: PortalProfile }> {
     return this.http.patch<{ data: PortalProfile }>('/api/v1/portal/profile', payload);
   }
 }

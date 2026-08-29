@@ -9,6 +9,7 @@ import { PortalProfileService, PortalProfile } from '../services/portal-profile.
 const mockProfile: PortalProfile = {
   id: 'c1',
   fullName: 'Jane Doe',
+  fullNameAr: 'جين دو',
   email: 'jane@example.com',
   phone: '555-0000',
   city: 'Riyadh',
