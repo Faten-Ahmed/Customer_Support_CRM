@@ -23,6 +23,11 @@
 **Story:** US-BE-066  
 **Goal:** Implement `PUT /api/admin/users/{id}/departments` (atomic replace of all department assignments — exactly one `isPrimary = true`) and `PUT /api/admin/users/{id}/skills` (atomic replace of skill/category assignments — empty list removes all skills; unknown category IDs return 422).
 
+> **⚠️ Implementation divergences from original plan:**
+> - `AssignUserSkillsCommandHandler` does **not** call `user.ReplaceSkills()` + `SaveChanges`. Instead it calls `IUserRepository.ReplaceUserSkillsAsync(userId, categoryIds)` which issues raw SQL (`DELETE … WHERE UserId` then bulk `INSERT`). This bypasses EF Core change tracking, which did not reliably persist changes to the `_skills` private backing field.
+> - `IUserRepository` has an additional method: `Task ReplaceUserSkillsAsync(Guid userId, IReadOnlyList<Guid> categoryIds, CancellationToken ct = default)`
+> - Frontend: the skills section in the user-edit dialog is shown **only** for Agent and Manager roles — Admin users do not have skills.
+
 **Architecture:** `AssignUserDepartmentsCommand(UserId, Departments[])` → validates exactly one primary, replaces assignments atomically. `AssignUserSkillsCommand(UserId, CategoryIds[])` → validates all category IDs exist, replaces atomically. Both commands return updated `UserDetailDto`.
 
 **Tech Stack:** .NET 10, ASP.NET Core, MediatR, EF Core, xUnit, Moq
@@ -306,14 +311,9 @@ public class AssignUserSkillsCommandHandler : IRequestHandler<AssignUserSkillsCo
                     "One or more category IDs do not exist.");
         }
 
-        var skills = cmd.CategoryIds.Select(cId => new UserSkill
-        {
-            UserId = user.Id,
-            CategoryId = cId
-        }).ToList();
-
-        user.ReplaceSkills(skills);
-        await _users.SaveChangesAsync(ct);
+        // ⚠️ Uses raw SQL via ReplaceUserSkillsAsync instead of user.ReplaceSkills() + SaveChanges
+        // because EF Core OwnsMany with private backing fields did not reliably track changes.
+        await _users.ReplaceUserSkillsAsync(user.Id, cmd.CategoryIds, ct);
     }
 }
 ```

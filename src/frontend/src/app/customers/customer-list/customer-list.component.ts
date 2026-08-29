@@ -12,6 +12,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Customer, CustomerService } from '../services/customer.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-customer-list',
@@ -27,6 +28,7 @@ import { Customer, CustomerService } from '../services/customer.service';
     MatChipsModule,
     MatButtonModule,
     MatIconModule,
+    TranslatePipe,
   ],
   templateUrl: './customer-list.component.html',
   styleUrl: './customer-list.component.scss',

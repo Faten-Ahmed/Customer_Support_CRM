@@ -173,7 +173,7 @@ public class RegisterCustomerCommandHandlerTests
                      .ReturnsAsync((Customer?)null);
 
         await _handler.Handle(
-            new RegisterCustomerCommand("Ali", "Nasser", "new@portal.test", "P@ssword1!"),
+            new RegisterCustomerCommand("Ali Nasser", "new@portal.test", "P@ssword1!"),
             default);
 
         _customerRepo.Verify(r => r.AddAsync(It.IsAny<Customer>(), default), Times.Once);
@@ -185,13 +185,13 @@ public class RegisterCustomerCommandHandlerTests
     [Fact]
     public async Task Handle_DuplicateEmail_ThrowsInvalidOperationException()
     {
-        var existing = Customer.Create("Old", "User", "dup@portal.test");
+        var existing = Customer.Create("Old User", "dup@portal.test");
         _customerRepo.Setup(r => r.FindByEmailAsync("dup@portal.test", default))
                      .ReturnsAsync(existing);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(
-                new RegisterCustomerCommand("Ali", "Nasser", "dup@portal.test", "P@ssword1!"),
+                new RegisterCustomerCommand("Ali Nasser", "dup@portal.test", "P@ssword1!"),
                 default));
     }
 
@@ -207,7 +207,7 @@ public class RegisterCustomerCommandHandlerTests
                  .Returns(Task.CompletedTask);
 
         await _handler.Handle(
-            new RegisterCustomerCommand("Ali", "Test", "hash@portal.test", "PlainP@ss1!"),
+            new RegisterCustomerCommand("Ali Test", "hash@portal.test", "PlainP@ss1!"),
             default);
 
         Assert.NotNull(captured);
@@ -239,8 +239,7 @@ using Microsoft.Extensions.Configuration;
 namespace CRM.Application.Portal.Auth.Commands;
 
 public record RegisterCustomerCommand(
-    string FirstName,
-    string LastName,
+    string FullName,
     string Email,
     string Password) : IRequest;
 
@@ -272,7 +271,7 @@ public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCo
         if (existing is not null)
             throw new InvalidOperationException($"Email '{cmd.Email}' is already registered.");
 
-        var customer = Customer.Create(cmd.FirstName, cmd.LastName, cmd.Email);
+        var customer = Customer.Create(cmd.FullName, cmd.Email);
         await _customers.AddAsync(customer, ct);
 
         var credential = CustomerCredential.Create(
@@ -289,7 +288,7 @@ public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCo
 
         var link = $"{_frontendUrl}/auth/verify-email?token={Uri.EscapeDataString(raw)}";
         await _email.SendEmailVerificationAsync(
-            customer.Email, $"{customer.FirstName} {customer.LastName}", link, ct);
+            customer.Email, customer.FullName, link, ct);
     }
 }
 ```
@@ -307,8 +306,7 @@ public class RegisterCustomerCommandValidator : AbstractValidator<RegisterCustom
 {
     public RegisterCustomerCommandValidator()
     {
-        RuleFor(x => x.FirstName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.FullName).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
         RuleFor(x => x.Password)
             .NotEmpty().MinimumLength(8).MaximumLength(128)
@@ -380,7 +378,7 @@ public class PortalAuthControllerRegisterTests
         var client = BuildClient();
 
         var response = await client.PostAsJsonAsync("/api/portal/auth/register",
-            new { firstName = "Ali", lastName = "Nasser", email = "ali@portal.test",
+            new { fullName = "Ali Nasser", email = "ali@portal.test",
                   password = "P@ssword1!" });
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -394,7 +392,7 @@ public class PortalAuthControllerRegisterTests
         var client = BuildClient();
 
         var response = await client.PostAsJsonAsync("/api/portal/auth/register",
-            new { firstName = "Ali", lastName = "Nasser", email = "dup@portal.test",
+            new { fullName = "Ali Nasser", email = "dup@portal.test",
                   password = "P@ssword1!" });
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);

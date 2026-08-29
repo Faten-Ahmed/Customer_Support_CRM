@@ -26,7 +26,7 @@ public class GetCustomerTicketsQueryHandlerTests
     {
         var customerId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
 
         _customers.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
         _tickets.Setup(r => r.ListByCustomerAsync(
@@ -65,7 +65,7 @@ public class GetCustomerTicketsQueryHandlerTests
         var deptId = Guid.NewGuid();
 
         _customers.Setup(r => r.FindByIdAsync(customerId, default))
-                  .ReturnsAsync(Customer.Create("Bob", "bob@example.com", null, null));
+                  .ReturnsAsync(Customer.Create("Bob", "بوب", "bob@example.com", null, null));
         _users.Setup(u => u.GetDepartmentIdsAsync(agentId, default))
               .ReturnsAsync(new List<Guid> { deptId });
         _tickets.Setup(r => r.ListByCustomerAsync(
@@ -93,7 +93,7 @@ public class GetCustomerTicketsQueryHandlerTests
         var adminId = Guid.NewGuid();
 
         _customers.Setup(r => r.FindByIdAsync(customerId, default))
-                  .ReturnsAsync(Customer.Create("Carol", "carol@example.com", null, null));
+                  .ReturnsAsync(Customer.Create("Carol", "كارول", "carol@example.com", null, null));
         _tickets.Setup(r => r.ListByCustomerAsync(
             customerId, "Open", null, 1, 20, default))
             .ReturnsAsync(new PagedResult<CustomerTicketProjection>(

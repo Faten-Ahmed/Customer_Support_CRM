@@ -10,7 +10,9 @@ public class CreateTicketInternalCommandValidator
     {
         RuleFor(x => x.CustomerId).NotEmpty();
         RuleFor(x => x.Subject).NotEmpty().MaximumLength(500);
+        RuleFor(x => x.SubjectAr).NotEmpty().MaximumLength(500);
         RuleFor(x => x.Description).NotEmpty().MaximumLength(10000);
+        RuleFor(x => x.DescriptionAr).NotEmpty().MaximumLength(10000);
         RuleFor(x => x.CreatedByUserId).NotEmpty();
     }
 }

@@ -23,9 +23,20 @@
 **Story:** US-FE-001
 **Goal:** Implement the internal staff login page at `/login` with full client-side validation, reactive form, loading state, and error handling for deactivated accounts and forced password changes.
 
-**Architecture:** `AuthModule` is a lazy-loaded feature module. `AuthService` handles all HTTP calls against `/api/v1/auth/*` and maintains the in-memory access token via an Angular Signal. `LoginComponent` uses a `ReactiveForm` with Angular Material components and delegates auth logic entirely to `AuthService`.
+**Architecture:** `AuthService` handles all HTTP calls against `/api/v1/auth/*`. Token is stored in `AuthStore` (localStorage-backed signal). `LoginComponent` uses a `ReactiveForm` with Angular Material components. After successful login, staff are routed to `/app`; customer accounts are blocked with a `PORTAL_USERS_NOT_ALLOWED` error and a link to `/portal/login`.
 
-**Tech Stack:** Angular 21, TypeScript, Angular Material, Jasmine, TestBed
+**Tech Stack:** Angular 21, TypeScript, Angular Material, Vitest, TestBed
+
+> **⚠️ Implementation divergences from original plan:**
+> - `LoginResponse` is **flat** (no nested `user` property): `{ accessToken, requiresPasswordChange, userId, email, firstName, lastName, role }`
+> - `role` values: `'Admin' | 'Manager' | 'Agent' | 'Customer'` (not `'PortalUser'`)
+> - Token is stored in `AuthStore` via `localStorage`, not a plain in-memory signal
+> - `AuthService` uses `inject(AuthStore)` and exposes `isAuthenticated` from the store
+> - On success: `res.role === 'Customer'` → `PORTAL_USERS_NOT_ALLOWED` error (not redirect); staff → navigate `/app`
+> - Successful redirect goes to `/app` (not `/dashboard`)
+> - Login form has a "Customer? Sign in via Customer Portal" link to `/portal/login`
+> - Test framework is **Vitest** (not Jasmine) — use `vi.fn()`, `vi.spyOn()`, not `jasmine.createSpyObj`
+> - `provideHttpClient()` + `provideHttpClientTesting()` instead of `HttpClientTestingModule`
 
 ---
 
@@ -178,16 +189,15 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  role: 'Admin' | 'Manager' | 'Agent' | 'PortalUser';
-  passwordMustChange: boolean;
-}
-
+// ⚠️ LoginResponse is flat — no nested user object. Role is 'Customer' not 'PortalUser'.
 export interface LoginResponse {
   accessToken: string;
-  user: AuthUser;
+  requiresPasswordChange: boolean;
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'Admin' | 'Manager' | 'Agent' | 'Customer';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -481,7 +491,14 @@ export class LoginComponent implements OnInit {
       .login(email, password)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: () => this.router.navigate(['/dashboard']),
+        next: (res) => {
+          // ⚠️ Customers are blocked from staff login; staff go to /app
+          if (res.role === 'Customer') {
+            this.errorCode.set('PORTAL_USERS_NOT_ALLOWED');
+          } else {
+            this.router.navigate(['/app']);
+          }
+        },
         error: (err: HttpErrorResponse) => {
           if (err.status === 423) {
             this.router.navigate(['/change-password']);

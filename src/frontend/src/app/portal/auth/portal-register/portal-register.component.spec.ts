@@ -62,6 +62,7 @@ describe('PortalRegisterComponent', () => {
   it('form should be invalid when passwords do not match', () => {
     component.registerForm.setValue({
       fullName: 'Jane Doe',
+      fullNameAr: 'جين دو',
       email: 'jane@example.com',
       password: 'Password1!',
       confirmPassword: 'Different1!',
@@ -72,6 +73,7 @@ describe('PortalRegisterComponent', () => {
   it('form should be valid when all fields are correct and passwords match', () => {
     component.registerForm.setValue({
       fullName: 'Jane Doe',
+      fullNameAr: 'جين دو',
       email: 'jane@example.com',
       password: 'Password1!',
       confirmPassword: 'Password1!',
@@ -86,6 +88,7 @@ describe('PortalRegisterComponent', () => {
 
     component.registerForm.setValue({
       fullName: 'Jane Doe',
+      fullNameAr: 'جين دو',
       email: 'jane@example.com',
       password: 'Password1!',
       confirmPassword: 'Password1!',
@@ -95,6 +98,7 @@ describe('PortalRegisterComponent', () => {
 
     expect(authServiceMock.portalRegister).toHaveBeenCalledWith({
       fullName: 'Jane Doe',
+      fullNameAr: 'جين دو',
       email: 'jane@example.com',
       password: 'Password1!',
       confirmPassword: 'Password1!',
@@ -108,6 +112,7 @@ describe('PortalRegisterComponent', () => {
 
     component.registerForm.setValue({
       fullName: 'Jane Doe',
+      fullNameAr: 'جين دو',
       email: 'jane@example.com',
       password: 'Password1!',
       confirmPassword: 'Password1!',
@@ -128,6 +133,7 @@ describe('PortalRegisterComponent', () => {
 
     component.registerForm.setValue({
       fullName: 'Jane Doe',
+      fullNameAr: 'جين دو',
       email: 'existing@example.com',
       password: 'Password1!',
       confirmPassword: 'Password1!',

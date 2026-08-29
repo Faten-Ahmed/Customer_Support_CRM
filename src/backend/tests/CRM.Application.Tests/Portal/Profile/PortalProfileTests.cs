@@ -22,7 +22,7 @@ public class PortalProfileTests
     public async Task Get_ReturnsCustomerProfile()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", "555-0100", "AcmeCorp");
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", "555-0100", "AcmeCorp");
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
 
         var result = await _getHandler.Handle(
@@ -46,11 +46,11 @@ public class PortalProfileTests
     public async Task Update_ChangesAllowedFields()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", "555-0100", "AcmeCorp");
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", "555-0100", "AcmeCorp");
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
 
         var result = await _updateHandler.Handle(
-            new UpdatePortalProfileCommand(customerId, "Alicia", "555-9999", "Riyadh"),
+            new UpdatePortalProfileCommand(customerId, "Alicia", "أليسيا", "555-9999", "Riyadh"),
             default);
 
         Assert.Equal("Alicia", result.FullName);
@@ -65,12 +65,12 @@ public class PortalProfileTests
     public async Task Update_NullFields_KeepsExistingValues()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", "555-0100", "AcmeCorp");
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", "555-0100", "AcmeCorp");
         customer.UpdateCity("Dubai");
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
 
         var result = await _updateHandler.Handle(
-            new UpdatePortalProfileCommand(customerId, null, null, null),
+            new UpdatePortalProfileCommand(customerId, null, null, null, null),
             default);
 
         Assert.Equal("Alice", result.FullName);

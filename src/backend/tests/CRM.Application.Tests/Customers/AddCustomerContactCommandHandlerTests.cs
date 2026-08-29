@@ -19,7 +19,7 @@ public class AddCustomerContactCommandHandlerTests
     public async Task Handle_ValidContact_AddsContactAndReturnsDto()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         _repo.Setup(r => r.FindByIdAsync(id, default)).ReturnsAsync(customer);
         _contactRepo.Setup(r => r.FindByCustomerIdAsync(id, default)).ReturnsAsync([]);
 
@@ -47,7 +47,7 @@ public class AddCustomerContactCommandHandlerTests
     public async Task Handle_InvalidContactType_ThrowsArgumentException()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         _repo.Setup(r => r.FindByIdAsync(id, default)).ReturnsAsync(customer);
         _contactRepo.Setup(r => r.FindByCustomerIdAsync(id, default)).ReturnsAsync([]);
 
@@ -59,7 +59,7 @@ public class AddCustomerContactCommandHandlerTests
     public async Task Handle_IsPrimary_DemotesExistingPrimaryOfSameType()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         var existingPrimary = CustomerContact.Create(customerId, "Phone", "555-0100", isPrimary: true);
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
         _contactRepo.Setup(r => r.FindByCustomerIdAsync(customerId, default))

@@ -8,7 +8,9 @@ namespace CRM.Application.Portal.Tickets.Commands;
 
 public record CreateTicketPortalCommand(
     string Subject,
+    string SubjectAr,
     string Description,
+    string DescriptionAr,
     TicketPriority Priority,
     Guid? DepartmentId,
     Guid? CategoryId,
@@ -46,7 +48,9 @@ public class CreateTicketPortalCommandHandler
         var ticket = Ticket.Create(
             customerId: cmd.PortalCustomerId,
             subject: cmd.Subject,
+            subjectAr: cmd.SubjectAr,
             description: cmd.Description,
+            descriptionAr: cmd.DescriptionAr,
             priority: cmd.Priority,
             channel: TicketChannel.Portal,
             createdByUserId: cmd.PortalCustomerId,

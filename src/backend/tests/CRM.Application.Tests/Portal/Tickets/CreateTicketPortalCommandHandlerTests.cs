@@ -24,7 +24,7 @@ public class CreateTicketPortalCommandHandlerTests
     public async Task Handle_VerifiedCustomer_CreatesTicketWithPortalChannel()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Ali Hassan", "ali@portal.test", null, null);
+        var customer = Customer.Create("Ali Hassan", "علي حسن", "ali@portal.test", null, null);
         var cred = CustomerCredential.Create(customerId, "hash");
         cred.VerifyEmail();
 
@@ -37,8 +37,8 @@ public class CreateTicketPortalCommandHandlerTests
                    .Returns(Task.CompletedTask);
 
         await _handler.Handle(new CreateTicketPortalCommand(
-            "My screen is black", "Description here", TicketPriority.Medium,
-            null, null, null, customerId), default);
+            "My screen is black", "شاشتي سوداء", "Description here", "الشاشة تظهر سوداء",
+            TicketPriority.Medium, null, null, null, customerId), default);
 
         Assert.NotNull(captured);
         Assert.Equal(TicketChannel.Portal, captured!.Channel);
@@ -49,7 +49,7 @@ public class CreateTicketPortalCommandHandlerTests
     public async Task Handle_UnverifiedEmail_ThrowsUnauthorizedAccessException()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Ali Hassan", "ali@portal.test", null, null);
+        var customer = Customer.Create("Ali Hassan", "علي حسن", "ali@portal.test", null, null);
         var cred = CustomerCredential.Create(customerId, "hash"); // Not verified
 
         _customerRepo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
@@ -57,7 +57,7 @@ public class CreateTicketPortalCommandHandlerTests
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _handler.Handle(new CreateTicketPortalCommand(
-                "Subj", "Desc", TicketPriority.Low, null, null, null, customerId), default));
+                "Subj", "موضوع", "Desc", "وصف", TicketPriority.Low, null, null, null, customerId), default));
     }
 
     [Fact]
@@ -68,6 +68,6 @@ public class CreateTicketPortalCommandHandlerTests
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _handler.Handle(new CreateTicketPortalCommand(
-                "Subj", "Desc", TicketPriority.Low, null, null, null, Guid.NewGuid()), default));
+                "Subj", "موضوع", "Desc", "وصف", TicketPriority.Low, null, null, null, Guid.NewGuid()), default));
     }
 }

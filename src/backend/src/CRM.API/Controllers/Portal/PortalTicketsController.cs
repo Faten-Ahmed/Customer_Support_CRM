@@ -39,8 +39,8 @@ public class PortalTicketsController : ControllerBase
             ?? User.FindFirst("sub")!.Value);
 
     public record CreatePortalTicketRequest(
-        string Subject, string Description, TicketPriority Priority,
-        Guid? DepartmentId, Guid? CategoryId, string? CustomFieldValues);
+        string Subject, string SubjectAr, string Description, string DescriptionAr,
+        TicketPriority Priority, Guid? DepartmentId, Guid? CategoryId, string? CustomFieldValues);
 
     [HttpGet]
     public async Task<IActionResult> List(
@@ -190,8 +190,9 @@ public class PortalTicketsController : ControllerBase
         try
         {
             var result = await _mediator.Send(new CreateTicketPortalCommand(
-                request.Subject, request.Description, request.Priority,
-                request.DepartmentId, request.CategoryId, request.CustomFieldValues, CustomerId), ct);
+                request.Subject, request.SubjectAr, request.Description, request.DescriptionAr,
+                request.Priority, request.DepartmentId, request.CategoryId,
+                request.CustomFieldValues, CustomerId), ct);
 
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }

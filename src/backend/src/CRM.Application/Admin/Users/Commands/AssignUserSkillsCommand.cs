@@ -33,13 +33,7 @@ public class AssignUserSkillsCommandHandler : IRequestHandler<AssignUserSkillsCo
                     "One or more category IDs do not exist.");
         }
 
-        var skills = cmd.CategoryIds.Select(cId => new UserSkill
-        {
-            UserId = user.Id,
-            CategoryId = cId
-        }).ToList();
-
-        user.ReplaceSkills(skills);
+        await _users.ReplaceUserSkillsAsync(user.Id, cmd.CategoryIds, ct);
         await _users.SaveChangesAsync(ct);
     }
 }

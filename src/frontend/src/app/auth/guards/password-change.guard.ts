@@ -8,7 +8,7 @@ export class PasswordChangeGuard {
   private readonly router = inject(Router);
 
   canActivate(): boolean {
-    if (this.authService.currentUser()?.passwordMustChange) {
+    if (this.authService.currentUser()?.requiresPasswordChange) {
       this.router.navigate(['/change-password']);
       return false;
     }

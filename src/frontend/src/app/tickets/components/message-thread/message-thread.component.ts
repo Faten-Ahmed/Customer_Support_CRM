@@ -4,11 +4,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { TicketMessage, TicketService } from '../../ticket.service';
 import { SignalRService } from '../../../shared/services/signalr.service';
 import * as signalR from '@microsoft/signalr';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-message-thread',
   standalone: true,
-  imports: [CommonModule, MatButtonModule],
+  imports: [CommonModule, MatButtonModule, TranslatePipe],
   templateUrl: './message-thread.component.html',
   styles: [`
     :host { display: block; }

@@ -22,6 +22,39 @@ namespace CRM.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CRM.Domain.Auth.PasswordResetToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResetTokens", (string)null);
+                });
+
             modelBuilder.Entity("CRM.Domain.Auth.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -307,6 +340,145 @@ namespace CRM.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Departments", (string)null);
+                });
+
+            modelBuilder.Entity("CRM.Domain.Sla.BusinessHours", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("WorkDays")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BusinessHours", (string)null);
+                });
+
+            modelBuilder.Entity("CRM.Domain.Sla.Holiday", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BusinessHoursId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessHoursId");
+
+                    b.ToTable("BusinessHourHolidays", (string)null);
+                });
+
+            modelBuilder.Entity("CRM.Domain.Sla.SlaPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BreachThresholdPercent")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CriticalBreachThresholdPercent")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("FirstResponseMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("ResolutionMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarningThresholdPercent")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SlaPolicies", (string)null);
+                });
+
+            modelBuilder.Entity("CRM.Domain.Sla.TicketSla", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccumulatedPauseMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BreachTier")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("ClockPausedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ClockStartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FirstResponseAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("FirstResponseBreached")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("FirstResponseDue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("ResolutionBreached")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ResolutionDue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SlaPolicyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TicketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId")
+                        .IsUnique();
+
+                    b.ToTable("TicketSlas", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Domain.Templates.QuickReplyTemplate", b =>
@@ -698,6 +870,15 @@ namespace CRM.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CRM.Domain.Sla.Holiday", b =>
+                {
+                    b.HasOne("CRM.Domain.Sla.BusinessHours", null)
+                        .WithMany("Holidays")
+                        .HasForeignKey("BusinessHoursId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CRM.Domain.Tickets.Attachment", b =>
                 {
                     b.HasOne("CRM.Domain.Tickets.Ticket", null)
@@ -792,6 +973,11 @@ namespace CRM.Infrastructure.Migrations
             modelBuilder.Entity("CRM.Domain.Customers.Customer", b =>
                 {
                     b.Navigation("Contacts");
+                });
+
+            modelBuilder.Entity("CRM.Domain.Sla.BusinessHours", b =>
+                {
+                    b.Navigation("Holidays");
                 });
 
             modelBuilder.Entity("CRM.Domain.Tickets.Ticket", b =>

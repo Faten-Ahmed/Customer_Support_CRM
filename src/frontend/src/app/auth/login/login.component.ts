@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../auth.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,7 @@ import { AuthService } from '../auth.service';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    TranslatePipe,
   ],
   templateUrl: './login.component.html',
 })
@@ -64,7 +66,13 @@ export class LoginComponent implements OnInit {
       .login(email, password)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: () => this.router.navigate(['/app']),
+        next: (res) => {
+          if (res.role === 'Customer') {
+            this.errorCode.set('PORTAL_USERS_NOT_ALLOWED');
+          } else {
+            this.router.navigate(['/app']);
+          }
+        },
         error: (err: HttpErrorResponse) => {
           if (err.status === 423) {
             this.router.navigate(['/change-password']);

@@ -6,20 +6,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthStore } from '../../auth/auth.store';
 import { I18nService } from '../../shared/services/i18n.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-portal-shell',
   standalone: true,
-  imports: [RouterOutlet, MatToolbarModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterOutlet, MatToolbarModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe],
   template: `
     <mat-toolbar color="primary">
-      <span class="brand">Customer Portal</span>
+      <span class="brand">{{ 'shell.customerPortal' | translate }}</span>
       <span class="spacer"></span>
-      <button mat-button (click)="i18n.toggleLang()" matTooltip="Switch language / تغيير اللغة" class="lang-toggle">
+      <button mat-button (click)="i18n.toggleLang()" [matTooltip]="'shell.switchLang' | translate" class="lang-toggle">
         {{ i18n.lang() === 'en' ? 'ع' : 'EN' }}
       </button>
       <span class="user-name">{{ user()?.fullName }}</span>
-      <button mat-icon-button (click)="logout()" matTooltip="Sign out">
+      <button mat-icon-button (click)="logout()" [matTooltip]="'shell.signOut' | translate">
         <mat-icon>logout</mat-icon>
       </button>
     </mat-toolbar>

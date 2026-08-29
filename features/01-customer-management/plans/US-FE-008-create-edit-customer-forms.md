@@ -156,17 +156,21 @@ import { catchError } from 'rxjs/operators';
 
 export interface CreateCustomerDto {
   fullName: string;
+  fullNameAr?: string;
   email: string;
   phone?: string;
   companyName?: string;
+  companyNameAr?: string;
   country?: string;
   city?: string;
 }
 
 export interface UpdateCustomerDto {
   fullName?: string;
+  fullNameAr?: string;
   phone?: string;
   companyName?: string;
+  companyNameAr?: string;
   country?: string;
   city?: string;
 }
@@ -174,9 +178,11 @@ export interface UpdateCustomerDto {
 export interface Customer {
   id: string;
   fullName: string;
+  fullNameAr?: string;
   email: string;
   phone?: string;
   companyName?: string;
+  companyNameAr?: string;
   country?: string;
   city?: string;
   createdAt?: string;
@@ -313,9 +319,11 @@ describe('CreateCustomerFormComponent', () => {
 
     component.form.setValue({
       fullName: 'Alice',
+      fullNameAr: '',
       email: 'alice@example.com',
       phone: '',
       companyName: '',
+      companyNameAr: '',
       country: '',
       city: '',
     });
@@ -325,9 +333,11 @@ describe('CreateCustomerFormComponent', () => {
 
     expect(customerServiceSpy.create).toHaveBeenCalledWith({
       fullName: 'Alice',
+      fullNameAr: '',
       email: 'alice@example.com',
       phone: '',
       companyName: '',
+      companyNameAr: '',
       country: '',
       city: '',
     });
@@ -339,9 +349,11 @@ describe('CreateCustomerFormComponent', () => {
 
     component.form.setValue({
       fullName: 'Bob',
+      fullNameAr: '',
       email: 'bob@example.com',
       phone: '',
       companyName: '',
+      companyNameAr: '',
       country: '',
       city: '',
     });
@@ -359,9 +371,11 @@ describe('CreateCustomerFormComponent', () => {
 
     component.form.setValue({
       fullName: 'Carol',
+      fullNameAr: '',
       email: 'carol@example.com',
       phone: '',
       companyName: '',
+      companyNameAr: '',
       country: '',
       city: '',
     });
@@ -493,9 +507,11 @@ export class CreateCustomerFormComponent {
 
   readonly form: FormGroup = this.fb.group({
     fullName: ['', [Validators.required]],
+    fullNameAr: [''],
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
     companyName: [''],
+    companyNameAr: [''],
     country: [''],
     city: [''],
   });
@@ -755,9 +771,11 @@ export class EditCustomerFormComponent implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group({
       fullName: [this.customer.fullName, [Validators.required]],
+      fullNameAr: [this.customer.fullNameAr ?? ''],
       email: [{ value: this.customer.email, disabled: true }],
       phone: [this.customer.phone ?? ''],
       companyName: [this.customer.companyName ?? ''],
+      companyNameAr: [this.customer.companyNameAr ?? ''],
       country: [this.customer.country ?? ''],
       city: [this.customer.city ?? ''],
     });
@@ -771,8 +789,10 @@ export class EditCustomerFormComponent implements OnInit {
 
     const dto: UpdateCustomerDto = {
       fullName: this.form.get('fullName')!.value,
+      fullNameAr: this.form.get('fullNameAr')!.value || undefined,
       phone: this.form.get('phone')!.value,
       companyName: this.form.get('companyName')!.value,
+      companyNameAr: this.form.get('companyNameAr')!.value || undefined,
       country: this.form.get('country')!.value,
       city: this.form.get('city')!.value,
     };

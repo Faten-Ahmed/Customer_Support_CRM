@@ -22,5 +22,5 @@ public class GetMyPortalProfileQueryHandler
     }
 
     internal static PortalProfileDto Map(Customer c)
-        => new(c.Id, c.FullName, c.Email, c.Phone, c.CompanyName, c.Country, c.City);
+        => new(c.Id, c.FullName, c.FullNameAr, c.Email, c.Phone, c.CompanyName, c.CompanyNameAr, c.Country, c.City);
 }

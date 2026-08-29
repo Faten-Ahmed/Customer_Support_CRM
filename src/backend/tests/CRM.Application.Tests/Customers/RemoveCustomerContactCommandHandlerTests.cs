@@ -19,7 +19,7 @@ public class RemoveCustomerContactCommandHandlerTests
     public async Task Handle_ValidRemoval_RemovesContact()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         var contact = CustomerContact.Create(customerId, "Phone", "555-0100", isPrimary: false);
 
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
@@ -45,7 +45,7 @@ public class RemoveCustomerContactCommandHandlerTests
     public async Task Handle_ContactNotFound_ThrowsKeyNotFoundException()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
         _contactRepo.Setup(r => r.FindByIdAsync(It.IsAny<Guid>(), default))
                     .ReturnsAsync((CustomerContact?)null);
@@ -59,7 +59,7 @@ public class RemoveCustomerContactCommandHandlerTests
     {
         var customerId = Guid.NewGuid();
         var otherCustomerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         var contact = CustomerContact.Create(otherCustomerId, "Phone", "555-0100", isPrimary: false);
 
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.API.Controllers;
 
-public record PortalRegisterRequest(string FullName, string Email, string Password);
+public record PortalRegisterRequest(string FullName, string FullNameAr, string Email, string Password);
 public record PortalVerifyEmailRequest(string Token);
 public record ResendVerificationRequest(string Email);
 
@@ -32,7 +32,7 @@ public class PortalAuthController : ControllerBase
     {
         try
         {
-            var command = new RegisterCustomerCommand(req.FullName, req.Email, req.Password);
+            var command = new RegisterCustomerCommand(req.FullName, req.FullNameAr, req.Email, req.Password);
             await _mediator.Send(command, ct);
             return StatusCode(201, new { message = "Registration successful. Please check your email to verify your account." });
         }

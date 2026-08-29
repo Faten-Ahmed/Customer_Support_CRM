@@ -25,6 +25,14 @@
 
 **Architecture:** `QuickReplyTemplate` entity with `TemplateScope` enum (Personal/Global). `IQuickReplyTemplateRepository` provides persistence. Commands enforce scope ownership: `PUT` and `DELETE` throw `InvalidOperationException` for Global templates. `GET` returns caller's Personal + all Global.
 
+> **⚠️ Additional endpoint added during implementation:**
+> A separate read-only endpoint was added to allow agents to browse Global templates from the ticket reply composer:
+> - `GET /api/v1/templates` — route in `TemplatesController.cs` (not `AgentMeController`)
+> - Authorized for `Admin,Manager,Agent`
+> - Reuses `ListGlobalTemplatesQuery` (returns paginated active global templates)
+> - Frontend template picker (`reply-composer.component`) calls this endpoint and renders templates in a `mat-menu`
+> - The original `/api/agents/me/templates` GET is for the agent's personal template management screen
+
 **Tech Stack:** .NET 10, ASP.NET Core, MediatR, EF Core, xUnit, Moq
 
 ---

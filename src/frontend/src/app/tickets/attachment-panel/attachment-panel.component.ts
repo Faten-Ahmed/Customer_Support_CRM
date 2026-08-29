@@ -15,6 +15,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TicketService, Attachment } from '../ticket.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 interface UploadProgress {
   filename: string;
@@ -33,6 +34,7 @@ interface UploadProgress {
     MatProgressBarModule,
     MatSnackBarModule,
     MatTooltipModule,
+    TranslatePipe,
   ],
   template: `
     <div class="attachment-panel">
@@ -46,8 +48,8 @@ interface UploadProgress {
         data-testid="upload-zone"
       >
         <mat-icon>cloud_upload</mat-icon>
-        <span>Drag &amp; drop files here or <strong>click to browse</strong></span>
-        <span class="hint">Max file size: 5 MB</span>
+        <span>{{ 'ticket.uploadHint' | translate }}</span>
+        <span class="hint">{{ 'ticket.maxSize' | translate }}</span>
         <input #fileInput type="file" multiple hidden (change)="onFileSelected($event)" />
       </div>
 
@@ -64,7 +66,7 @@ interface UploadProgress {
 
       <table mat-table [dataSource]="attachments()" class="attachment-table">
         <ng-container matColumnDef="fileName">
-          <th mat-header-cell *matHeaderCellDef>File</th>
+          <th mat-header-cell *matHeaderCellDef>{{ 'common.file' | translate }}</th>
           <td mat-cell *matCellDef="let att">
             <a
               [href]="att.presignedUrl"
@@ -76,17 +78,17 @@ interface UploadProgress {
         </ng-container>
 
         <ng-container matColumnDef="size">
-          <th mat-header-cell *matHeaderCellDef>Size</th>
+          <th mat-header-cell *matHeaderCellDef>{{ 'common.size' | translate }}</th>
           <td mat-cell *matCellDef="let att">{{ formatSize(att.fileSize) }}</td>
         </ng-container>
 
         <ng-container matColumnDef="uploaderName">
-          <th mat-header-cell *matHeaderCellDef>Uploaded by</th>
+          <th mat-header-cell *matHeaderCellDef>{{ 'ticket.uploadedBy' | translate }}</th>
           <td mat-cell *matCellDef="let att">{{ att.uploaderName ?? '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="uploadedAt">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <th mat-header-cell *matHeaderCellDef>{{ 'common.date' | translate }}</th>
           <td mat-cell *matCellDef="let att">{{ att.uploadedAt | date:'medium' }}</td>
         </ng-container>
 
@@ -99,7 +101,7 @@ interface UploadProgress {
                 color="warn"
                 data-testid="delete-btn"
                 (click)="confirmDelete(att)"
-                matTooltip="Delete attachment"
+                [matTooltip]="'ticket.deleteAttachment' | translate"
               >
                 <mat-icon>delete</mat-icon>
               </button>
@@ -112,7 +114,7 @@ interface UploadProgress {
       </table>
 
       @if (attachments().length === 0 && uploads().length === 0) {
-        <p class="empty-state" data-testid="empty-state">No attachments yet.</p>
+        <p class="empty-state" data-testid="empty-state">{{ 'ticket.noAttachments' | translate }}</p>
       }
     </div>
   `,
@@ -227,15 +229,15 @@ export class AttachmentPanelComponent implements OnInit {
 @Component({
   selector: 'app-delete-confirm-dialog',
   standalone: true,
-  imports: [MatButtonModule, MatDialogModule],
+  imports: [MatButtonModule, MatDialogModule, TranslatePipe],
   template: `
-    <h2 mat-dialog-title>Delete Attachment</h2>
+    <h2 mat-dialog-title>{{ 'ticket.deleteAttachmentTitle' | translate }}</h2>
     <mat-dialog-content>
-      Delete <strong>{{ data.fileName }}</strong>? This cannot be undone.
+      Delete <strong>{{ data.fileName }}</strong>? {{ 'ticket.deleteConfirm' | translate }}
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-button color="warn" [mat-dialog-close]="true">Delete</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
+      <button mat-button color="warn" [mat-dialog-close]="true">{{ 'common.delete' | translate }}</button>
     </mat-dialog-actions>
   `,
 })

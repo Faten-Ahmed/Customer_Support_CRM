@@ -73,7 +73,7 @@ public class GetCustomerQueryHandlerTests
     public async Task Handle_ExistingCustomer_ReturnsCustomerDetailDto()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Ali", "Hassan", "ali@crm.test", "+971501234567", true);
+        var customer = Customer.Create("Ali Hassan", "ali@crm.test", phone: "+971501234567", isVip: true);
         customer.AddContact("WhatsApp", "+971501234567", true);
 
         _repo.Setup(r => r.FindByIdWithContactsAsync(id, default)).ReturnsAsync(customer);
@@ -100,7 +100,7 @@ public class GetCustomerQueryHandlerTests
     public async Task Handle_DeletedCustomer_ThrowsKeyNotFoundException()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Ali", "Hassan", "ali@crm.test");
+        var customer = Customer.Create("Ali Hassan", "ali@crm.test");
         customer.SoftDelete();
 
         _repo.Setup(r => r.FindByIdWithContactsAsync(id, default)).ReturnsAsync(customer);
@@ -129,14 +129,21 @@ public record ContactDto(Guid Id, string Type, string Value, bool IsPrimary);
 
 public record CustomerDetailDto(
     Guid Id,
-    string FirstName,
-    string LastName,
+    string FullName,
+    string? FullNameAr,
     string Email,
     string? Phone,
+    string? CompanyName,
+    string? CompanyNameAr,
+    string? JobTitle,
+    string? Country,
+    string? City,
+    string? ExternalId,
     bool IsVip,
+    bool IsActive,
     bool IsDeleted,
-    DateTime CreatedAt,
-    DateTime UpdatedAt,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt,
     IReadOnlyList<ContactDto> Contacts);
 ```
 
@@ -167,11 +174,18 @@ public class GetCustomerQueryHandler : IRequestHandler<GetCustomerQuery, Custome
 
         return new CustomerDetailDto(
             Id: customer.Id,
-            FirstName: customer.FirstName,
-            LastName: customer.LastName,
+            FullName: customer.FullName,
+            FullNameAr: customer.FullNameAr,
             Email: customer.Email,
             Phone: customer.Phone,
+            CompanyName: customer.CompanyName,
+            CompanyNameAr: customer.CompanyNameAr,
+            JobTitle: customer.JobTitle,
+            Country: customer.Country,
+            City: customer.City,
+            ExternalId: customer.ExternalId,
             IsVip: customer.IsVip,
+            IsActive: customer.IsActive,
             IsDeleted: customer.IsDeleted,
             CreatedAt: customer.CreatedAt,
             UpdatedAt: customer.UpdatedAt,
@@ -248,8 +262,10 @@ public class CustomersControllerGetTests
         var id = Guid.NewGuid();
         _mediator.Setup(m => m.Send(It.Is<GetCustomerQuery>(q => q.CustomerId == id), default))
                  .ReturnsAsync(new CustomerDetailDto(
-                     id, "Ali", "Hassan", "ali@crm.test", null, false, false,
-                     DateTime.UtcNow, DateTime.UtcNow, new List<ContactDto>()));
+                     id, "Ali Hassan", null, "ali@crm.test", null,
+                     null, null, null, null, null, null,
+                     false, true, false,
+                     DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, new List<ContactDto>()));
 
         var client = BuildClient();
         var response = await client.GetAsync($"/api/customers/{id}");

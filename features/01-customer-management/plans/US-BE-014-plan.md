@@ -23,7 +23,7 @@
 **Story:** US-BE-014  
 **Goal:** Implement `PUT /api/customers/{id}` — updates a customer's name and phone (email is immutable); returns the updated `CustomerDetailDto`.
 
-**Architecture:** `UpdateCustomerCommand(id, firstName, lastName, phone)` → handler fetches customer, calls `customer.Update(...)`, saves. Email cannot be changed — validator enforces no email in body. Returns 404 if not found or deleted.
+**Architecture:** `UpdateCustomerCommand(id, fullName, fullNameAr, phone, ...)` → handler fetches customer, calls `customer.Update(...)`, saves. Email cannot be changed — validator enforces no email in body. Returns 404 if not found or deleted.
 
 **Tech Stack:** .NET 10, ASP.NET Core, MediatR, FluentValidation, EF Core, xUnit, Moq
 
@@ -73,14 +73,13 @@ public class UpdateCustomerCommandHandlerTests
     public async Task Handle_ExistingCustomer_UpdatesNameAndPhone()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Ali", "Hassan", "ali@crm.test", "+971501111111");
+        var customer = Customer.Create("Ali Hassan", "ali@crm.test", phone: "+971501111111");
         _repo.Setup(r => r.FindByIdWithContactsAsync(id, default)).ReturnsAsync(customer);
 
         var result = await _handler.Handle(
-            new UpdateCustomerCommand(id, "Ahmed", "Al-Rashid", "+971509999999"), default);
+            new UpdateCustomerCommand(id, "Ahmed Al-Rashid", null, "+971509999999"), default);
 
-        Assert.Equal("Ahmed", result.FirstName);
-        Assert.Equal("Al-Rashid", result.LastName);
+        Assert.Equal("Ahmed Al-Rashid", result.FullName);
         Assert.Equal("+971509999999", result.Phone);
         _repo.Verify(r => r.SaveChangesAsync(default), Times.Once);
     }
@@ -93,31 +92,31 @@ public class UpdateCustomerCommandHandlerTests
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _handler.Handle(
-                new UpdateCustomerCommand(Guid.NewGuid(), "X", "Y", null), default));
+                new UpdateCustomerCommand(Guid.NewGuid(), "X Y", null, null), default));
     }
 
     [Fact]
     public async Task Handle_DeletedCustomer_ThrowsKeyNotFoundException()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Ali", "Hassan", "ali@crm.test");
+        var customer = Customer.Create("Ali Hassan", "ali@crm.test");
         customer.SoftDelete();
 
         _repo.Setup(r => r.FindByIdWithContactsAsync(id, default)).ReturnsAsync(customer);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _handler.Handle(new UpdateCustomerCommand(id, "X", "Y", null), default));
+            _handler.Handle(new UpdateCustomerCommand(id, "X Y", null, null), default));
     }
 
     [Fact]
     public async Task Handle_NullPhone_ClearsPhone()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Ali", "Hassan", "ali@crm.test", "+971501111111");
+        var customer = Customer.Create("Ali Hassan", "ali@crm.test", phone: "+971501111111");
         _repo.Setup(r => r.FindByIdWithContactsAsync(id, default)).ReturnsAsync(customer);
 
         var result = await _handler.Handle(
-            new UpdateCustomerCommand(id, "Ali", "Hassan", null), default);
+            new UpdateCustomerCommand(id, "Ali Hassan", null, null), default);
 
         Assert.Null(result.Phone);
     }
@@ -144,9 +143,14 @@ namespace CRM.Application.Customers.Commands;
 
 public record UpdateCustomerCommand(
     Guid CustomerId,
-    string FirstName,
-    string LastName,
-    string? Phone) : IRequest<CustomerDetailDto>;
+    string FullName,
+    string? FullNameAr,
+    string? Phone,
+    string? CompanyName = null,
+    string? CompanyNameAr = null,
+    string? JobTitle = null,
+    string? Country = null,
+    string? City = null) : IRequest<CustomerDetailDto>;
 
 public class UpdateCustomerCommandHandler
     : IRequestHandler<UpdateCustomerCommand, CustomerDetailDto>
@@ -162,12 +166,15 @@ public class UpdateCustomerCommandHandler
         if (customer is null || customer.IsDeleted)
             throw new KeyNotFoundException($"Customer {cmd.CustomerId} not found.");
 
-        customer.Update(cmd.FirstName, cmd.LastName, cmd.Phone);
+        customer.Update(cmd.FullName, cmd.FullNameAr, cmd.Phone,
+            cmd.CompanyName, cmd.CompanyNameAr, cmd.JobTitle, cmd.Country, cmd.City);
         await _customers.SaveChangesAsync(ct);
 
         return new CustomerDetailDto(
-            customer.Id, customer.FirstName, customer.LastName,
-            customer.Email, customer.Phone, customer.IsVip, customer.IsDeleted,
+            customer.Id, customer.FullName, customer.FullNameAr,
+            customer.Email, customer.Phone, customer.CompanyName, customer.CompanyNameAr,
+            customer.JobTitle, customer.Country, customer.City, customer.ExternalId,
+            customer.IsVip, customer.IsActive, customer.IsDeleted,
             customer.CreatedAt, customer.UpdatedAt,
             customer.Contacts.Select(c => new ContactDto(c.Id, c.Type, c.Value, c.IsPrimary)).ToList());
     }
@@ -188,9 +195,12 @@ public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCo
     public UpdateCustomerCommandValidator()
     {
         RuleFor(x => x.CustomerId).NotEmpty();
-        RuleFor(x => x.FirstName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Phone).MaximumLength(30).When(x => x.Phone is not null);
+        RuleFor(x => x.FullName).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.FullNameAr).MaximumLength(200).When(x => x.FullNameAr is not null);
+        RuleFor(x => x.Phone).MaximumLength(50).When(x => x.Phone is not null);
+        RuleFor(x => x.CompanyName).MaximumLength(200).When(x => x.CompanyName is not null);
+        RuleFor(x => x.CompanyNameAr).MaximumLength(200).When(x => x.CompanyNameAr is not null);
+        RuleFor(x => x.JobTitle).MaximumLength(200).When(x => x.JobTitle is not null);
     }
 }
 ```
@@ -261,12 +271,14 @@ public class CustomersControllerUpdateTests
         var id = Guid.NewGuid();
         _mediator.Setup(m => m.Send(It.IsAny<UpdateCustomerCommand>(), default))
                  .ReturnsAsync(new CustomerDetailDto(
-                     id, "Ahmed", "Al-Rashid", "ali@crm.test", "+971509999999",
-                     false, false, DateTime.UtcNow, DateTime.UtcNow, new List<ContactDto>()));
+                     id, "Ahmed Al-Rashid", null, "ali@crm.test", "+971509999999",
+                     null, null, null, null, null, null,
+                     false, true, false,
+                     DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, new List<ContactDto>()));
 
         var client = BuildClient();
         var response = await client.PutAsJsonAsync($"/api/customers/{id}",
-            new { firstName = "Ahmed", lastName = "Al-Rashid", phone = "+971509999999" });
+            new { fullName = "Ahmed Al-Rashid", fullNameAr = (string?)null, phone = "+971509999999" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -280,7 +292,7 @@ public class CustomersControllerUpdateTests
 
         var client = BuildClient();
         var response = await client.PutAsJsonAsync($"/api/customers/{id}",
-            new { firstName = "X", lastName = "Y", phone = (string?)null });
+            new { fullName = "X Y", fullNameAr = (string?)null, phone = (string?)null });
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -300,7 +312,15 @@ Expected: FAIL — `PUT /api/customers/{id}` does not exist yet.
 ```csharp
 // Add to src/CRM.API/Controllers/CustomersController.cs inside the class:
 
-public record UpdateCustomerRequest(string FirstName, string LastName, string? Phone);
+public record UpdateCustomerRequest(
+    string FullName,
+    string? FullNameAr,
+    string? Phone,
+    string? CompanyName = null,
+    string? CompanyNameAr = null,
+    string? JobTitle = null,
+    string? Country = null,
+    string? City = null);
 
 [HttpPut("{id:guid}")]
 public async Task<IActionResult> Update(
@@ -309,7 +329,9 @@ public async Task<IActionResult> Update(
     try
     {
         var result = await _mediator.Send(
-            new UpdateCustomerCommand(id, request.FirstName, request.LastName, request.Phone), ct);
+            new UpdateCustomerCommand(id, request.FullName, request.FullNameAr, request.Phone,
+                request.CompanyName, request.CompanyNameAr, request.JobTitle,
+                request.Country, request.City), ct);
         return Ok(result);
     }
     catch (KeyNotFoundException ex)

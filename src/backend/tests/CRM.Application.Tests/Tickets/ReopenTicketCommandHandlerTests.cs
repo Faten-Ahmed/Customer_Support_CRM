@@ -23,7 +23,7 @@ public class ReopenTicketCommandHandlerTests
 
     private static Ticket MakeResolvedTicket(Guid? assignedTo = null)
     {
-        var ticket = Ticket.Create(Guid.NewGuid(), "Subject", "Desc",
+        var ticket = Ticket.Create(Guid.NewGuid(), "Subject", "موضوع", "Desc", "وصف",
             TicketPriority.Medium, TicketChannel.Portal, Guid.NewGuid());
 
         if (assignedTo.HasValue)

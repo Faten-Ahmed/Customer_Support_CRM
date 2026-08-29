@@ -1,5 +1,5 @@
 @if (loading()) {
-  <p class="state-message">Loading…</p>
+  <p class="state-message">{{ 'common.loading' | translate }}</p>
 } @else if (customer()) {
   <div class="customer-detail">
 
@@ -11,31 +11,31 @@
         <div class="badges">
           @if (customer()!.isVip) { <span class="vip-badge">⭐ VIP</span> }
           <span class="status-badge" [class.status-active]="customer()!.isActive" [class.status-inactive]="!customer()!.isActive">
-            {{ customer()!.isActive ? 'Active' : 'Inactive' }}
+            {{ customer()!.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
           </span>
         </div>
       </div>
       <div class="header-actions">
         <button mat-raised-button color="primary" [routerLink]="['/app/tickets/new']" [queryParams]="{ customerId: customer()!.id }">
-          <mat-icon>add</mat-icon> New Ticket
+          <mat-icon>add</mat-icon> {{ 'common.newTicket' | translate }}
         </button>
         @if (isAdminOrManager) {
           <button mat-stroked-button [color]="customer()!.isVip ? 'accent' : 'primary'"
                   [disabled]="vipLoading()" (click)="toggleVip()"
-                  [matTooltip]="customer()!.isVip ? 'Remove VIP status' : 'Mark as VIP'">
+                  [matTooltip]="(customer()!.isVip ? 'customer.removeVipStatus' : 'customer.markAsVip') | translate">
             @if (vipLoading()) { <mat-spinner diameter="18" /> }
             @else { <mat-icon>{{ customer()!.isVip ? 'star' : 'star_border' }}</mat-icon> }
-            {{ customer()!.isVip ? 'Remove VIP' : 'Mark VIP' }}
+            {{ (customer()!.isVip ? 'customer.removeVip' : 'customer.markVip') | translate }}
           </button>
         }
         @if (isAdmin && customer()!.isActive) {
           <button mat-stroked-button color="warn" [disabled]="deactivating()" (click)="confirmDeactivate()">
-            @if (deactivating()) { <mat-spinner diameter="18" /> } @else { Deactivate }
+            @if (deactivating()) { <mat-spinner diameter="18" /> } @else { {{ 'customer.deactivate' | translate }} }
           </button>
         }
         @if (isAdmin && !customer()!.isActive) {
           <button mat-stroked-button color="primary" [disabled]="reactivating()" (click)="confirmReactivate()">
-            @if (reactivating()) { <mat-spinner diameter="18" /> } @else { Reactivate }
+            @if (reactivating()) { <mat-spinner diameter="18" /> } @else { {{ 'customer.reactivate' | translate }} }
           </button>
         }
       </div>
@@ -44,59 +44,59 @@
     <mat-tab-group>
 
       <!-- ── Overview ── -->
-      <mat-tab label="Overview">
+      <mat-tab [label]="'customer.overview' | translate">
         <div class="tab-content">
           @if (!editing()) {
             <dl class="detail-list">
               <div class="detail-item">
-                <dt>Full Name</dt>
+                <dt>{{ 'common.fullName' | translate }}</dt>
                 <dd>{{ customer()!.fullName }}</dd>
               </div>
               <div class="detail-item">
-                <dt>Email</dt>
+                <dt>{{ 'common.email' | translate }}</dt>
                 <dd>{{ customer()!.email }}</dd>
               </div>
               <div class="detail-item">
-                <dt>Phone</dt>
+                <dt>{{ 'common.phone' | translate }}</dt>
                 <dd>{{ customer()!.phone || '—' }}</dd>
               </div>
               <div class="detail-item">
-                <dt>Company</dt>
+                <dt>{{ 'common.company' | translate }}</dt>
                 <dd>{{ customer()!.companyName || '—' }}</dd>
               </div>
               <div class="detail-item">
-                <dt>Member Since</dt>
+                <dt>{{ 'customer.memberSince' | translate }}</dt>
                 <dd>{{ customer()!.createdAt | date:'mediumDate' }}</dd>
               </div>
             </dl>
             <button mat-stroked-button (click)="enterEditMode()">
-              <mat-icon>edit</mat-icon> Edit Profile
+              <mat-icon>edit</mat-icon> {{ 'customer.editProfile' | translate }}
             </button>
           } @else {
             <form [formGroup]="editForm" class="edit-form">
               <mat-form-field appearance="outline">
-                <mat-label>Full Name</mat-label>
+                <mat-label>{{ 'common.fullName' | translate }}</mat-label>
                 <input matInput formControlName="fullName" />
                 @if (editForm.get('fullName')?.hasError('required') && editForm.get('fullName')?.touched) {
-                  <mat-error>Full name is required.</mat-error>
+                  <mat-error>{{ 'err.fullNameRequired' | translate }}</mat-error>
                 }
               </mat-form-field>
               <mat-form-field appearance="outline">
-                <mat-label>Phone</mat-label>
+                <mat-label>{{ 'common.phone' | translate }}</mat-label>
                 <input matInput formControlName="phone" placeholder="+966 5x xxx xxxx" />
                 @if (editForm.get('phone')?.hasError('phone') && editForm.get('phone')?.touched) {
-                  <mat-error>Enter a valid phone number (digits, spaces, +, -, parentheses).</mat-error>
+                  <mat-error>{{ 'err.phoneInvalid' | translate }}</mat-error>
                 }
               </mat-form-field>
               <mat-form-field appearance="outline">
-                <mat-label>Company Name</mat-label>
+                <mat-label>{{ 'customer.companyName' | translate }}</mat-label>
                 <input matInput formControlName="companyName" />
               </mat-form-field>
               <div class="form-actions">
                 <button mat-raised-button color="primary" type="button" [disabled]="savingEdit()" (click)="saveChanges()">
-                  @if (savingEdit()) { <mat-spinner diameter="18" /> } @else { Save }
+                  @if (savingEdit()) { <mat-spinner diameter="18" /> } @else { {{ 'common.save' | translate }} }
                 </button>
-                <button mat-stroked-button type="button" (click)="cancelEdit()">Cancel</button>
+                <button mat-stroked-button type="button" (click)="cancelEdit()">{{ 'common.cancel' | translate }}</button>
               </div>
             </form>
           }
@@ -104,7 +104,7 @@
       </mat-tab>
 
       <!-- ── Contacts ── -->
-      <mat-tab label="Contacts">
+      <mat-tab [label]="'customer.contacts' | translate">
         <div class="tab-content">
           @if (customer()!.contacts.length > 0) {
             <div class="contacts-list">
@@ -114,13 +114,13 @@
                     <span class="contact-type-badge">{{ contact.type }}</span>
                     <span class="contact-value">{{ contact.value }}</span>
                     @if (contact.isPrimary) {
-                      <span class="primary-badge">Primary</span>
+                      <span class="primary-badge">{{ 'common.primary' | translate }}</span>
                     }
                   </div>
                   <button mat-icon-button color="warn"
                           [disabled]="removingContactId() === contact.id"
                           (click)="removeContact(contact.id)"
-                          matTooltip="Remove contact">
+                          [matTooltip]="'customer.removeContact' | translate">
                     @if (removingContactId() === contact.id) {
                       <mat-spinner diameter="18" />
                     } @else {
@@ -132,13 +132,13 @@
             </div>
             <mat-divider class="contact-divider" />
           } @else {
-            <p class="empty-hint">No contacts yet. Add one below.</p>
+            <p class="empty-hint">{{ 'customer.noContacts' | translate }}</p>
           }
 
-          <h3 class="section-title">Add Contact</h3>
+          <h3 class="section-title">{{ 'customer.addContact' | translate }}</h3>
           <form [formGroup]="contactForm" class="contact-form" (ngSubmit)="addContact()">
             <mat-form-field appearance="outline" class="type-field">
-              <mat-label>Type</mat-label>
+              <mat-label>{{ 'common.type' | translate }}</mat-label>
               <mat-select formControlName="type">
                 @for (t of contactTypes; track t) {
                   <mat-option [value]="t">{{ t }}</mat-option>
@@ -147,36 +147,36 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="value-field">
-              <mat-label>Value</mat-label>
+              <mat-label>{{ 'common.value' | translate }}</mat-label>
               <input matInput formControlName="value" [placeholder]="contactValuePlaceholder"
                      [type]="contactForm.get('type')?.value === 'Email' ? 'email' : 'tel'" />
               @if (contactForm.get('value')?.hasError('required') && contactForm.get('value')?.touched) {
-                <mat-error>Value is required.</mat-error>
+                <mat-error>{{ 'err.valueRequired' | translate }}</mat-error>
               }
               @if (contactForm.get('value')?.hasError('email') && contactForm.get('value')?.touched) {
-                <mat-error>Enter a valid email address.</mat-error>
+                <mat-error>{{ 'err.emailInvalid' | translate }}</mat-error>
               }
               @if (contactForm.get('value')?.hasError('phone') && contactForm.get('value')?.touched) {
-                <mat-error>Enter a valid phone number (digits, spaces, +, -, parentheses).</mat-error>
+                <mat-error>{{ 'err.phoneInvalid' | translate }}</mat-error>
               }
             </mat-form-field>
 
-            <mat-checkbox formControlName="isPrimary" class="primary-check">Primary</mat-checkbox>
+            <mat-checkbox formControlName="isPrimary" class="primary-check">{{ 'common.primary' | translate }}</mat-checkbox>
 
             <button mat-raised-button color="primary" type="submit" [disabled]="contactSubmitting()">
-              @if (contactSubmitting()) { <mat-spinner diameter="18" /> } @else { Add }
+              @if (contactSubmitting()) { <mat-spinner diameter="18" /> } @else { {{ 'common.add' | translate }} }
             </button>
           </form>
         </div>
       </mat-tab>
 
       <!-- ── Tickets ── -->
-      <mat-tab label="Tickets">
+      <mat-tab [label]="'common.tickets' | translate">
         <div class="tab-content">
           @if (ticketsLoading()) {
-            <p class="state-message">Loading tickets…</p>
+            <p class="state-message">{{ 'customer.loadingTickets' | translate }}</p>
           } @else if (tickets().length === 0) {
-            <p class="state-message">No tickets for this customer.</p>
+            <p class="state-message">{{ 'customer.noTickets' | translate }}</p>
           } @else {
             <mat-table [dataSource]="tickets()" class="tickets-table">
               <ng-container matColumnDef="ticketNumber">
@@ -184,25 +184,25 @@
                 <mat-cell *matCellDef="let t">{{ t.ticketNumber }}</mat-cell>
               </ng-container>
               <ng-container matColumnDef="subject">
-                <mat-header-cell *matHeaderCellDef>Subject</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>{{ 'common.subject' | translate }}</mat-header-cell>
                 <mat-cell *matCellDef="let t">{{ t.subject }}</mat-cell>
               </ng-container>
               <ng-container matColumnDef="status">
-                <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>{{ 'common.status' | translate }}</mat-header-cell>
                 <mat-cell *matCellDef="let t">
                   <span class="status-chip status-{{ t.status.toLowerCase() }}">{{ t.status }}</span>
                 </mat-cell>
               </ng-container>
               <ng-container matColumnDef="priority">
-                <mat-header-cell *matHeaderCellDef>Priority</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>{{ 'common.priority' | translate }}</mat-header-cell>
                 <mat-cell *matCellDef="let t">{{ t.priority }}</mat-cell>
               </ng-container>
               <ng-container matColumnDef="category">
-                <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>{{ 'common.category' | translate }}</mat-header-cell>
                 <mat-cell *matCellDef="let t">{{ t.category || '—' }}</mat-cell>
               </ng-container>
               <ng-container matColumnDef="createdAt">
-                <mat-header-cell *matHeaderCellDef>Created</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>{{ 'common.created' | translate }}</mat-header-cell>
                 <mat-cell *matCellDef="let t">{{ t.createdAt | date:'mediumDate' }}</mat-cell>
               </ng-container>
 

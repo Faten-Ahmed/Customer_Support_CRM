@@ -17,25 +17,31 @@ export interface EscalateModalData {
   template: `
     <h2 mat-dialog-title>Escalate Ticket</h2>
     <mat-dialog-content>
-      <form [formGroup]="form" class="pt-2">
-        <mat-form-field appearance="outline" class="w-full">
+      <form [formGroup]="form" style="padding-top:8px;min-width:400px">
+        <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Escalation Reason</mat-label>
-          <textarea matInput formControlName="reason" rows="4"></textarea>
-          @if (form.get('reason')?.hasError('required')) {
-            <mat-error>Reason is required</mat-error>
-          }
+          <textarea matInput formControlName="reason" rows="4" placeholder="Describe why this ticket needs escalation"></textarea>
+          <mat-error>Reason is required</mat-error>
         </mat-form-field>
+        @if (errorMessage) {
+          <p style="color:#c62828;font-size:13px;margin:8px 0 0">{{ errorMessage }}</p>
+        }
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="warn" [disabled]="form.invalid" (click)="onSubmit()">Escalate</button>
+      <button mat-flat-button color="warn" [disabled]="form.invalid || saving" (click)="onSubmit()">
+        {{ saving ? 'Escalating…' : 'Escalate' }}
+      </button>
     </mat-dialog-actions>
   `,
 })
 export class EscalateModalComponent {
   private readonly fb = inject(FormBuilder);
   private readonly ticketService = inject(TicketService);
+
+  saving = false;
+  errorMessage = '';
 
   form = this.fb.group({ reason: ['', Validators.required] });
 
@@ -46,8 +52,14 @@ export class EscalateModalComponent {
 
   onSubmit(): void {
     if (this.form.invalid) return;
+    this.saving = true;
+    this.errorMessage = '';
     this.ticketService.escalate(this.data.ticketId, this.form.value.reason!).subscribe({
       next: () => this.dialogRef.close(true),
+      error: (err) => {
+        this.saving = false;
+        this.errorMessage = err?.error?.error ?? 'Escalation failed. Only InProgress tickets can be escalated.';
+      },
     });
   }
 }

@@ -5,35 +5,56 @@
     <label class="mode-option" [class.active]="!isInternal()" (click)="setMode(false)">
       <input type="radio" name="replyMode" [checked]="!isInternal()" (change)="setMode(false)" />
       <span class="mode-icon">💬</span>
-      <span class="mode-label">Reply to Customer</span>
+      <span class="mode-label">{{ 'ticket.replyToCustomer' | translate }}</span>
     </label>
     <label class="mode-option mode-internal-opt" [class.active]="isInternal()" (click)="setMode(true)">
       <input type="radio" name="replyMode" [checked]="isInternal()" (change)="setMode(true)" />
       <span class="mode-icon">🔒</span>
-      <span class="mode-label">Internal Note</span>
+      <span class="mode-label">{{ 'ticket.internalNote' | translate }}</span>
     </label>
   </div>
 
   @if (isInternal()) {
-    <div class="internal-banner">Internal notes are only visible to agents — the customer cannot see this.</div>
+    <div class="internal-banner">{{ 'ticket.internalNoteWarning' | translate }}</div>
   }
 
   <mat-form-field appearance="outline" style="width:100%">
-    <mat-label>{{ isInternal() ? 'Internal note…' : 'Write a reply…' }}</mat-label>
+    <mat-label>{{ isInternal() ? ('ticket.internalNotePlaceholder' | translate) : ('ticket.replyPlaceholder' | translate) }}</mat-label>
     <textarea matInput [formControl]="replyControl" rows="4"></textarea>
   </mat-form-field>
 
   <div class="composer-footer">
     <div class="footer-left">
-      <button mat-stroked-button type="button" (click)="openTemplatePicker()" [disabled]="isInternal()">
-        <mat-icon>library_books</mat-icon> Template
+      <button mat-stroked-button type="button"
+              [matMenuTriggerFor]="templateMenu"
+              (menuOpened)="loadTemplates()"
+              [disabled]="isInternal()">
+        <mat-icon>library_books</mat-icon> {{ 'ticket.template' | translate }}
       </button>
-      <span class="char-count">{{ charCount }} chars</span>
+      <mat-menu #templateMenu>
+        @if (templatesLoading()) {
+          <div style="padding:16px;display:flex;justify-content:center">
+            <mat-spinner diameter="24" />
+          </div>
+        } @else if (templates().length === 0) {
+          <button mat-menu-item disabled>No templates available</button>
+        } @else {
+          @for (t of templates(); track t.id) {
+            <button mat-menu-item (click)="applyTemplate(t)" style="max-width:320px">
+              <span style="font-weight:500">{{ t.title }}</span>
+              @if (t.category) {
+                <span style="font-size:11px;color:#888;margin-left:6px">{{ t.category }}</span>
+              }
+            </button>
+          }
+        }
+      </mat-menu>
+      <span class="char-count">{{ charCount }} {{ 'ticket.chars' | translate }}</span>
     </div>
     <button mat-flat-button [color]="isInternal() ? 'accent' : 'primary'"
             [disabled]="!replyControl.value?.trim() || sending()"
             (click)="send()">
-      {{ sending() ? 'Sending…' : (isInternal() ? 'Add Note' : 'Send Reply') }}
+      {{ sending() ? ('ticket.sending' | translate) : (isInternal() ? ('ticket.addNote' | translate) : ('ticket.sendReply' | translate)) }}
     </button>
   </div>
 

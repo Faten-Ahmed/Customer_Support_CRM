@@ -1,7 +1,9 @@
+using CRM.Application.Sla.Commands;
 using CRM.Application.Tickets.Commands;
 using CRM.Domain.Customers;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -11,12 +13,15 @@ public class CreateTicketInternalCommandHandlerTests
 {
     private readonly Mock<ICustomerRepository> _customerRepo = new();
     private readonly Mock<ITicketRepository> _ticketRepo = new();
+    private readonly Mock<IMediator> _mediator = new();
     private readonly CreateTicketInternalCommandHandler _handler;
 
     public CreateTicketInternalCommandHandlerTests()
     {
+        _mediator.Setup(m => m.Send(It.IsAny<StartSlaClockCommand>(), It.IsAny<CancellationToken>()))
+                 .Returns(Task.FromResult(Unit.Value));
         _handler = new CreateTicketInternalCommandHandler(
-            _customerRepo.Object, _ticketRepo.Object);
+            _customerRepo.Object, _ticketRepo.Object, _mediator.Object);
     }
 
     [Fact]
@@ -24,12 +29,13 @@ public class CreateTicketInternalCommandHandlerTests
     {
         var customerId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
-        var customer = Customer.Create("Ali Hassan", "ali@crm.test", null, null);
+        var customer = Customer.Create("Ali Hassan", "علي حسن", "ali@crm.test", null, null);
 
         _customerRepo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
 
         var result = await _handler.Handle(new CreateTicketInternalCommand(
-            customerId, "Cannot login", "User cannot login to portal",
+            customerId, "Cannot login", "لا أستطيع تسجيل الدخول",
+            "User cannot login to portal", "المستخدم لا يستطيع تسجيل الدخول في البوابة",
             TicketPriority.High, TicketChannel.Internal, agentId, null, null, null), default);
 
         Assert.NotEqual(Guid.Empty, result.Id);
@@ -47,7 +53,7 @@ public class CreateTicketInternalCommandHandlerTests
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _handler.Handle(new CreateTicketInternalCommand(
-                Guid.NewGuid(), "Subj", "Desc",
+                Guid.NewGuid(), "Subj", "موضوع", "Desc", "وصف",
                 TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid(),
                 null, null, null), default));
     }
@@ -55,14 +61,14 @@ public class CreateTicketInternalCommandHandlerTests
     [Fact]
     public async Task Handle_InactiveCustomer_ThrowsKeyNotFoundException()
     {
-        var customer = Customer.Create("Ali Hassan", "ali@crm.test", null, null);
+        var customer = Customer.Create("Ali Hassan", "علي حسن", "ali@crm.test", null, null);
         customer.Deactivate();
 
         _customerRepo.Setup(r => r.FindByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync(customer);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _handler.Handle(new CreateTicketInternalCommand(
-                Guid.NewGuid(), "Subj", "Desc",
+                Guid.NewGuid(), "Subj", "موضوع", "Desc", "وصف",
                 TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid(),
                 null, null, null), default));
     }

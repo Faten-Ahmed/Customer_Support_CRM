@@ -6,5 +6,6 @@ public record LoginResponse(
     bool RequiresPasswordChange,
     Guid UserId,
     string Email,
-    string FullName,
+    string FirstName,
+    string LastName,
     string Role);

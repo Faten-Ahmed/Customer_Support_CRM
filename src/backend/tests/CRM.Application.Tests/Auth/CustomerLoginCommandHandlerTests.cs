@@ -27,7 +27,7 @@ public class CustomerLoginCommandHandlerTests
 
     private static Customer MakeCustomer(bool active = true)
     {
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         if (!active) customer.Deactivate();
         return customer;
     }

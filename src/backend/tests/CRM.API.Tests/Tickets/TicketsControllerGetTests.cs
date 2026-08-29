@@ -47,9 +47,10 @@ public class TicketsControllerGetTests
         _mediator.Setup(m => m.Send(It.Is<GetTicketQuery>(q => q.TicketId == id), It.IsAny<CancellationToken>()))
                  .ReturnsAsync(new TicketDetailDto(
                      id, "TKT-001", Guid.NewGuid(), "Ali Hassan",
-                     "Cannot login", "Description goes here",
+                     "Cannot login", "لا يمكن تسجيل الدخول",
+                     "Description goes here", "وصف",
                      "New", "High", "Internal",
-                     null, null, null, null, null, null,
+                     null, null, null, null, null, null, null, null,
                      DateTime.UtcNow, DateTime.UtcNow, null, null));
 
         var client = BuildClient();

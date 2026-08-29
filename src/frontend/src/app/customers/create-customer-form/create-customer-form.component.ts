@@ -29,6 +29,14 @@ import { CustomerService, CreateCustomerDto } from '../services/customer.service
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name (Arabic) *</mat-label>
+          <input matInput formControlName="fullNameAr" dir="rtl" />
+          @if (form.get('fullNameAr')?.hasError('required') && form.get('fullNameAr')?.touched) {
+            <mat-error>Full name in Arabic is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email *</mat-label>
           <input matInput formControlName="email" type="email" />
           @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
@@ -50,16 +58,6 @@ import { CustomerService, CreateCustomerDto } from '../services/customer.service
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Company Name</mat-label>
           <input matInput formControlName="companyName" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Country</mat-label>
-          <input matInput formControlName="country" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>City</mat-label>
-          <input matInput formControlName="city" />
         </mat-form-field>
 
         <div class="form-actions">
@@ -88,11 +86,10 @@ export class CreateCustomerFormComponent {
 
   readonly form: FormGroup = this.fb.group({
     fullName: ['', [Validators.required]],
+    fullNameAr: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
     companyName: [''],
-    country: [''],
-    city: [''],
   });
 
   onSubmit(): void {
@@ -101,8 +98,8 @@ export class CreateCustomerFormComponent {
       return;
     }
     this.submitting.set(true);
-    const { fullName, email, phone, companyName } = this.form.getRawValue();
-    const dto: CreateCustomerDto = { fullName, email, ...(phone ? { phone } : {}), ...(companyName ? { companyName } : {}) };
+    const { fullName, fullNameAr, email, phone, companyName } = this.form.getRawValue();
+    const dto: CreateCustomerDto = { fullName, fullNameAr, email, ...(phone ? { phone } : {}), ...(companyName ? { companyName } : {}) };
     this.customerService.create(dto).subscribe({
       next: customer => {
         this.submitting.set(false);

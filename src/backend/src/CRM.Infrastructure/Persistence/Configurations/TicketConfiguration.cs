@@ -15,7 +15,9 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
 
         builder.Property(t => t.TicketNumber).IsRequired().HasMaxLength(40);
         builder.Property(t => t.Subject).IsRequired().HasMaxLength(500);
+        builder.Property(t => t.SubjectAr).IsRequired().HasMaxLength(500);
         builder.Property(t => t.Description).IsRequired();
+        builder.Property(t => t.DescriptionAr).IsRequired().HasColumnType("nvarchar(max)");
         builder.Property(t => t.CustomFieldValues).HasColumnType("nvarchar(max)");
 
         builder.Property(t => t.Status)

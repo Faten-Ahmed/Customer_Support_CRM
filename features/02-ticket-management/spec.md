@@ -74,7 +74,7 @@ Tickets are the central aggregate of the CRM. A ticket represents a single suppo
 
 **BR-TKT-002** `TicketNumber` is auto-generated as `TKT-{YEAR}-{SEQUENCE}` where SEQUENCE is a zero-padded 5-digit integer, per-year, per-organization (e.g., `TKT-2025-00043`). The sequence resets each January 1.
 
-**BR-TKT-003** Priority defaults to `Medium` if not provided by the creating system. Channel-specific overrides:
+**BR-TKT-003** Priority defaults to `Medium` if not provided by the creating system. Tickets support optional bilingual fields `subjectAr` (Arabic subject) and `descriptionAr` (Arabic description) for RTL display; these fields are stored alongside the primary English fields and are not required. Channel-specific overrides:
   - Email subject containing keywords `urgent`, `critical`, `asap` → `High`
   - Portal creation → always `Medium` (customer cannot set priority)
   - Admin/Agent creation → any priority allowed

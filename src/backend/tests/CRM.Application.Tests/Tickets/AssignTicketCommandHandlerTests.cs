@@ -25,7 +25,7 @@ public class AssignTicketCommandHandlerTests
         var agentId = Guid.NewGuid();
         var managerId = Guid.NewGuid();
 
-        var ticket = Ticket.Create(Guid.NewGuid(), "Subj", "Desc",
+        var ticket = Ticket.Create(Guid.NewGuid(), "Subj", "موضوع", "Desc", "وصف",
             TicketPriority.Medium, TicketChannel.Internal, managerId);
         var agent = User.CreateForTest("agent@crm.test", "hash",
             UserRole.Agent, true, false, agentId);
@@ -55,7 +55,7 @@ public class AssignTicketCommandHandlerTests
     [Fact]
     public async Task Handle_NonExistentAgent_ThrowsKeyNotFoundException()
     {
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
 
         _ticketRepo.Setup(r => r.FindByIdDetailedAsync(It.IsAny<Guid>(), default))
@@ -72,7 +72,7 @@ public class AssignTicketCommandHandlerTests
     [Fact]
     public async Task Handle_InactiveAgent_ThrowsInvalidOperationException()
     {
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
         var inactiveAgent = User.CreateForTest("agent@crm.test", "hash",
             UserRole.Agent, false, false);
@@ -92,7 +92,7 @@ public class AssignTicketCommandHandlerTests
     public async Task Handle_ClosedTicket_ThrowsInvalidOperationException()
     {
         var ticketId = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
         ticket.ChangeStatus(TicketStatus.Closed, Guid.NewGuid());
 

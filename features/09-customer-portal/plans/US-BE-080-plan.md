@@ -74,7 +74,7 @@ public class PortalProfileTests
     public async Task Get_ReturnsCustomerProfile()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", "AcmeCorp", "555-0100");
+        var customer = Customer.Create("Alice", "alice@example.com");
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
 
         var result = await _getHandler.Handle(
@@ -98,11 +98,11 @@ public class PortalProfileTests
     public async Task Update_ChangesAllowedFields()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", "AcmeCorp", "555-0100");
+        var customer = Customer.Create("Alice", "alice@example.com");
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
 
         var result = await _updateHandler.Handle(
-            new UpdatePortalProfileCommand(customerId, "Alicia", "555-9999", "Riyadh"),
+            new UpdatePortalProfileCommand(customerId, "Alicia", null, "555-9999", "Riyadh"),
             default);
 
         Assert.Equal("Alicia", result.FullName);
@@ -117,12 +117,12 @@ public class PortalProfileTests
     public async Task Update_NullFields_KeepsExistingValues()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", "AcmeCorp", "555-0100");
+        var customer = Customer.Create("Alice", "alice@example.com");
         customer.UpdateCity("Dubai");
         _repo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
 
         var result = await _updateHandler.Handle(
-            new UpdatePortalProfileCommand(customerId, null, null, null),
+            new UpdatePortalProfileCommand(customerId, null, null, null, null),
             default);
 
         Assert.Equal("Alice", result.FullName);
@@ -148,9 +148,10 @@ public string? Phone { get; private set; }
 public string? CompanyName { get; private set; }
 public string? City { get; private set; }
 
-public void UpdateProfile(string? fullName, string? phone, string? city)
+public void UpdateProfile(string? fullName, string? fullNameAr, string? phone, string? city)
 {
     if (fullName is not null) FullName = fullName;
+    if (fullNameAr is not null) FullNameAr = fullNameAr;
     if (phone is not null) Phone = phone;
     if (city is not null) City = city;
 }
@@ -167,9 +168,11 @@ namespace CRM.Application.Portal.DTOs;
 public record PortalProfileDto(
     Guid Id,
     string FullName,
+    string? FullNameAr,
     string Email,
     string? Phone,
     string? CompanyName,
+    string? CompanyNameAr,
     string? Country,
     string? City);
 ```
@@ -202,7 +205,7 @@ public class GetMyPortalProfileQueryHandler
     }
 
     internal static PortalProfileDto Map(Customer c)
-        => new(c.Id, c.FullName, c.Email, c.Phone, c.CompanyName, c.Country, c.City);
+        => new(c.Id, c.FullName, c.FullNameAr, c.Email, c.Phone, c.CompanyName, c.CompanyNameAr, c.Country, c.City);
 }
 ```
 
@@ -218,7 +221,7 @@ using MediatR;
 namespace CRM.Application.Portal.Commands;
 
 public record UpdatePortalProfileCommand(
-    Guid CustomerId, string? FullName, string? Phone, string? City)
+    Guid CustomerId, string? FullName, string? FullNameAr, string? Phone, string? City)
     : IRequest<PortalProfileDto>;
 
 public class UpdatePortalProfileCommandHandler
@@ -233,9 +236,30 @@ public class UpdatePortalProfileCommandHandler
         var customer = await _customers.FindByIdAsync(cmd.CustomerId, ct)
             ?? throw new KeyNotFoundException($"Customer {cmd.CustomerId} not found.");
 
-        customer.UpdateProfile(cmd.FullName, cmd.Phone, cmd.City);
+        customer.UpdateProfile(cmd.FullName, cmd.FullNameAr, cmd.Phone, cmd.City);
         await _customers.SaveChangesAsync(ct);
         return GetMyPortalProfileQueryHandler.Map(customer);
+    }
+}
+```
+
+- [ ] **Step 6b: Create UpdatePortalProfileCommandValidator**
+
+```csharp
+// src/CRM.Application/Portal/Validators/UpdatePortalProfileCommandValidator.cs
+using CRM.Application.Portal.Commands;
+using FluentValidation;
+
+namespace CRM.Application.Portal.Validators;
+
+public class UpdatePortalProfileCommandValidator : AbstractValidator<UpdatePortalProfileCommand>
+{
+    public UpdatePortalProfileCommandValidator()
+    {
+        RuleFor(x => x.FullName).MaximumLength(200).When(x => x.FullName is not null);
+        RuleFor(x => x.FullNameAr).MaximumLength(200).When(x => x.FullNameAr is not null);
+        RuleFor(x => x.Phone).MaximumLength(50).When(x => x.Phone is not null);
+        RuleFor(x => x.City).MaximumLength(100).When(x => x.City is not null);
     }
 }
 ```
@@ -285,12 +309,12 @@ public class PortalController : ControllerBase
         [FromBody] UpdateProfileRequest req, CancellationToken ct)
     {
         var result = await _mediator.Send(
-            new UpdatePortalProfileCommand(CurrentCustomerId, req.FullName, req.Phone, req.City), ct);
+            new UpdatePortalProfileCommand(CurrentCustomerId, req.FullName, req.FullNameAr, req.Phone, req.City), ct);
         return Ok(new { data = result });
     }
 }
 
-public record UpdateProfileRequest(string? FullName, string? Phone, string? City);
+public record UpdateProfileRequest(string? FullName, string? FullNameAr, string? Phone, string? City);
 ```
 
 - [ ] **Step 9: Write controller test**
@@ -332,8 +356,8 @@ public class PortalControllerTests
     {
         _mediator.Setup(m => m.Send(It.IsAny<GetMyPortalProfileQuery>(), default))
                  .ReturnsAsync(new PortalProfileDto(
-                     Guid.NewGuid(), "Alice", "alice@example.com",
-                     "555-0100", "AcmeCorp", null, null));
+                     Guid.NewGuid(), "Alice", null, "alice@example.com",
+                     "555-0100", "AcmeCorp", null, null, null));
 
         var response = await BuildClient().GetAsync("/api/portal/profile");
 

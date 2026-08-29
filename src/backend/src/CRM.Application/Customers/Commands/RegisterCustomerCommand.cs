@@ -8,6 +8,7 @@ namespace CRM.Application.Customers.Commands;
 
 public record RegisterCustomerCommand(
     string FullName,
+    string FullNameAr,
     string Email,
     string Password) : IRequest;
 
@@ -36,7 +37,7 @@ public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCo
         if (existing is not null)
             throw new InvalidOperationException($"Email '{cmd.Email}' is already registered.");
 
-        var customer = Customer.Create(cmd.FullName, cmd.Email, null, null);
+        var customer = Customer.Create(cmd.FullName, cmd.FullNameAr, cmd.Email, null, null);
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(cmd.Password);
         var credential = CustomerCredential.Create(customer.Id, passwordHash);

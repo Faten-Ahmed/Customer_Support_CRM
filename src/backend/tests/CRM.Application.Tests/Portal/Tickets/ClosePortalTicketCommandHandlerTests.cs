@@ -17,7 +17,7 @@ public class ClosePortalTicketCommandHandlerTests
     }
 
     private static Ticket MakeTicket(Guid customerId) =>
-        Ticket.Create(customerId, "Test", "Desc",
+        Ticket.Create(customerId, "Test", "اختبار", "Desc", "وصف",
             TicketPriority.Medium, TicketChannel.Portal, customerId);
 
     [Fact]

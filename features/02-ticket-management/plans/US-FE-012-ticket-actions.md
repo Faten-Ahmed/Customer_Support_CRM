@@ -21,11 +21,17 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-FE-012
-**Goal:** Implement colour-coded status badges and four action modals (Assign, Transfer, Escalate, Change Status/Resolve) that operate on a ticket without leaving the detail page.
+**Goal:** Implement colour-coded status badges and action modals (Assign, Transfer, Edit, Escalate, Change Status/Resolve) that operate on a ticket without leaving the detail page.
 
-**Architecture:** Each action modal is a standalone `MatDialog` component. `TicketService` gains four new methods. Status badge is a pure standalone pipe/component. Valid next-state logic is computed client-side based on current status and user role, matching the state machine in the spec.
+**Architecture:** Each action modal is a standalone `MatDialog` component. `TicketService` gains new methods. Status badge is a pure standalone pipe/component. Valid next-state logic is computed client-side based on current status and user role.
 
-**Tech Stack:** Angular 21, TypeScript, Angular Material, Jasmine, TestBed
+**Tech Stack:** Angular 21, TypeScript, Angular Material, Vitest, TestBed
+
+> **⚠️ Implementation divergences from original plan:**
+> - **Edit ticket modal** (`edit-ticket-modal.component.ts`): loads departments and categories via `forkJoin` on `ngOnInit`. Pre-fills all fields including `departmentId`, `categoryId`, `subjectAr`, `descriptionAr`. Uses Angular Signals (`signal()`) for `loading` and `saving` to avoid NG0100 ExpressionChangedAfterItHasBeenChecked.
+> - **Transfer modal** (`transfer-modal.component.ts`): completely department-only — no agent field. Loads active departments on init. Form fields: `departmentId` (required) + `transferNote` (required, min 10 chars). Calls `TicketService.transfer(ticketId, departmentId, transferNote)` which posts to `POST /api/v1/tickets/{id}/transfer`.
+> - `TicketDetail` TypeScript interface now includes `departmentId?: string` and `categoryId?: string`
+> - `TicketService.transfer()` uses `http.post()` (not `http.patch()`)
 
 ---
 

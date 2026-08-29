@@ -23,6 +23,7 @@ import { MessageThreadComponent } from '../components/message-thread/message-thr
 import { ReplyComposerComponent } from '../components/reply-composer/reply-composer.component';
 import { AttachmentPanelComponent } from '../attachment-panel/attachment-panel.component';
 import { TicketHistoryComponent } from '../ticket-history/ticket-history.component';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -41,6 +42,7 @@ import { TicketHistoryComponent } from '../ticket-history/ticket-history.compone
     ReplyComposerComponent,
     AttachmentPanelComponent,
     TicketHistoryComponent,
+    TranslatePipe,
   ],
   styles: [`
     :host { display: block; }
@@ -157,15 +159,13 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
 
   onTransfer(): void {
     const ticketId = this.ticket()!.id;
-    this.ticketService.getAgents().subscribe(agents => {
-      const ref = this.dialog.open(TransferModalComponent, {
-        width: '460px',
-        data: { ticketId, agents },
-      });
-      ref.afterClosed().subscribe((confirmed: boolean) => {
-        if (!confirmed) return;
-        this.refreshTicket(ticketId);
-      });
+    const ref = this.dialog.open(TransferModalComponent, {
+      width: '460px',
+      data: { ticketId },
+    });
+    ref.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.refreshTicket(ticketId);
     });
   }
 

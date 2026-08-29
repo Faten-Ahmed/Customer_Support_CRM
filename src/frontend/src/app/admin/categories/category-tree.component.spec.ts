@@ -62,7 +62,7 @@ describe('CategoryTreeComponent', () => {
   it('should open dialog for new category', () => {
     const dialog = fixture.debugElement.injector.get(MatDialog);
     vi.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(null) } as any);
-    component.openNewCategoryDialog();
+    component.openNewRootDialog();
     expect(dialog.open).toHaveBeenCalled();
   });
 

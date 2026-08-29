@@ -38,7 +38,7 @@ public class PortalController : ControllerBase
         try
         {
             var result = await _mediator.Send(
-                new UpdatePortalProfileCommand(CurrentCustomerId, req.FullName, req.Phone, req.City), ct);
+                new UpdatePortalProfileCommand(CurrentCustomerId, req.FullName, req.FullNameAr, req.Phone, req.City), ct);
             return Ok(new { data = result });
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
@@ -51,11 +51,11 @@ public class PortalController : ControllerBase
         try
         {
             var result = await _mediator.Send(
-                new UpdatePortalProfileCommand(CurrentCustomerId, req.FullName, req.Phone, req.City), ct);
+                new UpdatePortalProfileCommand(CurrentCustomerId, req.FullName, req.FullNameAr, req.Phone, req.City), ct);
             return Ok(new { data = result });
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
     }
 }
 
-public record UpdateProfileRequest(string? FullName, string? Phone, string? City);
+public record UpdateProfileRequest(string? FullName, string? FullNameAr, string? Phone, string? City);

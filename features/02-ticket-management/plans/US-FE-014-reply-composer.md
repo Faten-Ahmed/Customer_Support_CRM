@@ -21,9 +21,17 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-FE-014
-**Goal:** Implement the reply composer textarea below the message thread — with internal-note toggle, template picker modal, character counter, and optimistic message append after send.
+**Goal:** Implement the reply composer textarea below the message thread — with internal-note toggle, template picker dropdown, and send button.
 
-**Architecture:** `ReplyComposerComponent` is standalone and receives `ticketId` as `@Input()`. It emits `@Output() messageSent` when a reply is submitted, which `MessageThreadComponent` listens to for optimistic update. `TemplateService.render()` is called with the selected `templateId` and `ticketId` to get interpolated content. `TicketService.addMessage()` posts the reply.
+**Architecture:** `ReplyComposerComponent` is standalone and receives `ticketId` as `@Input()`. `TicketService.addMessage()` posts the reply. Template picker uses a `mat-menu` that loads templates from `GET /api/v1/templates` on menu open.
+
+> **⚠️ Implementation divergences from original plan:**
+> - Template picker uses a **`mat-menu`** (not a modal dialog) — button triggers `[matMenuTriggerFor]="templateMenu"` with `(menuOpened)="loadTemplates()"` 
+> - `TemplateService` calls `GET /api/v1/templates` (not `GET /api/agents/me/templates`) and reads `page.data` with `isActive` filter
+> - `Template` interface: `{ id, title, titleAr, content, contentAr, scope, isActive }` — selecting a template sets the textarea content directly
+> - `templatesLoading` signal drives a spinner inside the menu while loading
+> - No `TemplateService.render()` call — content is inserted verbatim
+> - `MatMenuModule` and `MatProgressSpinnerModule` are imported in the component
 
 **Tech Stack:** Angular 21, TypeScript, Angular Material, Jasmine, TestBed
 

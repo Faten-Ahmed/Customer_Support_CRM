@@ -53,7 +53,7 @@ public class AuthControllerLoginTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new LoginResponse(
                 "jwt", "raw-refresh", false,
-                Guid.NewGuid(), "agent@crm.test", "Ali Hassan", "Agent"));
+                Guid.NewGuid(), "agent@crm.test", "Ali", "Hassan", "Agent"));
     }
 
     [Fact]

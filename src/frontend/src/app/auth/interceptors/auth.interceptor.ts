@@ -23,7 +23,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => err);
       }
 
-      if (err.status === 401 && !req.url.includes('/auth/refresh') && !req.url.includes('/auth/login')) {
+      if (err.status === 401 && !req.url.includes('/auth/refresh') && !req.url.includes('/auth/login') && !req.url.includes('/auth/change-password-first-login')) {
         return authService.refresh().pipe(
           switchMap(res => {
             authStore.setToken(res.accessToken);
@@ -40,7 +40,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         );
       }
 
-      if (err.status === 401) {
+      if (err.status === 401 && !req.url.includes('/auth/change-password-first-login')) {
         authStore.clearToken();
         router.navigate(['/login']);
       }

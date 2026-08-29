@@ -29,7 +29,9 @@ public class GlobalTemplateCommandHandlerTests
         var adminId = Guid.NewGuid();
 
         var result = await _createHandler.Handle(
-            new CreateGlobalTemplateCommand(adminId, "Standard Greeting", "Hello {{customer_name}}!", "Greeting"),
+            new CreateGlobalTemplateCommand(
+                adminId, "Standard Greeting", "تحية معيارية",
+                "Hello {{customer_name}}!", "مرحباً {{customer_name}}!", "Greeting"),
             default);
 
         Assert.Equal("Global", result.Scope);
@@ -42,11 +44,11 @@ public class GlobalTemplateCommandHandlerTests
     {
         var adminId = Guid.NewGuid();
         var template = QuickReplyTemplate.CreateGlobal(
-            "Old Title", "Content", "Greeting", adminId);
+            "Old Title", "العنوان القديم", "Content", "المحتوى", "Greeting", adminId);
         _repo.Setup(r => r.FindByIdAsync(template.Id, default)).ReturnsAsync(template);
 
         var result = await _updateHandler.Handle(
-            new UpdateGlobalTemplateCommand(template.Id, "New Title", null, null),
+            new UpdateGlobalTemplateCommand(template.Id, "New Title", null, null, null, null),
             default);
 
         Assert.Equal("New Title", result.Title);
@@ -57,12 +59,12 @@ public class GlobalTemplateCommandHandlerTests
     {
         var adminId = Guid.NewGuid();
         var template = QuickReplyTemplate.CreatePersonal(
-            "Personal Template", "Content", "Greeting", adminId);
+            "Personal Template", "قالب شخصي", "Content", "المحتوى", "Greeting", adminId);
         _repo.Setup(r => r.FindByIdAsync(template.Id, default)).ReturnsAsync(template);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _updateHandler.Handle(
-                new UpdateGlobalTemplateCommand(template.Id, "New Title", null, null),
+                new UpdateGlobalTemplateCommand(template.Id, "New Title", null, null, null, null),
                 default));
     }
 
@@ -71,7 +73,7 @@ public class GlobalTemplateCommandHandlerTests
     {
         var adminId = Guid.NewGuid();
         var template = QuickReplyTemplate.CreateGlobal(
-            "Title", "Content", "Cat", adminId);
+            "Title", "العنوان", "Content", "المحتوى", "Cat", adminId);
         _repo.Setup(r => r.FindByIdAsync(template.Id, default)).ReturnsAsync(template);
 
         await _deleteHandler.Handle(
@@ -85,7 +87,7 @@ public class GlobalTemplateCommandHandlerTests
     {
         var agentId = Guid.NewGuid();
         var template = QuickReplyTemplate.CreatePersonal(
-            "Personal", "Content", "Cat", agentId);
+            "Personal", "شخصي", "Content", "المحتوى", "Cat", agentId);
         _repo.Setup(r => r.FindByIdAsync(template.Id, default)).ReturnsAsync(template);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>

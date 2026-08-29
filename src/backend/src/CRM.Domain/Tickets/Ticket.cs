@@ -13,7 +13,9 @@ public class Ticket
     public Guid? DepartmentId { get; private set; }
     public Guid? CategoryId { get; private set; }
     public string Subject { get; private set; } = null!;
+    public string SubjectAr { get; private set; } = null!;
     public string Description { get; private set; } = null!;
+    public string DescriptionAr { get; private set; } = null!;
     public TicketStatus Status { get; private set; }
     public TicketPriority Priority { get; private set; }
     public TicketChannel Channel { get; private set; }
@@ -36,7 +38,9 @@ public class Ticket
     public static Ticket Create(
         Guid customerId,
         string subject,
+        string subjectAr,
         string description,
+        string descriptionAr,
         TicketPriority priority,
         TicketChannel channel,
         Guid createdByUserId,
@@ -50,7 +54,9 @@ public class Ticket
             TicketNumber = GenerateNumber(),
             CustomerId = customerId,
             Subject = subject,
+            SubjectAr = subjectAr,
             Description = description,
+            DescriptionAr = descriptionAr,
             Status = TicketStatus.New,
             Priority = priority,
             Channel = channel,
@@ -90,7 +96,9 @@ public class Ticket
 
     public void UpdateDetails(
         string subject,
+        string subjectAr,
         string description,
+        string descriptionAr,
         TicketPriority priority,
         Guid? categoryId,
         Guid? departmentId,
@@ -102,11 +110,13 @@ public class Ticket
             _history.Add(TicketHistory.Create(Id, "Subject", Subject, subject, changedBy));
             Subject = subject;
         }
+        SubjectAr = subjectAr;
         if (Description != description)
         {
             _history.Add(TicketHistory.Create(Id, "Description", null, "(updated)", changedBy));
             Description = description;
         }
+        DescriptionAr = descriptionAr;
         if (Priority != priority)
         {
             _history.Add(TicketHistory.Create(Id, "Priority", Priority.ToString(), priority.ToString(), changedBy));
@@ -124,22 +134,22 @@ public class Ticket
     }
 
     public void Transfer(
-        Guid? targetDepartmentId,
-        Guid? targetAgentId,
-        string reason,
+        Guid targetDepartmentId,
+        string transferNote,
         Guid transferredBy)
     {
         var oldDept = DepartmentId?.ToString();
         var oldAgent = AssignedToUserId?.ToString();
 
         DepartmentId = targetDepartmentId;
-        AssignedToUserId = targetAgentId;
-        Status = targetAgentId.HasValue ? TicketStatus.Assigned : TicketStatus.New;
+        AssignedToUserId = null;
+        Status = TicketStatus.New;
         UpdatedAt = DateTime.UtcNow;
 
-        _history.Add(TicketHistory.Create(Id, "Transfer", oldDept, targetDepartmentId?.ToString(), transferredBy));
-        _history.Add(TicketHistory.Create(Id, "AssignedTo", oldAgent, targetAgentId?.ToString(), transferredBy));
-        _history.Add(TicketHistory.Create(Id, "TransferReason", null, reason, transferredBy));
+        _history.Add(TicketHistory.Create(Id, "Transfer", oldDept, targetDepartmentId.ToString(), transferredBy));
+        if (oldAgent is not null)
+            _history.Add(TicketHistory.Create(Id, "AssignedTo", oldAgent, null, transferredBy));
+        _history.Add(TicketHistory.Create(Id, "TransferNote", null, transferNote, transferredBy));
     }
 
     public void CloseByCustomer()

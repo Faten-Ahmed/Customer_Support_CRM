@@ -22,13 +22,13 @@
 **As a** logged-in user, **I want to** fetch my own profile from the token, **so that** the client can display my name, role, and settings.
 
 ## Acceptance Criteria
-- [ ] `GET /auth/me` returns `200` with the caller's full profile (id, fullName, email, role, primaryDepartment, departments[], skills[], availabilityStatus, isActive)
+- [ ] `GET /auth/me` returns `200` with the caller's full profile (id, firstName, lastName, firstNameAr, lastNameAr, jobTitle, jobTitleAr, email, role, primaryDepartment, departments[], skills[], availabilityStatus, isActive, requiresPasswordChange)
 - [ ] Returns `401` if no valid Bearer token is present
 - [ ] Deactivated user's token returns `401` with code `ACCOUNT_INACTIVE`
 
 ## Technical Notes
 - Endpoint: `GET /auth/me`
-- Entity: `User` with `AgentDepartment[]`, `AgentSkill[]`
+- Entity: `User` with `AgentDepartment[]`, `AgentSkill[]`; name fields are `FirstName`/`LastName` (split from the old `FullName`)
 - Spec: `specs/api/auth.md`
 
 ## Dependencies

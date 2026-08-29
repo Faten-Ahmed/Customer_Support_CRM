@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { UserService, UserSummary } from './user.service';
 import { UserFormDialogComponent } from './user-form-dialog.component';
+import { UserEditDialogComponent } from './user-edit-dialog.component';
 
 @Component({
   selector: 'app-user-list',
@@ -37,7 +38,7 @@ export class UserListComponent implements OnInit {
   selectedRole = '';
   selectedActive = '';
 
-  readonly displayedColumns = ['name', 'email', 'role', 'isActive', 'actions'];
+  readonly displayedColumns = ['name', 'email', 'role', 'department', 'isActive', 'actions'];
 
   ngOnInit(): void {
     this.loadUsers();
@@ -62,6 +63,11 @@ export class UserListComponent implements OnInit {
     ref.afterClosed().subscribe(result => {
       if (result) this.loadUsers();
     });
+  }
+
+  openEditDialog(user: UserSummary): void {
+    this.dialog.open(UserEditDialogComponent, { data: user }).afterClosed()
+      .subscribe(result => { if (result) this.loadUsers(); });
   }
 
   deactivate(user: UserSummary): void {

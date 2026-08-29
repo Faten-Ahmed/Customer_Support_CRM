@@ -22,7 +22,7 @@
 **As a** user, **I want to** view the full details of a ticket, **so that** I can understand its current state and history summary.
 
 ## Acceptance Criteria
-- [ ] `GET /tickets/{id}` (agent+) returns full ticket object including `customer`, `assignedAgent`, `category`, `sla`, `customFieldValues`, `messagesCount`
+- [ ] `GET /tickets/{id}` (agent+) returns full ticket object including `customer`, `assignedAgent`, `category`, `sla`, `customFieldValues`, `messagesCount`, `subjectAr`, `descriptionAr`
 - [ ] `GET /portal/tickets/{id}` (customer) returns the same but: no internal agent UUID, no internal notes count, no custom field raw data — only customer-safe fields
 - [ ] Customer accessing another customer's ticket returns `403`
 - [ ] Agent accessing a ticket outside their departments returns `403` (unless Admin/Manager)

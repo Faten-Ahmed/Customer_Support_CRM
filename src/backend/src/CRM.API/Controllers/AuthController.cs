@@ -42,13 +42,12 @@ public class AuthController : ControllerBase
             return Ok(new
             {
                 result.AccessToken,
-                user = new
-                {
-                    id = result.UserId,
-                    email = result.Email,
-                    role = result.Role,
-                    passwordMustChange = result.RequiresPasswordChange,
-                }
+                result.RequiresPasswordChange,
+                UserId = result.UserId,
+                result.Email,
+                result.FirstName,
+                result.LastName,
+                result.Role,
             });
         }
         catch (UnauthorizedAccessException)
@@ -98,27 +97,22 @@ public class AuthController : ControllerBase
         }
     }
 
-    public record ChangeFirstLoginPasswordRequest(string CurrentPassword, string NewPassword);
+    public record ChangeFirstLoginPasswordRequest(string Email, string CurrentPassword, string NewPassword);
 
-    [Authorize]
+    [AllowAnonymous]
     [HttpPost("change-password-first-login")]
     public async Task<IActionResult> ChangeFirstLoginPassword(
         [FromBody] ChangeFirstLoginPasswordRequest request,
         CancellationToken ct)
     {
-        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value;
-
-        if (!Guid.TryParse(userIdClaim, out var userId))
-            return Unauthorized();
-
         try
         {
             await _mediator.Send(
-                new ChangeFirstLoginPasswordCommand(userId, request.CurrentPassword, request.NewPassword),
+                new ChangeFirstLoginPasswordCommand(request.Email, request.CurrentPassword, request.NewPassword),
                 ct);
             return NoContent();
         }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (UnauthorizedAccessException ex) { return Unauthorized(new { error = ex.Message }); }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }

@@ -12,6 +12,7 @@ import { CustomerService, Customer } from '../services/customer.service';
 const mockCustomer: Customer = {
   id: 'c-1',
   fullName: 'Alice',
+  fullNameAr: 'أليس',
   email: 'alice@example.com',
   phone: '555-0100',
   companyName: 'Acme',

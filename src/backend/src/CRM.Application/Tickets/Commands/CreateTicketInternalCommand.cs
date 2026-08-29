@@ -1,3 +1,4 @@
+using CRM.Application.Sla.Commands;
 using CRM.Application.Tickets.DTOs;
 using CRM.Domain.Customers;
 using CRM.Domain.Tickets;
@@ -9,7 +10,9 @@ namespace CRM.Application.Tickets.Commands;
 public record CreateTicketInternalCommand(
     Guid CustomerId,
     string Subject,
+    string SubjectAr,
     string Description,
+    string DescriptionAr,
     TicketPriority Priority,
     TicketChannel Channel,
     Guid CreatedByUserId,
@@ -22,12 +25,14 @@ public class CreateTicketInternalCommandHandler
 {
     private readonly ICustomerRepository _customers;
     private readonly ITicketRepository _tickets;
+    private readonly IMediator _mediator;
 
     public CreateTicketInternalCommandHandler(
-        ICustomerRepository customers, ITicketRepository tickets)
+        ICustomerRepository customers, ITicketRepository tickets, IMediator mediator)
     {
         _customers = customers;
         _tickets = tickets;
+        _mediator = mediator;
     }
 
     public async Task<TicketSummaryDto> Handle(
@@ -41,7 +46,9 @@ public class CreateTicketInternalCommandHandler
         var ticket = Ticket.Create(
             customerId: cmd.CustomerId,
             subject: cmd.Subject,
+            subjectAr: cmd.SubjectAr,
             description: cmd.Description,
+            descriptionAr: cmd.DescriptionAr,
             priority: cmd.Priority,
             channel: cmd.Channel,
             createdByUserId: cmd.CreatedByUserId,
@@ -51,6 +58,8 @@ public class CreateTicketInternalCommandHandler
 
         await _tickets.AddAsync(ticket, ct);
         await _tickets.SaveChangesAsync(ct);
+
+        await _mediator.Send(new StartSlaClockCommand(ticket.Id), ct);
 
         return new TicketSummaryDto(
             ticket.Id, ticket.TicketNumber, ticket.CustomerId,

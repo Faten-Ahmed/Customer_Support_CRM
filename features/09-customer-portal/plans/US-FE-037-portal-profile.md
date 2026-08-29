@@ -102,10 +102,12 @@ import { Observable } from 'rxjs';
 export interface PortalProfile {
   id: string;
   fullName: string;
+  fullNameAr?: string;
   email: string;
   phone?: string;
   preferredLanguage?: string;
-  company?: string;
+  companyName?: string;
+  companyNameAr?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -156,7 +158,7 @@ const mockProfile: PortalProfile = {
   fullName: 'Jane Doe',
   email: 'jane@example.com',
   phone: '555-0000',
-  company: 'ACME Corp',
+  companyName: 'ACME Corp',
 };
 
 describe('PortalProfileComponent', () => {
@@ -265,44 +267,52 @@ export class PortalProfileComponent implements OnInit {
 
   form = this.fb.group({
     fullName: [{ value: '', disabled: true }],
+    fullNameAr: [{ value: '', disabled: true }],
     email: [{ value: '', disabled: true }],
     phone: [{ value: '', disabled: true }],
-    company: [{ value: '', disabled: true }],
+    companyName: [{ value: '', disabled: true }],
+    companyNameAr: [{ value: '', disabled: true }],
   });
 
   ngOnInit(): void {
     this.profileService.get().subscribe(p => {
       this.profile.set(p);
-      this.form.patchValue({ fullName: p.fullName, email: p.email, phone: p.phone ?? '', company: p.company ?? '' });
+      this.form.patchValue({ fullName: p.fullName, fullNameAr: p.fullNameAr ?? '', email: p.email, phone: p.phone ?? '', companyName: p.companyName ?? '', companyNameAr: p.companyNameAr ?? '' });
     });
   }
 
   enterEditMode(): void {
     this.editMode.set(true);
     this.form.get('fullName')!.enable();
+    this.form.get('fullNameAr')!.enable();
     this.form.get('phone')!.enable();
-    this.form.get('company')!.enable();
+    this.form.get('companyName')!.enable();
+    this.form.get('companyNameAr')!.enable();
   }
 
   cancelEdit(): void {
     const p = this.profile();
-    if (p) this.form.patchValue({ fullName: p.fullName, phone: p.phone ?? '', company: p.company ?? '' });
+    if (p) this.form.patchValue({ fullName: p.fullName, fullNameAr: p.fullNameAr ?? '', phone: p.phone ?? '', companyName: p.companyName ?? '', companyNameAr: p.companyNameAr ?? '' });
     this.editMode.set(false);
     this.form.get('fullName')!.disable();
+    this.form.get('fullNameAr')!.disable();
     this.form.get('phone')!.disable();
-    this.form.get('company')!.disable();
+    this.form.get('companyName')!.disable();
+    this.form.get('companyNameAr')!.disable();
   }
 
   save(): void {
     this.saving.set(true);
     const val = this.form.getRawValue();
-    this.profileService.update({ fullName: val.fullName!, phone: val.phone!, company: val.company! }).subscribe(updated => {
+    this.profileService.update({ fullName: val.fullName!, fullNameAr: val.fullNameAr || undefined, phone: val.phone!, companyName: val.companyName!, companyNameAr: val.companyNameAr || undefined }).subscribe(updated => {
       this.profile.set(updated);
       this.saving.set(false);
       this.editMode.set(false);
       this.form.get('fullName')!.disable();
+      this.form.get('fullNameAr')!.disable();
       this.form.get('phone')!.disable();
-      this.form.get('company')!.disable();
+      this.form.get('companyName')!.disable();
+      this.form.get('companyNameAr')!.disable();
     });
   }
 }
@@ -330,6 +340,11 @@ export class PortalProfileComponent implements OnInit {
       </mat-form-field>
 
       <mat-form-field appearance="outline">
+        <mat-label>Full Name (Arabic)</mat-label>
+        <input matInput formControlName="fullNameAr" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
         <mat-label>Email</mat-label>
         <input matInput formControlName="email" />
         <mat-icon matSuffix matTooltip="Email cannot be changed here. Contact support to update your email.">lock</mat-icon>
@@ -341,8 +356,13 @@ export class PortalProfileComponent implements OnInit {
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Company</mat-label>
-        <input matInput formControlName="company" />
+        <mat-label>Company Name</mat-label>
+        <input matInput formControlName="companyName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Company Name (Arabic)</mat-label>
+        <input matInput formControlName="companyNameAr" />
       </mat-form-field>
 
       @if (editMode()) {

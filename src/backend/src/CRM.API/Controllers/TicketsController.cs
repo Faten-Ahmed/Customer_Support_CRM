@@ -24,7 +24,9 @@ public class TicketsController : ControllerBase
     public record CreateTicketRequest(
         Guid CustomerId,
         string Subject,
+        string SubjectAr,
         string Description,
+        string DescriptionAr,
         TicketPriority Priority,
         TicketChannel Channel,
         Guid? DepartmentId,
@@ -38,7 +40,8 @@ public class TicketsController : ControllerBase
         try
         {
             var result = await _mediator.Send(new CreateTicketInternalCommand(
-                request.CustomerId, request.Subject, request.Description,
+                request.CustomerId, request.Subject, request.SubjectAr,
+                request.Description, request.DescriptionAr,
                 request.Priority, request.Channel, CurrentUserId,
                 request.DepartmentId, request.CategoryId, request.CustomFieldValues), ct);
 
@@ -83,8 +86,8 @@ public class TicketsController : ControllerBase
     }
 
     public record UpdateTicketRequest(
-        string Subject, string Description, TicketPriority Priority,
-        Guid? CategoryId, Guid? DepartmentId, string? CustomFieldValues);
+        string Subject, string SubjectAr, string Description, string DescriptionAr,
+        TicketPriority Priority, Guid? CategoryId, Guid? DepartmentId, string? CustomFieldValues);
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(
@@ -93,9 +96,9 @@ public class TicketsController : ControllerBase
         try
         {
             var result = await _mediator.Send(new UpdateTicketCommand(
-                id, request.Subject, request.Description, request.Priority,
-                request.CategoryId, request.DepartmentId, request.CustomFieldValues,
-                CurrentUserId), ct);
+                id, request.Subject, request.SubjectAr, request.Description, request.DescriptionAr,
+                request.Priority, request.CategoryId, request.DepartmentId,
+                request.CustomFieldValues, CurrentUserId), ct);
             return Ok(result);
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
@@ -136,23 +139,27 @@ public class TicketsController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
 
-    public record TransferTicketRequest(
-        Guid? TargetDepartmentId, Guid? TargetAgentId, string Reason);
+    public record TransferTicketRequest(Guid DepartmentId, string TransferNote);
 
-    [Authorize(Roles = "Admin,Manager")]
-    [HttpPatch("{id:guid}/transfer")]
+    [Authorize(Roles = "Admin,Manager,Agent")]
+    [HttpPost("{id:guid}/transfer")]
     public async Task<IActionResult> Transfer(
         Guid id, [FromBody] TransferTicketRequest request, CancellationToken ct)
     {
+        if (request.DepartmentId == Guid.Empty)
+            return UnprocessableEntity(new { errors = new { DepartmentId = new[] { "DepartmentId is required." } } });
+
+        if (string.IsNullOrWhiteSpace(request.TransferNote) || request.TransferNote.Length < 10)
+            return UnprocessableEntity(new { errors = new { TransferNote = new[] { "TransferNote must be at least 10 characters." } } });
+
         try
         {
             await _mediator.Send(new TransferTicketCommand(
-                id, request.TargetDepartmentId, request.TargetAgentId,
-                request.Reason, CurrentUserId), ct);
+                id, request.DepartmentId, request.TransferNote, CurrentUserId), ct);
             return NoContent();
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
-        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return UnprocessableEntity(new { error = ex.Message }); }
     }
 
     public record EscalateTicketRequest(string Reason);
@@ -250,5 +257,19 @@ public class TicketsController : ControllerBase
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
         catch (UnauthorizedAccessException ex) { return StatusCode(403, new { error = ex.Message }); }
+    }
+
+    [HttpGet("{id:guid}/sla")]
+    public async Task<IActionResult> GetSla(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetTicketSlaQuery(id), ct);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
     }
 }

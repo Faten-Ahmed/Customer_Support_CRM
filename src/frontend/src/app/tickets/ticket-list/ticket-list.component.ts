@@ -20,6 +20,7 @@ import {
   TicketPriority,
   TicketListParams,
 } from '../ticket.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-ticket-list',
@@ -36,6 +37,7 @@ import {
     MatProgressSpinnerModule,
     MatIconModule,
     MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './ticket-list.component.html',
   styleUrl: './ticket-list.component.scss',

@@ -65,6 +65,14 @@ interface FilePreview {
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
+              <mat-label>الموضوع (بالعربية)</mat-label>
+              <input matInput formControlName="subjectAr" placeholder="وصف مختصر للمشكلة" dir="rtl" />
+              @if (form.get('subjectAr')?.hasError('required') && form.get('subjectAr')?.touched) {
+                <mat-error>الموضوع مطلوب</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
               <mat-label>Priority</mat-label>
               <mat-select formControlName="priority">
                 <mat-option value="Low">Low</mat-option>
@@ -80,6 +88,15 @@ interface FilePreview {
                 placeholder="Please describe your issue in detail"></textarea>
               @if (form.get('description')?.hasError('required') && form.get('description')?.touched) {
                 <mat-error>Description is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>الوصف (بالعربية)</mat-label>
+              <textarea matInput formControlName="descriptionAr" rows="6" dir="rtl"
+                placeholder="يرجى وصف المشكلة بالتفصيل"></textarea>
+              @if (form.get('descriptionAr')?.hasError('required') && form.get('descriptionAr')?.touched) {
+                <mat-error>الوصف مطلوب</mat-error>
               }
             </mat-form-field>
 
@@ -206,8 +223,10 @@ export class PortalSubmitTicketComponent {
 
   form = this.fb.group({
     subject: ['', [Validators.required, Validators.maxLength(500)]],
+    subjectAr: ['', [Validators.required, Validators.maxLength(500)]],
     priority: ['Medium', Validators.required],
     description: ['', [Validators.required, Validators.maxLength(10000)]],
+    descriptionAr: ['', [Validators.required, Validators.maxLength(10000)]],
   });
 
   onFilesSelected(input: HTMLInputElement): void {
@@ -253,10 +272,10 @@ export class PortalSubmitTicketComponent {
     this.errorMsg.set(null);
     this.uploadProgress.set('Creating ticket…');
 
-    const { subject, priority, description } = this.form.value;
+    const { subject, subjectAr, priority, description, descriptionAr } = this.form.value;
 
     this.http.post<{ id: string; ticketNumber: string }>('/api/v1/portal/tickets', {
-      subject, description, priority,
+      subject, subjectAr, description, descriptionAr, priority,
     }).subscribe({
       next: ticket => {
         const files = this.filePreviews();

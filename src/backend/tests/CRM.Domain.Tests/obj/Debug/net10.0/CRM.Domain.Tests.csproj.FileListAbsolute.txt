@@ -1,10 +1,5 @@
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\bin\Debug\net10.0\.msCoverageSourceRootsMapping_CRM.Domain.Tests
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\bin\Debug\net10.0\CoverletSourceRootsMapping_CRM.Domain.Tests
-C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.csproj.AssemblyReference.cache
-C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.AssemblyInfoInputs.cache
-C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.AssemblyInfo.cs
-C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.csproj.CoreCompileInputs.cache
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\bin\Debug\net10.0\testhost.dll
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\bin\Debug\net10.0\xunit.abstractions.dll
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\bin\Debug\net10.0\testhost.exe
@@ -92,6 +87,11 @@ C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\test
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\bin\Debug\net10.0\zh-Hant\Microsoft.VisualStudio.TestPlatform.Common.resources.dll
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\bin\Debug\net10.0\CRM.Domain.dll
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\bin\Debug\net10.0\CRM.Domain.pdb
+C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.csproj.AssemblyReference.cache
+C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.AssemblyInfoInputs.cache
+C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.AssemblyInfo.cs
+C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.csproj.CoreCompileInputs.cache
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Doma.492A7F9A.Up2Date
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\CRM.Domain.Tests.dll
 C:\Users\fahme\OneDrive\Desktop\Self-Study\Customer_Support_CRM\src\backend\tests\CRM.Domain.Tests\obj\Debug\net10.0\refint\CRM.Domain.Tests.dll

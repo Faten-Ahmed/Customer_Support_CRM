@@ -55,5 +55,8 @@ public interface ITicketRepository
         CancellationToken ct = default);
     Task<int> CountOpenForDepartmentAsync(Guid departmentId, CancellationToken ct = default);
     Task<int> CountOpenForCategoryAsync(Guid categoryId, CancellationToken ct = default);
+    Task<string?> GetDepartmentNameAsync(Guid departmentId, CancellationToken ct = default);
+    Task<string?> GetCategoryNameAsync(Guid categoryId, CancellationToken ct = default);
+    Task<bool> IsDepartmentActiveAsync(Guid departmentId, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
 }

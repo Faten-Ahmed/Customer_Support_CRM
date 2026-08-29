@@ -49,7 +49,7 @@ Customers are the end-users who submit support tickets. They exist independently
 
 **BR-CUST-009** `CustomerContact` entries (additional contacts) are subordinate to the Customer. Creating or deleting contacts requires Agent+ role. A customer may have up to 10 additional contacts.
 
-**BR-CUST-010** Searching customers (`GET /customers?search=`) matches against `FullName`, `Email`, `Phone`, `CompanyName` using a case-insensitive LIKE prefix or full-text search. Soft-deleted customers are excluded from search results by default; include them via `?includeDeleted=true` (Admin only).
+**BR-CUST-010** Searching customers (`GET /customers?search=`) matches against `FullName`, `Email`, `Phone`, `CompanyName` using a case-insensitive LIKE prefix or full-text search. The optional bilingual fields `fullNameAr` (Arabic full name) and `companyNameAr` (Arabic company name) are stored alongside the primary fields and used for Arabic-language display; they do not affect search routing or uniqueness rules. Soft-deleted customers are excluded from search results by default; include them via `?includeDeleted=true` (Admin only).
 
 **BR-CUST-011** `GET /customers/{id}/tickets` returns tickets for that customer scoped by the caller's role: Agent sees tickets in their departments only; Admin/Manager sees all.
 
@@ -58,7 +58,7 @@ Customers are the end-users who submit support tickets. They exist independently
 ## Workflows
 
 ### W-CUST-01: Internal Customer Creation
-1. Agent or Admin submits `POST /customers` with required fields (`fullName`, `email`).
+1. Agent or Admin submits `POST /customers` with required fields (`fullName`, `email`) and optional bilingual fields (`fullNameAr`, `companyNameAr`).
 2. System validates uniqueness of `email` (case-insensitive).
 3. Customer record created with `IsActive = true`, `EmailVerified = true` (skip portal verification), `CreatedBy = caller UserId`.
 4. Domain event `CustomerCreated` published.

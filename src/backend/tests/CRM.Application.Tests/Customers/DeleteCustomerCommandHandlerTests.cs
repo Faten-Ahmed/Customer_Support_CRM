@@ -20,7 +20,7 @@ public class DeleteCustomerCommandHandlerTests
     public async Task Handle_NoOpenTickets_DeactivatesCustomer()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         _customers.Setup(r => r.FindByIdAsync(id, default)).ReturnsAsync(customer);
         _tickets.Setup(r => r.HasOpenTicketsAsync(id, default)).ReturnsAsync(false);
 
@@ -34,7 +34,7 @@ public class DeleteCustomerCommandHandlerTests
     public async Task Handle_HasOpenTickets_ThrowsInvalidOperationException()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         _customers.Setup(r => r.FindByIdAsync(id, default)).ReturnsAsync(customer);
         _tickets.Setup(r => r.HasOpenTicketsAsync(id, default)).ReturnsAsync(true);
 

@@ -30,6 +30,14 @@ import { Customer, CustomerService, UpdateCustomerDto } from '../services/custom
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Full Name (Arabic) *</mat-label>
+            <input matInput formControlName="fullNameAr" dir="rtl" />
+            @if (form.get('fullNameAr')?.hasError('required') && form.get('fullNameAr')?.touched) {
+              <mat-error>Full name in Arabic is required.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Email (read-only)</mat-label>
             <input matInput formControlName="email" type="email" />
             <mat-hint>Email cannot be changed after account creation.</mat-hint>
@@ -91,6 +99,7 @@ export class EditCustomerFormComponent implements OnInit {
   private buildForm(customer: Customer): void {
     this.form = this.fb.group({
       fullName: [customer.fullName, [Validators.required]],
+      fullNameAr: [customer.fullNameAr ?? '', [Validators.required]],
       email: [{ value: customer.email, disabled: true }],
       phone: [customer.phone ?? ''],
       companyName: [customer.companyName ?? ''],
@@ -105,6 +114,7 @@ export class EditCustomerFormComponent implements OnInit {
 
     const dto: UpdateCustomerDto = {
       fullName: this.form.get('fullName')!.value,
+      fullNameAr: this.form.get('fullNameAr')!.value,
       phone: this.form.get('phone')!.value,
       companyName: this.form.get('companyName')!.value,
     };

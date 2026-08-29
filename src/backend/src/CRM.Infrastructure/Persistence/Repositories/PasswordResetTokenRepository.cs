@@ -1,16 +1,21 @@
 using CRM.Domain.Auth;
+using CRM.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRM.Infrastructure.Persistence.Repositories;
 
-// Stub until the PasswordResetTokens EF table is added.
 public class PasswordResetTokenRepository : IPasswordResetTokenRepository
 {
-    public Task AddAsync(PasswordResetToken token, CancellationToken ct = default)
-        => Task.CompletedTask;
+    private readonly AppDbContext _db;
+
+    public PasswordResetTokenRepository(AppDbContext db) => _db = db;
+
+    public async Task AddAsync(PasswordResetToken token, CancellationToken ct = default)
+        => await _db.PasswordResetTokens.AddAsync(token, ct);
 
     public Task<PasswordResetToken?> FindByHashAsync(string tokenHash, CancellationToken ct = default)
-        => Task.FromResult<PasswordResetToken?>(null);
+        => _db.PasswordResetTokens.FirstOrDefaultAsync(t => t.TokenHash == tokenHash, ct);
 
     public Task SaveChangesAsync(CancellationToken ct = default)
-        => Task.CompletedTask;
+        => _db.SaveChangesAsync(ct);
 }

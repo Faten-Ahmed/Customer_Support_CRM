@@ -26,6 +26,7 @@
 - [ ] `priority` defaults to `Medium` if not provided; any priority allowed when set by agent
 - [ ] `Channel` is set by the system based on context (default `Portal` when created via API without channel; actual channel set by inbound handlers)
 - [ ] `categoryId`, `customFieldValues` are optional; if provided, validated against active field definitions (US-BE-038)
+- [ ] `subjectAr` (Arabic subject) and `descriptionAr` (Arabic description) are optional bilingual fields; stored as-is alongside primary fields
 - [ ] `TicketNumber` generated as `TKT-{YEAR}-{PADDED_SEQ}` (sequence lock + increment)
 - [ ] `TicketCreated` domain event published → triggers SLA start (US-BE-039) and auto-assign (US-BE-035)
 - [ ] Unknown `customerId` or `departmentId` returns `404`

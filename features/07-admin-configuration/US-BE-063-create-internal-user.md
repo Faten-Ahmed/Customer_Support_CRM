@@ -22,7 +22,8 @@
 **As an** admin, **I want to** create accounts for new agents and managers, **so that** they can access the CRM.
 
 ## Acceptance Criteria
-- [ ] `POST /admin/users` with `fullName`, `email`, `password`, `role`, `primaryDepartmentId` (required for Agent/Manager) creates user; returns `201`
+- [ ] `POST /admin/users` with `firstName`, `lastName`, `email`, `password`, `role`, `primaryDepartmentId` (required for Agent/Manager) creates user; returns `201`
+- [ ] `firstNameAr`, `lastNameAr` (Arabic name), `jobTitle`, `jobTitleAr` are optional fields accepted in the request body
 - [ ] Duplicate email returns `409`
 - [ ] `primaryDepartmentId` required for Agent/Manager roles; missing returns `422`
 - [ ] Created with `PasswordMustChange = true`, `IsActive = true`

@@ -20,7 +20,7 @@ public class GetCustomerQueryHandlerTests
     public async Task Handle_ExistingActiveCustomer_ReturnsDetailDto()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Ali Hassan", "ali@example.com", "0501234567", "Acme");
+        var customer = Customer.Create("Ali Hassan", "علي حسن", "ali@example.com", "0501234567", "Acme");
 
         _repo.Setup(r => r.FindByIdWithContactsAsync(id, default)).ReturnsAsync(customer);
 
@@ -46,7 +46,7 @@ public class GetCustomerQueryHandlerTests
     public async Task Handle_SoftDeletedCustomer_ThrowsKeyNotFoundException()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Ali Hassan", "ali@example.com", null, null);
+        var customer = Customer.Create("Ali Hassan", "علي حسن", "ali@example.com", null, null);
         customer.Deactivate();
 
         _repo.Setup(r => r.FindByIdWithContactsAsync(id, default)).ReturnsAsync(customer);

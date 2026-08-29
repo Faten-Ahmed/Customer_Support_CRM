@@ -55,7 +55,9 @@ public class TicketsControllerCreateTests
         {
             customerId = Guid.NewGuid(),
             subject = "Cannot login",
+            subjectAr = "لا أستطيع تسجيل الدخول",
             description = "User cannot access portal",
+            descriptionAr = "المستخدم لا يستطيع الوصول للبوابة",
             priority = 2,
             channel = 5
         });
@@ -74,7 +76,9 @@ public class TicketsControllerCreateTests
         {
             customerId = Guid.NewGuid(),
             subject = "Subj",
+            subjectAr = "موضوع",
             description = "Desc",
+            descriptionAr = "وصف",
             priority = 0,
             channel = 5
         });

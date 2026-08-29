@@ -107,9 +107,11 @@ import { Observable } from 'rxjs';
 export interface Customer {
   id: string;
   fullName: string;
+  fullNameAr?: string;
   email: string;
   phone?: string;
-  company?: string;
+  companyName?: string;
+  companyNameAr?: string;
   isVip: boolean;
   isActive: boolean;
   ticketCount: number;
@@ -292,7 +294,7 @@ export class CustomerListComponent implements OnInit {
   page = 1;
   pageSize = 20;
 
-  displayedColumns = ['fullName', 'email', 'phone', 'company', 'vip', 'active', 'ticketCount', 'createdAt'];
+  displayedColumns = ['fullName', 'email', 'phone', 'companyName', 'vip', 'active', 'ticketCount', 'createdAt'];
 
   ngOnInit(): void {
     this.loadCustomers();
@@ -392,9 +394,9 @@ export class CustomerListComponent implements OnInit {
         <mat-cell *matCellDef="let c">{{ c.phone || '—' }}</mat-cell>
       </ng-container>
 
-      <ng-container matColumnDef="company">
+      <ng-container matColumnDef="companyName">
         <mat-header-cell *matHeaderCellDef>Company</mat-header-cell>
-        <mat-cell *matCellDef="let c">{{ c.company || '—' }}</mat-cell>
+        <mat-cell *matCellDef="let c">{{ c.companyName || '—' }}</mat-cell>
       </ng-container>
 
       <ng-container matColumnDef="vip">

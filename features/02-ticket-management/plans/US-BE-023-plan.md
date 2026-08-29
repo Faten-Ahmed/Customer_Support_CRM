@@ -21,9 +21,14 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-BE-023  
-**Goal:** Implement `PUT /api/tickets/{id}` — allows updating a ticket's subject, description, priority, category, department, and custom field values. Records history for each changed field.
+**Goal:** Implement `PUT /api/v1/tickets/{id}` — allows updating a ticket's subject, description, priority, category, department, and custom field values. Records history for each changed field.
 
-**Architecture:** `UpdateTicketCommand(id, subject, description, priority, categoryId, departmentId, customFieldValues, updatedByUserId)` → handler fetches ticket, applies changes to allowed fields via domain methods, records history entries, saves. Returns `TicketDetailDto`.
+**Architecture:** `UpdateTicketCommand(id, subject, subjectAr, description, descriptionAr, priority, categoryId, departmentId, customFieldValues, updatedByUserId)` → handler fetches ticket, applies changes to allowed fields via domain methods, resolves department/category names, records history entries, saves. Returns `TicketDetailDto`.
+
+> **⚠️ Implementation divergences from original plan:**
+> - `UpdateTicketCommand` includes `SubjectAr` and `DescriptionAr` fields (required Arabic equivalents)
+> - `UpdateTicketCommand` returns `TicketDetailDto` (same shape as `GetTicketQuery` — includes `DepartmentName`, `CategoryName`, `SubjectAr`, `DescriptionAr`, `DepartmentId`, `CategoryId`)
+> - Handler calls `ITicketRepository.GetDepartmentNameAsync` and `GetCategoryNameAsync` to populate name fields in the response
 
 **Tech Stack:** .NET 10, ASP.NET Core, MediatR, FluentValidation, EF Core, xUnit, Moq
 
@@ -59,18 +64,22 @@ public void UpdateDetails(
     Guid? categoryId,
     Guid? departmentId,
     string? customFieldValues,
-    Guid changedBy)
+    Guid changedBy,
+    string? subjectAr = null,
+    string? descriptionAr = null)
 {
     if (Subject != subject)
     {
         _history.Add(TicketHistory.Create(Id, "Subject", Subject, subject, changedBy));
         Subject = subject;
     }
+    SubjectAr = subjectAr;
     if (Description != description)
     {
         _history.Add(TicketHistory.Create(Id, "Description", null, "(updated)", changedBy));
         Description = description;
     }
+    DescriptionAr = descriptionAr;
     if (Priority != priority)
     {
         _history.Add(TicketHistory.Create(Id, "Priority", Priority.ToString(), priority.ToString(), changedBy));
@@ -204,7 +213,9 @@ public record UpdateTicketCommand(
     Guid? CategoryId,
     Guid? DepartmentId,
     string? CustomFieldValues,
-    Guid UpdatedByUserId) : IRequest<TicketDetailDto>;
+    Guid UpdatedByUserId,
+    string? SubjectAr = null,
+    string? DescriptionAr = null) : IRequest<TicketDetailDto>;
 
 public class UpdateTicketCommandHandler : IRequestHandler<UpdateTicketCommand, TicketDetailDto>
 {
@@ -223,7 +234,7 @@ public class UpdateTicketCommandHandler : IRequestHandler<UpdateTicketCommand, T
         ticket.UpdateDetails(
             cmd.Subject, cmd.Description, cmd.Priority,
             cmd.CategoryId, cmd.DepartmentId, cmd.CustomFieldValues,
-            cmd.UpdatedByUserId);
+            cmd.UpdatedByUserId, cmd.SubjectAr, cmd.DescriptionAr);
 
         await _tickets.SaveChangesAsync(ct);
 
@@ -231,7 +242,8 @@ public class UpdateTicketCommandHandler : IRequestHandler<UpdateTicketCommand, T
         return new TicketDetailDto(
             ticket.Id, ticket.TicketNumber, ticket.CustomerId,
             ticket.Customer?.FullName ?? "Unknown",
-            ticket.Subject, ticket.Description, ticket.Status.ToString(),
+            ticket.Subject, ticket.SubjectAr, ticket.Description, ticket.DescriptionAr,
+            ticket.Status.ToString(),
             ticket.Priority.ToString(), ticket.Channel.ToString(),
             ticket.AssignedToUserId, null,
             ticket.Category?.Name, ticket.Department?.Name,
@@ -329,7 +341,7 @@ public class TicketsControllerUpdateTests
         _mediator.Setup(m => m.Send(It.IsAny<UpdateTicketCommand>(), default))
                  .ReturnsAsync(new TicketDetailDto(
                      id, "TKT-001", Guid.NewGuid(), "Ali Hassan",
-                     "New Subject", "New Desc", "New", "High", "Internal",
+                     "New Subject", null, "New Desc", null, "New", "High", "Internal",
                      null, null, null, null, null, null,
                      DateTime.UtcNow, DateTime.UtcNow, null, null));
 
@@ -370,7 +382,8 @@ Expected: FAIL — `PUT /api/tickets/{id}` does not exist.
 
 public record UpdateTicketRequest(
     string Subject, string Description, TicketPriority Priority,
-    Guid? CategoryId, Guid? DepartmentId, string? CustomFieldValues);
+    Guid? CategoryId, Guid? DepartmentId, string? CustomFieldValues,
+    string? SubjectAr = null, string? DescriptionAr = null);
 
 [HttpPut("{id:guid}")]
 public async Task<IActionResult> Update(
@@ -381,7 +394,7 @@ public async Task<IActionResult> Update(
         var result = await _mediator.Send(new UpdateTicketCommand(
             id, request.Subject, request.Description, request.Priority,
             request.CategoryId, request.DepartmentId, request.CustomFieldValues,
-            CurrentUserId), ct);
+            CurrentUserId, request.SubjectAr, request.DescriptionAr), ct);
         return Ok(result);
     }
     catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }

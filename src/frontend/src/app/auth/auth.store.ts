@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 
 export interface JwtUser {
   sub: string;
+  email: string;
   role: 'Admin' | 'Manager' | 'Agent' | 'Customer';
   passwordMustChange: boolean;
   fullName?: string;
@@ -39,13 +40,15 @@ export class AuthStore {
       const payload = JSON.parse(atob(token.split('.')[1]));
       // ASP.NET Core emits role as the long-form URI claim key
       const ROLE_URI = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+      const EMAIL_URI = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
       const role = payload['role'] ?? payload[ROLE_URI];
+      const email = (payload['email'] ?? payload[EMAIL_URI] ?? '') as string;
       // fullName may come as a single claim or as firstName+lastName
       const fullName = payload['fullName']
         ?? (payload['firstName'] && payload['lastName']
             ? `${payload['firstName']} ${payload['lastName']}`
             : undefined);
-      return { ...payload, role, fullName } as JwtUser;
+      return { ...payload, role, email, fullName } as JwtUser;
     } catch {
       return null;
     }

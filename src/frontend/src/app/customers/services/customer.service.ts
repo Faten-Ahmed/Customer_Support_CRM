@@ -13,6 +13,7 @@ export interface Contact {
 export interface Customer {
   id: string;
   fullName: string;
+  fullNameAr?: string;
   email: string;
   phone?: string;
   companyName?: string;
@@ -36,6 +37,7 @@ export interface CustomerTicket {
 
 export interface CreateCustomerDto {
   fullName: string;
+  fullNameAr: string;
   email: string;
   phone?: string;
   companyName?: string;
@@ -43,6 +45,7 @@ export interface CreateCustomerDto {
 
 export interface UpdateCustomerDto {
   fullName?: string;
+  fullNameAr?: string;
   phone?: string;
   companyName?: string;
 }

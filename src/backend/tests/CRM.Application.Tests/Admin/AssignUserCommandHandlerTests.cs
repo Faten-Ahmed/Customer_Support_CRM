@@ -34,9 +34,8 @@ public class AssignUserCommandHandlerTests
         await _deptHandler.Handle(
             new AssignUserDepartmentsCommand(user.Id, depts), default);
 
+        _repo.Verify(r => r.ReplaceUserDepartmentsAsync(user.Id, It.Is<IReadOnlyList<UserDepartment>>(list => list.Count == 2), default), Times.Once);
         _repo.Verify(r => r.SaveChangesAsync(default), Times.Once);
-        Assert.Equal(2, user.Departments.Count);
-        Assert.Single(user.Departments, d => d.IsPrimary);
     }
 
     [Fact]
@@ -90,8 +89,8 @@ public class AssignUserCommandHandlerTests
         await _skillHandler.Handle(
             new AssignUserSkillsCommand(user.Id, new[] { catId }), default);
 
+        _repo.Verify(r => r.ReplaceUserSkillsAsync(user.Id, It.Is<IReadOnlyList<Guid>>(ids => ids.Count == 1), default), Times.Once);
         _repo.Verify(r => r.SaveChangesAsync(default), Times.Once);
-        Assert.Single(user.Skills);
     }
 
     [Fact]

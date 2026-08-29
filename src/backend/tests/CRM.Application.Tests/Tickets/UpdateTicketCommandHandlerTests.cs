@@ -21,13 +21,13 @@ public class UpdateTicketCommandHandlerTests
     {
         var id = Guid.NewGuid();
         var ticket = Ticket.Create(
-            Guid.NewGuid(), "Old Subject", "Old Desc",
+            Guid.NewGuid(), "Old Subject", "عنوان قديم", "Old Desc", "وصف قديم",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
 
         _repo.Setup(r => r.FindByIdDetailedAsync(id, default)).ReturnsAsync(ticket);
 
         var result = await _handler.Handle(new UpdateTicketCommand(
-            id, "New Subject", "New Desc", TicketPriority.High,
+            id, "New Subject", "عنوان جديد", "New Desc", "وصف جديد", TicketPriority.High,
             null, null, null, Guid.NewGuid()), default);
 
         Assert.Equal("New Subject", result.Subject);
@@ -43,7 +43,7 @@ public class UpdateTicketCommandHandlerTests
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _handler.Handle(new UpdateTicketCommand(
-                Guid.NewGuid(), "S", "D", TicketPriority.Low,
+                Guid.NewGuid(), "S", "موضوع", "D", "وصف", TicketPriority.Low,
                 null, null, null, Guid.NewGuid()), default));
     }
 
@@ -52,7 +52,7 @@ public class UpdateTicketCommandHandlerTests
     {
         var id = Guid.NewGuid();
         var ticket = Ticket.Create(
-            Guid.NewGuid(), "Subj", "Desc",
+            Guid.NewGuid(), "Subj", "موضوع", "Desc", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
         ticket.ChangeStatus(TicketStatus.Closed, Guid.NewGuid());
 
@@ -60,7 +60,7 @@ public class UpdateTicketCommandHandlerTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(new UpdateTicketCommand(
-                id, "S", "D", TicketPriority.Low,
+                id, "S", "موضوع", "D", "وصف", TicketPriority.Low,
                 null, null, null, Guid.NewGuid()), default));
     }
 }

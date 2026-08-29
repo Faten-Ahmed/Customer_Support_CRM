@@ -5,21 +5,21 @@
 
 <!-- Top toolbar -->
 <mat-toolbar color="primary">
-  <button mat-icon-button (click)="toggleSidenav()" [matTooltip]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+  <button mat-icon-button (click)="toggleSidenav()" [matTooltip]="collapsed() ? ('shell.expandSidebar' | translate) : ('shell.collapseSidebar' | translate)">
     <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
   </button>
 
-  <span class="toolbar-brand">CRM Support</span>
+  <span class="toolbar-brand">{{ 'shell.brand' | translate }}</span>
 
-  <button mat-button (click)="i18n.toggleLang()" matTooltip="Switch language / تغيير اللغة" class="lang-toggle">
+  <button mat-button (click)="i18n.toggleLang()" [matTooltip]="'shell.switchLang' | translate" class="lang-toggle">
     {{ i18n.lang() === 'en' ? 'ع' : 'EN' }}
   </button>
 
-  <button mat-icon-button (click)="toggleAi()" matTooltip="AI Assistant">
+  <button mat-icon-button (click)="toggleAi()" [matTooltip]="'shell.aiAssistant' | translate">
     <mat-icon>auto_awesome</mat-icon>
   </button>
 
-  <button mat-icon-button matTooltip="Notifications">
+  <button mat-icon-button [matTooltip]="'shell.notifications' | translate">
     <mat-icon matBadge="3" matBadgeColor="warn">notifications</mat-icon>
   </button>
 
@@ -29,10 +29,10 @@
     <span class="role-badge">{{ user?.role }}</span>
   </button>
   <mat-menu #userMenu="matMenu">
-    <button mat-menu-item routerLink="/app/profile"><mat-icon>person</mat-icon> My Profile</button>
-    <button mat-menu-item routerLink="/app/settings"><mat-icon>settings</mat-icon> Settings</button>
+    <button mat-menu-item routerLink="/app/profile"><mat-icon>person</mat-icon> {{ 'shell.myProfile' | translate }}</button>
+    <button mat-menu-item routerLink="/app/settings"><mat-icon>settings</mat-icon> {{ 'shell.settings' | translate }}</button>
     <mat-divider></mat-divider>
-    <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
+    <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> {{ 'shell.logout' | translate }}</button>
   </mat-menu>
 </mat-toolbar>
 
@@ -43,10 +43,10 @@
       @for (item of visibleNavItems(); track item.route) {
         <a [routerLink]="item.route" routerLinkActive="active-link"
            class="nav-link"
-           [matTooltip]="collapsed() ? item.label : ''" matTooltipPosition="right">
+           [matTooltip]="collapsed() ? (item.labelKey | translate) : ''" matTooltipPosition="right">
           <mat-icon>{{ item.icon }}</mat-icon>
           @if (!collapsed()) {
-            <span>{{ item.label }}</span>
+            <span>{{ item.labelKey | translate }}</span>
           }
         </a>
       }

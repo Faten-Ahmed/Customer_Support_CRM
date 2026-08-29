@@ -27,7 +27,7 @@ public class RegisterCustomerCommandHandlerTests
                   .ReturnsAsync((Customer?)null);
 
         var cmd = new RegisterCustomerCommand(
-            "Jane Doe", "jane@example.com", "SecurePass1!");
+            "Jane Doe", "جين دو", "jane@example.com", "SecurePass1!");
 
         await _handler.Handle(cmd, default);
 
@@ -41,11 +41,11 @@ public class RegisterCustomerCommandHandlerTests
     [Fact]
     public async Task Handle_DuplicateEmail_ThrowsInvalidOperationException()
     {
-        var existing = Customer.Create("Bob", "jane@example.com", null, null);
+        var existing = Customer.Create("Bob", "بوب", "jane@example.com", null, null);
         _customers.Setup(r => r.FindByEmailAsync("jane@example.com", default))
                   .ReturnsAsync(existing);
 
-        var cmd = new RegisterCustomerCommand("Jane", "jane@example.com", "SecurePass1!");
+        var cmd = new RegisterCustomerCommand("Jane", "جين", "jane@example.com", "SecurePass1!");
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(cmd, default));

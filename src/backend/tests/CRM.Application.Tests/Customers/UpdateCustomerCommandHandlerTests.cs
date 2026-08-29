@@ -19,11 +19,11 @@ public class UpdateCustomerCommandHandlerTests
     public async Task Handle_ExistingCustomer_UpdatesAndReturnsDto()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         _repo.Setup(r => r.FindByIdWithContactsAsync(id, default)).ReturnsAsync(customer);
 
         var result = await _handler.Handle(
-            new UpdateCustomerCommand(id, "Alice Updated", "0501234567", "Acme"), default);
+            new UpdateCustomerCommand(id, "Alice Updated", "أليس محدثة", "0501234567", "Acme", null), default);
 
         Assert.Equal("Alice Updated", result.FullName);
         Assert.Equal("0501234567", result.Phone);
@@ -37,6 +37,6 @@ public class UpdateCustomerCommandHandlerTests
              .ReturnsAsync((Customer?)null);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _handler.Handle(new UpdateCustomerCommand(Guid.NewGuid(), "Name", null, null), default));
+            _handler.Handle(new UpdateCustomerCommand(Guid.NewGuid(), "Name", "اسم", null, null, null), default));
     }
 }

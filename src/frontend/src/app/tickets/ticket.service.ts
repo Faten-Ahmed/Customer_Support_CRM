@@ -80,7 +80,9 @@ export interface CreateTicketPayload {
   departmentId: string;
   categoryId?: string;
   subject: string;
+  subjectAr: string;
   description: string;
+  descriptionAr: string;
   priority: TicketPriority | string;
   channel?: TicketChannel;
   customFields?: { definitionId: string; value: string }[];
@@ -95,9 +97,13 @@ export interface SlaInfo {
 }
 
 export interface TicketDetail extends TicketSummary {
+  subjectAr?: string;
   description: string;
-  categoryName?: string;
+  descriptionAr?: string;
+  departmentId?: string;
   departmentName?: string;
+  categoryId?: string;
+  categoryName?: string;
   customFieldValues?: string;
   sla?: SlaInfo;
   resolvedAt?: string;
@@ -118,6 +124,19 @@ export interface TicketHistoryPage {
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
+export interface SlaClock {
+  dueAt: string;
+  elapsedPercent: number;
+  breached: boolean;
+  remainingLabel: string;
+}
+
+export interface SlaStatus {
+  isPaused: boolean;
+  firstResponse: SlaClock;
+  resolution: SlaClock;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -154,12 +173,20 @@ export class TicketService {
     return this.http.post<TicketDetail>(this.baseUrl, payload);
   }
 
+  update(ticketId: string, payload: { subject: string; subjectAr: string; description: string; descriptionAr: string; priority: string; categoryId?: string; departmentId?: string; customFieldValues?: string }): Observable<TicketDetail> {
+    return this.http.put<TicketDetail>(`${this.baseUrl}/${ticketId}`, payload);
+  }
+
   assign(ticketId: string, agentId: string): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${ticketId}/assign`, { agentId });
   }
 
-  transfer(ticketId: string, departmentId: string, note: string): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${ticketId}/transfer`, { departmentId, note });
+  getAgents(): Observable<{ id: string; name: string; role: string }[]> {
+    return this.http.get<{ id: string; name: string; role: string }[]>('/api/v1/users/agents');
+  }
+
+  transfer(ticketId: string, departmentId: string, transferNote: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${ticketId}/transfer`, { departmentId, transferNote });
   }
 
   escalate(ticketId: string, reason: string): Observable<void> {
@@ -200,5 +227,9 @@ export class TicketService {
       .set('page', String(page))
       .set('pageSize', String(pageSize));
     return this.http.get<TicketHistoryPage>(`${this.baseUrl}/${ticketId}/history`, { params });
+  }
+
+  getSla(ticketId: string): Observable<SlaStatus> {
+    return this.http.get<SlaStatus>(`${this.baseUrl}/${ticketId}/sla`);
   }
 }

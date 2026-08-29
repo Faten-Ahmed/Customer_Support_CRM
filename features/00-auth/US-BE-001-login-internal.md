@@ -26,12 +26,13 @@
 - [ ] Invalid password or unknown email returns `401` with code `INVALID_CREDENTIALS`
 - [ ] `IsActive = false` user returns `401` with code `ACCOUNT_INACTIVE`
 - [ ] `PasswordMustChange = true` user is issued a token but all subsequent API calls return `423` with code `PASSWORD_CHANGE_REQUIRED` (except `POST /auth/change-password`)
-- [ ] JWT payload contains: `sub` (userId), `role`, `email`, `name`, `departmentId` (primaryDept), `jti`
+- [ ] JWT payload contains: `sub` (userId), `role`, `email`, `firstName`, `lastName`, `departmentId` (primaryDept), `jti`
+- [ ] `requiresPasswordChange` is included in the login response body (not in JWT) so the client can redirect immediately; matches `RequiresPasswordChange` flag on `User`
 - [ ] Passwords are hashed with BCrypt (cost factor ≥ 12); plaintext is never stored or logged
 
 ## Technical Notes
 - Endpoint: `POST /auth/login`
-- Entity: `User` (`Email`, `PasswordHash`, `IsActive`, `PasswordMustChange`)
+- Entity: `User` (`Email`, `PasswordHash`, `IsActive`, `RequiresPasswordChange`, `FirstName`, `LastName`)
 - Spec: `specs/api/auth.md`
 
 ## Dependencies

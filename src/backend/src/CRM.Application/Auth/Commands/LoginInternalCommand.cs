@@ -54,7 +54,8 @@ public class LoginInternalCommandHandler : IRequestHandler<LoginInternalCommand,
                 RequiresPasswordChange: user.RequiresPasswordChange,
                 UserId: user.Id,
                 Email: user.Email,
-                FullName: $"{user.FirstName} {user.LastName}",
+                FirstName: user.FirstName,
+                LastName: user.LastName,
                 Role: user.Role.ToString());
         }
 
@@ -85,7 +86,8 @@ public class LoginInternalCommandHandler : IRequestHandler<LoginInternalCommand,
             RequiresPasswordChange: false,
             UserId: customer.Id,
             Email: customer.Email,
-            FullName: customer.FullName,
+            FirstName: customer.FullName,
+            LastName: string.Empty,
             Role: "Customer");
     }
 }

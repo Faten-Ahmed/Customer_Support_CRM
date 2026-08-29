@@ -26,9 +26,11 @@ public class GetCustomerQueryHandler : IRequestHandler<GetCustomerQuery, Custome
         return new CustomerDetailDto(
             customer.Id,
             customer.FullName,
+            customer.FullNameAr,
             customer.Email,
             customer.Phone,
             customer.CompanyName,
+            customer.CompanyNameAr,
             customer.IsVip,
             customer.IsActive,
             customer.CreatedAt,

@@ -29,7 +29,7 @@ public class UploadAttachmentCommandHandlerTests
     public async Task Handle_ValidFile_UploadsAndReturnsDto()
     {
         var ticketId = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
 
         _ticketRepo.Setup(r => r.FindByIdAsync(ticketId, default)).ReturnsAsync(ticket);
@@ -53,7 +53,7 @@ public class UploadAttachmentCommandHandlerTests
     public async Task Handle_FileTooLarge_ThrowsInvalidOperationException()
     {
         var ticketId = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
         _ticketRepo.Setup(r => r.FindByIdAsync(ticketId, default)).ReturnsAsync(ticket);
 
@@ -67,7 +67,7 @@ public class UploadAttachmentCommandHandlerTests
     public async Task Handle_DisallowedMimeType_ThrowsInvalidOperationException()
     {
         var ticketId = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
         _ticketRepo.Setup(r => r.FindByIdAsync(ticketId, default)).ReturnsAsync(ticket);
 

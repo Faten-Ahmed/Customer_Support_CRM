@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TicketService, TicketHistoryEntry } from '../ticket.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 const FIELD_ICONS: Record<string, string> = {
   Status:            'swap_horiz',
@@ -19,11 +20,11 @@ const FIELD_ICONS: Record<string, string> = {
 @Component({
   selector: 'app-ticket-history',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, MatIconModule, MatTooltipModule, TranslatePipe],
   template: `
     <div class="history-panel">
       @if (history().length === 0) {
-        <p class="empty-state" data-testid="empty-state">No history available yet.</p>
+        <p class="empty-state" data-testid="empty-state">{{ 'ticket.noHistory' | translate }}</p>
       } @else {
         <ul class="history-list">
           @for (entry of history(); track entry.changedAt) {

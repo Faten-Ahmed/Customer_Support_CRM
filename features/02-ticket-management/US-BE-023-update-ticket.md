@@ -22,7 +22,7 @@
 **As an** agent, **I want to** update a ticket's subject, category, priority, and custom fields, **so that** the ticket metadata is accurate.
 
 ## Acceptance Criteria
-- [ ] `PUT /tickets/{id}` accepts partial updates: `subject`, `categoryId`, `priority`, `customFieldValues`
+- [ ] `PUT /tickets/{id}` accepts partial updates: `subject`, `subjectAr`, `descriptionAr`, `categoryId`, `priority`, `customFieldValues`
 - [ ] Returns `200` with the updated ticket
 - [ ] Changing `priority` recalculates SLA deadlines from the current moment (elapsed time preserved)
 - [ ] Changing `categoryId` publishes `TicketCategoryChanged` history entry

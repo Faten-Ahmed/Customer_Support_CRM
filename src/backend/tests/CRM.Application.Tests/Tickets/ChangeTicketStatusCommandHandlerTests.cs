@@ -1,4 +1,5 @@
 using CRM.Application.Tickets.Commands;
+using CRM.Domain.Sla;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
 using Moq;
@@ -9,18 +10,21 @@ namespace CRM.Application.Tests.Tickets;
 public class ChangeTicketStatusCommandHandlerTests
 {
     private readonly Mock<ITicketRepository> _repo = new();
+    private readonly Mock<ITicketSlaRepository> _slaRepo = new();
     private readonly ChangeTicketStatusCommandHandler _handler;
 
     public ChangeTicketStatusCommandHandlerTests()
     {
-        _handler = new ChangeTicketStatusCommandHandler(_repo.Object);
+        _slaRepo.Setup(r => r.FindByTicketIdAsync(It.IsAny<Guid>(), default))
+                .ReturnsAsync((TicketSla?)null);
+        _handler = new ChangeTicketStatusCommandHandler(_repo.Object, _slaRepo.Object);
     }
 
     [Fact]
     public async Task Handle_ValidTransition_ChangesStatus()
     {
         var id = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Medium, TicketChannel.Internal, Guid.NewGuid());
         ticket.Assign(Guid.NewGuid(), Guid.NewGuid()); // → Assigned
 
@@ -37,7 +41,7 @@ public class ChangeTicketStatusCommandHandlerTests
     public async Task Handle_InvalidTransition_ThrowsInvalidOperationException()
     {
         var id = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
 
         _repo.Setup(r => r.FindByIdDetailedAsync(id, default)).ReturnsAsync(ticket);

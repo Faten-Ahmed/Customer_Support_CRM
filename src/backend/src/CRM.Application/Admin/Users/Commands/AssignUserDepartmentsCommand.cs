@@ -33,7 +33,7 @@ public class AssignUserDepartmentsCommandHandler
             IsPrimary = d.IsPrimary
         }).ToList();
 
-        user.ReplaceDepartments(assignments);
+        await _users.ReplaceUserDepartmentsAsync(user.Id, assignments, ct);
         await _users.SaveChangesAsync(ct);
     }
 }

@@ -21,9 +21,20 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-BE-026  
-**Goal:** Implement `PATCH /api/tickets/{id}/transfer` — transfers a ticket to a different department/agent, recording the transfer in history and triggering SLA recalculation.
+**Goal:** Implement `POST /api/v1/tickets/{id}/transfer` — transfers a ticket to a different **department** (department-only; no agent reassignment), clears the assignee, resets status to New, records the transfer in history.
 
-**Architecture:** `TransferTicketCommand(ticketId, targetDepartmentId, targetAgentId, reason, transferredByUserId)` → handler validates ticket is in transferable status (not Closed/Resolved), updates department + assigns new agent (or clears agent if only dept transfer), records history, saves. Publishes `TicketTransferredEvent` for SLA recalculation (handled by US-BE-042).
+**Architecture:** `TransferTicketCommand(ticketId, departmentId, transferNote, transferredByUserId)` → handler validates ticket is transferable (not Closed/Resolved) and that target department is active, calls `Ticket.Transfer(targetDepartmentId, transferNote, transferredBy)` which always clears the assignee and resets status to New.
+
+> **⚠️ Implementation divergences from original plan:**
+> - HTTP method is `POST` (not `PATCH`)
+> - Route is `/api/v1/tickets/{id}/transfer`
+> - No agent reassignment — ticket always goes back to unassigned/New
+> - `TransferTicketCommand` has no `TargetAgentId`; `TargetDepartmentId` is required (non-nullable `Guid`)
+> - Field renamed: `Reason` → `TransferNote`
+> - `Ticket.Transfer()` signature: `(Guid targetDepartmentId, string transferNote, Guid transferredBy)`
+> - Handler calls `ITicketRepository.IsDepartmentActiveAsync` to validate the target department
+> - Endpoint authorized for `Admin,Manager,Agent` (not just `Admin,Manager`)
+> - Returns `422` for validation failures (invalid dept), `404` for not found, `409` for status conflicts
 
 **Tech Stack:** .NET 10, ASP.NET Core, MediatR, EF Core, xUnit, Moq
 
@@ -50,24 +61,24 @@
 
 ```csharp
 // Add to Ticket class in src/CRM.Domain/Tickets/Ticket.cs:
+// ⚠️ Department-only transfer: always clears assignee, always resets to New
 
 public void Transfer(
-    Guid? targetDepartmentId,
-    Guid? targetAgentId,
-    string reason,
+    Guid targetDepartmentId,
+    string transferNote,
     Guid transferredBy)
 {
     var oldDept = DepartmentId?.ToString();
     var oldAgent = AssignedToUserId?.ToString();
 
     DepartmentId = targetDepartmentId;
-    AssignedToUserId = targetAgentId;
-    Status = targetAgentId.HasValue ? TicketStatus.Assigned : TicketStatus.New;
+    AssignedToUserId = null;
+    Status = TicketStatus.New;
     UpdatedAt = DateTime.UtcNow;
 
-    _history.Add(TicketHistory.Create(Id, "Transfer", oldDept, targetDepartmentId?.ToString(), transferredBy));
-    _history.Add(TicketHistory.Create(Id, "AssignedTo", oldAgent, targetAgentId?.ToString(), transferredBy));
-    _history.Add(TicketHistory.Create(Id, "TransferReason", null, reason, transferredBy));
+    _history.Add(TicketHistory.Create(Id, "Transfer", oldDept, targetDepartmentId.ToString(), transferredBy));
+    _history.Add(TicketHistory.Create(Id, "AssignedTo", oldAgent, null, transferredBy));
+    _history.Add(TicketHistory.Create(Id, "TransferNote", null, transferNote, transferredBy));
 }
 ```
 
@@ -179,18 +190,17 @@ Expected: FAIL — `TransferTicketCommand` does not exist yet.
 
 ```csharp
 // src/CRM.Application/Tickets/Commands/TransferTicketCommand.cs
+// ⚠️ No TargetAgentId; TargetDepartmentId is required (non-nullable); field is TransferNote not Reason
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
-using CRM.Infrastructure.Identity;
 using MediatR;
 
 namespace CRM.Application.Tickets.Commands;
 
 public record TransferTicketCommand(
     Guid TicketId,
-    Guid? TargetDepartmentId,
-    Guid? TargetAgentId,
-    string Reason,
+    Guid DepartmentId,
+    string TransferNote,
     Guid TransferredByUserId) : IRequest;
 
 public class TransferTicketCommandHandler : IRequestHandler<TransferTicketCommand>
@@ -325,23 +335,24 @@ Expected: FAIL — endpoint does not exist.
 
 ```csharp
 // Add to src/CRM.API/Controllers/TicketsController.cs inside the class:
+// ⚠️ POST not PATCH; open to Agent too; TransferNote not Reason; returns 422 for invalid dept
 
-public record TransferTicketRequest(
-    Guid? TargetDepartmentId, Guid? TargetAgentId, string Reason);
+public record TransferTicketRequest(Guid DepartmentId, string TransferNote);
 
-[Authorize(Roles = "Admin,Manager")]
-[HttpPatch("{id:guid}/transfer")]
+[Authorize(Roles = "Admin,Manager,Agent")]
+[HttpPost("{id:guid}/transfer")]
 public async Task<IActionResult> Transfer(
     Guid id, [FromBody] TransferTicketRequest request, CancellationToken ct)
 {
     try
     {
         await _mediator.Send(new TransferTicketCommand(
-            id, request.TargetDepartmentId, request.TargetAgentId,
-            request.Reason, CurrentUserId), ct);
+            id, request.DepartmentId, request.TransferNote, CurrentUserId), ct);
         return NoContent();
     }
     catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+    catch (InvalidOperationException ex) when (ex.Message.StartsWith("Department"))
+        { return UnprocessableEntity(new { errors = new[] { new { code = "INVALID_DEPARTMENT", message = ex.Message } } }); }
     catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
 }
 ```

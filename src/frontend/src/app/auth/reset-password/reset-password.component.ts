@@ -17,6 +17,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../auth.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const pw = control.get('password')?.value;
@@ -38,6 +39,7 @@ export type PasswordStrength = 'weak' | 'medium' | 'strong';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',
@@ -108,7 +110,7 @@ export class ResetPasswordComponent implements OnInit {
       .resetPassword(tok, password, confirmPassword)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: res => this.successMessage.set(res.message ?? 'Password reset successfully.'),
+        next: () => this.successMessage.set('Password reset successfully.'),
         error: (err: HttpErrorResponse) => {
           this.errorCode.set(err.error?.code ?? 'SERVER_ERROR');
         },

@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { finalize } from 'rxjs/operators';
 import { CustomerDetail, CustomerTicket, CustomerService } from '../services/customer.service';
 import { AuthStore } from '../../auth/auth.store';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-customer-detail',
@@ -28,6 +29,7 @@ import { AuthStore } from '../../auth/auth.store';
     MatFormFieldModule, MatInputModule, MatSelectModule, MatCheckboxModule,
     MatTableModule, MatPaginatorModule,
     MatSnackBarModule, MatProgressSpinnerModule, MatDividerModule, MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './customer-detail.component.html',
   styleUrl: './customer-detail.component.scss',

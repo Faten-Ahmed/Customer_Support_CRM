@@ -6,7 +6,7 @@ using MediatR;
 namespace CRM.Application.Portal.Commands;
 
 public record UpdatePortalProfileCommand(
-    Guid CustomerId, string? FullName, string? Phone, string? City)
+    Guid CustomerId, string? FullName, string? FullNameAr, string? Phone, string? City)
     : IRequest<PortalProfileDto>;
 
 public class UpdatePortalProfileCommandHandler
@@ -21,7 +21,7 @@ public class UpdatePortalProfileCommandHandler
         var customer = await _customers.FindByIdAsync(cmd.CustomerId, ct)
             ?? throw new KeyNotFoundException($"Customer {cmd.CustomerId} not found.");
 
-        customer.UpdateProfile(cmd.FullName, cmd.Phone, cmd.City);
+        customer.UpdateProfile(cmd.FullName, cmd.FullNameAr, cmd.Phone, cmd.City);
         await _customers.SaveChangesAsync(ct);
         return GetMyPortalProfileQueryHandler.Map(customer);
     }

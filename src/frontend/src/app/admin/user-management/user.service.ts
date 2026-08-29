@@ -31,7 +31,7 @@ export interface CreateUserPayload {
   email: string;
   role: string;
   tempPassword: string;
-  primaryDepartmentId: string;
+  primaryDepartmentId?: string;
   firstNameAr?: string;
   lastNameAr?: string;
   jobTitle?: string;

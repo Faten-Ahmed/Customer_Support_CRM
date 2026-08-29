@@ -68,6 +68,7 @@ describe('CreateCustomerFormComponent', () => {
 
     component.form.setValue({
       fullName: 'Alice',
+      fullNameAr: 'أليس',
       email: 'alice@example.com',
       phone: '',
       companyName: '',
@@ -89,7 +90,7 @@ describe('CreateCustomerFormComponent', () => {
     );
 
     component.form.setValue({
-      fullName: 'Carol', email: 'carol@example.com',
+      fullName: 'Carol', fullNameAr: 'كارول', email: 'carol@example.com',
       phone: '', companyName: '', country: '', city: '',
     });
     component.onSubmit();

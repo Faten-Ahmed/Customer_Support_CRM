@@ -125,6 +125,22 @@ public class TicketRepository : ITicketRepository
     public Task<int> CountOpenForCategoryAsync(Guid categoryId, CancellationToken ct = default)
         => Task.FromResult(0);
 
+    public async Task<string?> GetDepartmentNameAsync(Guid departmentId, CancellationToken ct = default)
+        => await _db.Departments
+            .Where(d => d.Id == departmentId)
+            .Select(d => d.Name)
+            .FirstOrDefaultAsync(ct);
+
+    public async Task<bool> IsDepartmentActiveAsync(Guid departmentId, CancellationToken ct = default)
+        => await _db.Departments
+            .AnyAsync(d => d.Id == departmentId && d.IsActive, ct);
+
+    public async Task<string?> GetCategoryNameAsync(Guid categoryId, CancellationToken ct = default)
+        => await _db.TicketCategories
+            .Where(c => c.Id == categoryId)
+            .Select(c => c.Name)
+            .FirstOrDefaultAsync(ct);
+
     public Task SaveChangesAsync(CancellationToken ct = default)
         => _db.SaveChangesAsync(ct);
 }

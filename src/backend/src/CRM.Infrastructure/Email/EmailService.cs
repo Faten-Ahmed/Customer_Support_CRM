@@ -48,13 +48,21 @@ public class EmailService : IEmailService
     public async Task SendPasswordResetEmailAsync(
         string toEmail, string toName, string resetToken, CancellationToken ct = default)
     {
-        var subject = "Reset your CRM Portal password";
+        var subject = "Reset your CRM password";
+        var resetUrl = $"http://localhost:4200/reset-password?token={Uri.EscapeDataString(resetToken)}";
         var body = $"""
-            <p>Hello {toName},</p>
-            <p>Use the token below to reset your password:</p>
-            <p style="font-size:1.2em;letter-spacing:2px;font-weight:bold;">{resetToken}</p>
-            <p>POST to <code>/api/v1/auth/portal/reset-password</code> with the token and your new password.</p>
-            <p>This token expires in 1 hour.</p>
+            <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+              <h2 style="color:#1976d2;">Reset your password</h2>
+              <p>Hello {toName},</p>
+              <p>Click the button below to reset your password. This link expires in 1 hour.</p>
+              <p style="text-align:center;margin:32px 0;">
+                <a href="{resetUrl}" style="background:#1976d2;color:#fff;padding:12px 28px;
+                   border-radius:6px;text-decoration:none;font-weight:600;">
+                  Reset Password
+                </a>
+              </p>
+              <p style="color:#666;font-size:0.875rem;">If you didn't request a password reset, you can safely ignore this email.</p>
+            </div>
             """;
 
         await SendAsync(toEmail, toName, subject, body, ct);

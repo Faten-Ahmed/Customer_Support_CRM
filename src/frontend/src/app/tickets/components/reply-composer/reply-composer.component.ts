@@ -7,9 +7,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { catchError, of } from 'rxjs';
 import { TicketMessage, TicketService } from '../../ticket.service';
 import { Template, TemplateService } from '../../template.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-reply-composer',
@@ -22,6 +25,9 @@ import { Template, TemplateService } from '../../template.service';
     MatInputModule,
     MatFormFieldModule,
     MatTooltipModule,
+    MatMenuModule,
+    MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   templateUrl: './reply-composer.component.html',
   styles: [`
@@ -105,6 +111,7 @@ export class ReplyComposerComponent {
   readonly isInternal = signal(false);
   readonly sending = signal(false);
   readonly templates = signal<Template[]>([]);
+  readonly templatesLoading = signal(false);
 
   get charCount(): number {
     return (this.replyControl.value ?? '').length;
@@ -132,10 +139,15 @@ export class ReplyComposerComponent {
     });
   }
 
-  openTemplatePicker(): void {
+  loadTemplates(): void {
+    if (this.templates().length > 0) return;
+    this.templatesLoading.set(true);
     this.templateService.list().pipe(
-      catchError(() => of({ items: [], totalCount: 0 }))
-    ).subscribe(page => this.templates.set(page.items));
+      catchError(() => of({ data: [], meta: { totalCount: 0 } }))
+    ).subscribe(page => {
+      this.templates.set((page.data ?? []).filter(t => t.isActive));
+      this.templatesLoading.set(false);
+    });
   }
 
   applyTemplate(template: Template): void {

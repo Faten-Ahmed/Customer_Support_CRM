@@ -9,7 +9,9 @@ public class CreateTicketPortalCommandValidator
     public CreateTicketPortalCommandValidator()
     {
         RuleFor(x => x.Subject).NotEmpty().MaximumLength(500);
+        RuleFor(x => x.SubjectAr).NotEmpty().MaximumLength(500);
         RuleFor(x => x.Description).NotEmpty().MaximumLength(10000);
+        RuleFor(x => x.DescriptionAr).NotEmpty().MaximumLength(10000);
         RuleFor(x => x.PortalCustomerId).NotEmpty();
     }
 }

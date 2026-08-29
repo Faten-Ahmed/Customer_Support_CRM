@@ -21,11 +21,16 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-FE-010  
-**Goal:** Implement the `/tickets/{id}` shell page with a three-panel layout, action bar, and SignalR real-time integration hook.
+**Goal:** Implement the `/app/tickets/{id}` shell page with a three-panel layout, action bar, and SignalR real-time integration hook.
 
-**Architecture:** `TicketDetailComponent` is a standalone shell that loads ticket data via `TicketService.getById(id)` on route activation. The three-panel layout (metadata, thread, AI assistance) uses Angular Signals for reactive state. SignalR integration is handled by a `SignalRService` that joins a ticket room and emits new messages via an Observable; the component subscribes on init and unsubscribes on destroy. Action buttons are hidden/disabled based on the current status and the authenticated user's role (resolved from a `AuthService`).
+**Architecture:** `TicketDetailComponent` is a standalone shell that loads ticket data via `TicketService.getById(id)` on route activation. The three-panel layout (metadata, thread, AI assistance) uses Angular Signals for reactive state. SignalR integration is handled by a `SignalRService` that joins a ticket room and emits new messages via an Observable; the component subscribes on init and unsubscribes on destroy. Action buttons are hidden/disabled based on the current status and the authenticated user's role (resolved from `AuthStore`).
 
-**Tech Stack:** Angular 21, TypeScript, Angular Material, Jasmine, TestBed
+**Tech Stack:** Angular 21, TypeScript, Angular Material, Vitest, TestBed
+
+> **⚠️ Implementation divergences from original plan:**
+> - `TicketDetail` TypeScript interface includes `departmentId?: string`, `categoryId?: string` in addition to `departmentName`, `categoryName`
+> - Department and category **names** are returned by the API (resolved server-side); the frontend displays them directly without additional lookups
+> - Route is `/app/tickets/:id` (inside the `/app` shell)
 
 ---
 

@@ -4,7 +4,6 @@ using CRM.Application.Common;
 using CRM.Domain.Auth;
 using CRM.Domain.Users;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 
 namespace CRM.Application.Auth.Commands;
 
@@ -15,18 +14,15 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
     private readonly IUserRepository _users;
     private readonly IPasswordResetTokenRepository _tokens;
     private readonly IEmailService _email;
-    private readonly string _resetBaseUrl;
 
     public ForgotPasswordCommandHandler(
         IUserRepository users,
         IPasswordResetTokenRepository tokens,
-        IEmailService email,
-        IConfiguration? config = null)
+        IEmailService email)
     {
         _users = users;
         _tokens = tokens;
         _email = email;
-        _resetBaseUrl = config?["App:FrontendUrl"] ?? "https://app.crm.local";
     }
 
     public async Task Handle(ForgotPasswordCommand cmd, CancellationToken ct)
@@ -42,7 +38,6 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
         await _tokens.AddAsync(token, ct);
         await _tokens.SaveChangesAsync(ct);
 
-        var link = $"{_resetBaseUrl}/auth/reset-password?token={Uri.EscapeDataString(raw)}";
-        await _email.SendPasswordResetEmailAsync(user.Email, $"{user.FirstName} {user.LastName}", link, ct);
+        await _email.SendPasswordResetEmailAsync(user.Email, $"{user.FirstName} {user.LastName}", raw, ct);
     }
 }

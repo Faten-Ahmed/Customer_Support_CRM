@@ -21,11 +21,18 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-FE-011
-**Goal:** Implement the internal "Create Ticket" form at `/tickets/new` with a searchable customer autocomplete, hierarchical department/category selection, dynamic custom fields per department, and navigation to the new ticket on success.
+**Goal:** Implement the internal "Create Ticket" form at `/app/tickets/new` with a searchable customer autocomplete, hierarchical department/category selection, dynamic custom fields per department, and navigation to the new ticket on success.
 
-**Architecture:** `CreateTicketFormComponent` is standalone, lazy-loaded. It uses Reactive Forms. Customer field uses `MatAutocomplete` with a debounced search. On `departmentId` change, custom field definitions are fetched from `FieldDefinitionService` and rendered dynamically inside a `FormArray`. On successful creation, the router navigates to `/tickets/{id}`.
+**Architecture:** `CreateTicketFormComponent` is standalone, lazy-loaded. It uses Reactive Forms. Customer field uses `MatAutocomplete` with a debounced search. Departments and categories are loaded via `forkJoin(DepartmentService, CategoryService)` on `ngOnInit`. On successful creation, the router navigates to `/app/tickets/{id}`.
 
-**Tech Stack:** Angular 21, TypeScript, Angular Material, Jasmine, TestBed
+**Tech Stack:** Angular 21, TypeScript, Angular Material, Vitest, TestBed
+
+> **⚠️ Implementation divergences from original plan:**
+> - `subjectAr` and `descriptionAr` are **required** form fields (`Validators.required`) — both rendered side-by-side with their English counterparts
+> - Departments and categories are loaded via `forkJoin([departmentService.list(), categoryService.list()])` on init, not lazy-loaded on department change
+> - Categories are flattened with a `flattenCategories()` helper before binding to the dropdown
+> - `DepartmentService` and `CategoryService` are injected (not just `FieldDefinitionService`)
+> - Route is `/app/tickets/new` (inside `/app` shell)
 
 ---
 

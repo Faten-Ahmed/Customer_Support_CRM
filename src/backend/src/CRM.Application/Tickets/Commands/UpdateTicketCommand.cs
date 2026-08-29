@@ -8,7 +8,9 @@ namespace CRM.Application.Tickets.Commands;
 public record UpdateTicketCommand(
     Guid TicketId,
     string Subject,
+    string SubjectAr,
     string Description,
+    string DescriptionAr,
     TicketPriority Priority,
     Guid? CategoryId,
     Guid? DepartmentId,
@@ -30,20 +32,31 @@ public class UpdateTicketCommandHandler : IRequestHandler<UpdateTicketCommand, T
             throw new InvalidOperationException("Cannot edit a closed ticket.");
 
         ticket.UpdateDetails(
-            cmd.Subject, cmd.Description, cmd.Priority,
-            cmd.CategoryId, cmd.DepartmentId, cmd.CustomFieldValues,
+            cmd.Subject, cmd.SubjectAr, cmd.Description, cmd.DescriptionAr,
+            cmd.Priority, cmd.CategoryId, cmd.DepartmentId, cmd.CustomFieldValues,
             cmd.UpdatedByUserId);
 
         await _tickets.SaveChangesAsync(ct);
 
+        var departmentName = ticket.DepartmentId.HasValue
+            ? await _tickets.GetDepartmentNameAsync(ticket.DepartmentId.Value, ct)
+            : null;
+
+        var categoryName = ticket.CategoryId.HasValue
+            ? await _tickets.GetCategoryNameAsync(ticket.CategoryId.Value, ct)
+            : null;
+
         return new TicketDetailDto(
             ticket.Id, ticket.TicketNumber, ticket.CustomerId,
             ticket.Customer?.FullName ?? "Unknown",
-            ticket.Subject, ticket.Description, ticket.Status.ToString(),
+            ticket.Subject, ticket.SubjectAr,
+            ticket.Description, ticket.DescriptionAr,
+            ticket.Status.ToString(),
             ticket.Priority.ToString(), ticket.Channel.ToString(),
             ticket.AssignedToUserId,
             ticket.AssignedTo is null ? null : $"{ticket.AssignedTo.FirstName} {ticket.AssignedTo.LastName}",
-            null, null,
+            ticket.DepartmentId, departmentName,
+            ticket.CategoryId, categoryName,
             ticket.CustomFieldValues, null,
             ticket.CreatedAt, ticket.UpdatedAt, ticket.ResolvedAt, ticket.ClosedAt);
     }

@@ -4,9 +4,11 @@ public class Customer
 {
     public Guid Id { get; private set; }
     public string FullName { get; private set; } = string.Empty;
+    public string FullNameAr { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
     public string? Phone { get; private set; }
     public string? CompanyName { get; private set; }
+    public string? CompanyNameAr { get; private set; }
     public string? Country { get; private set; }
     public string? City { get; private set; }
     public string? PasswordHash { get; private set; }
@@ -20,10 +22,18 @@ public class Customer
 
     private Customer() { }
 
-    public static Customer Create(string fullName, string email, string? phone, string? companyName)
+    public static Customer Create(
+        string fullName,
+        string fullNameAr,
+        string email,
+        string? phone,
+        string? companyName,
+        string? companyNameAr = null)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             throw new ArgumentException("Full name is required.", nameof(fullName));
+        if (string.IsNullOrWhiteSpace(fullNameAr))
+            throw new ArgumentException("Full name (Arabic) is required.", nameof(fullNameAr));
         if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email is required.", nameof(email));
 
@@ -31,9 +41,11 @@ public class Customer
         {
             Id = Guid.NewGuid(),
             FullName = fullName,
+            FullNameAr = fullNameAr,
             Email = email,
             Phone = phone,
             CompanyName = companyName,
+            CompanyNameAr = companyNameAr,
             EmailVerified = false,
             IsVip = false,
             IsActive = true,
@@ -41,18 +53,23 @@ public class Customer
         };
     }
 
-    public void Update(string fullName, string? phone, string? companyName)
+    public void Update(string fullName, string fullNameAr, string? phone, string? companyName, string? companyNameAr = null)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             throw new ArgumentException("Full name is required.", nameof(fullName));
+        if (string.IsNullOrWhiteSpace(fullNameAr))
+            throw new ArgumentException("Full name (Arabic) is required.", nameof(fullNameAr));
         FullName = fullName;
+        FullNameAr = fullNameAr;
         Phone = phone;
         CompanyName = companyName;
+        CompanyNameAr = companyNameAr;
     }
 
-    public void UpdateProfile(string? fullName, string? phone, string? city)
+    public void UpdateProfile(string? fullName, string? fullNameAr, string? phone, string? city)
     {
         if (fullName is not null) FullName = fullName;
+        if (fullNameAr is not null) FullNameAr = fullNameAr;
         if (phone is not null) Phone = phone;
         if (city is not null) City = city;
     }

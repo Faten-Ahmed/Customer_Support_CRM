@@ -26,6 +26,7 @@
 - [ ] `EmailVerified = true` and `IsActive = true` — no verification needed for internal creation
 - [ ] Duplicate email (case-insensitive) returns `409` with code `EMAIL_ALREADY_EXISTS`
 - [ ] `phone`, `companyName`, `country`, `city` are optional
+- [ ] `fullNameAr` (Arabic full name) and `companyNameAr` (Arabic company name) are optional bilingual fields; stored as-is, no uniqueness constraint
 - [ ] `CustomerCreated` domain event published after successful creation
 - [ ] Audit log entry written: action `CustomerCreated`, actorId = caller
 

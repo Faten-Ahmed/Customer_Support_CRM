@@ -62,7 +62,7 @@ public class PortalTicketsControllerCreateTests
 
         var client = BuildClient();
         var response = await client.PostAsJsonAsync("/api/v1/portal/tickets",
-            new { subject = "Screen black", description = "My screen is black", priority = 1 });
+            new { subject = "Screen black", subjectAr = "شاشتي سوداء", description = "My screen is black", descriptionAr = "شاشتي تظهر سوداء", priority = 1 });
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
@@ -75,7 +75,7 @@ public class PortalTicketsControllerCreateTests
 
         var client = BuildClient();
         var response = await client.PostAsJsonAsync("/api/v1/portal/tickets",
-            new { subject = "Subj", description = "Desc", priority = 0 });
+            new { subject = "Subj", subjectAr = "موضوع", description = "Desc", descriptionAr = "وصف", priority = 0 });
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }

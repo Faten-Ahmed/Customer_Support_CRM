@@ -3,6 +3,7 @@ using CRM.Domain.Branches;
 using CRM.Domain.Categories;
 using CRM.Domain.Customers;
 using CRM.Domain.Departments;
+using CRM.Domain.Sla;
 using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
 using CRM.Domain.Users;
@@ -20,6 +21,7 @@ public class AppDbContext : DbContext
     public DbSet<CustomerContact> CustomerContacts => Set<CustomerContact>();
     public DbSet<CustomerCredential> CustomerCredentials => Set<CustomerCredential>();
     public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
     public DbSet<TicketHistory> TicketHistory => Set<TicketHistory>();
@@ -29,6 +31,10 @@ public class AppDbContext : DbContext
     public DbSet<TicketCategory> TicketCategories => Set<TicketCategory>();
     public DbSet<TicketFieldDefinition> TicketFieldDefinitions => Set<TicketFieldDefinition>();
     public DbSet<QuickReplyTemplate> QuickReplyTemplates => Set<QuickReplyTemplate>();
+    public DbSet<SlaPolicy> SlaPolicies => Set<SlaPolicy>();
+    public DbSet<BusinessHours> BusinessHours => Set<BusinessHours>();
+    public DbSet<Holiday> Holidays => Set<Holiday>();
+    public DbSet<TicketSla> TicketSlas => Set<TicketSla>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -76,8 +76,8 @@ public class ListCustomersQueryHandlerTests
     {
         var customers = new List<Customer>
         {
-            Customer.Create("Ali", "Hassan", "ali@crm.test"),
-            Customer.Create("Sara", "Al-Ali", "sara@crm.test")
+            Customer.Create("Ali Hassan", "ali@crm.test"),
+            Customer.Create("Sara Al-Ali", "sara@crm.test")
         };
 
         _repo.Setup(r => r.ListAsync(It.IsAny<CustomerFilter>(), default))
@@ -190,7 +190,8 @@ public class ListCustomersQueryHandler
 
         var dtos = paged.Items
             .Select(c => new CustomerDto(
-                c.Id, c.FirstName, c.LastName, c.Email, c.Phone, c.IsVip, c.CreatedAt))
+                c.Id, c.FullName, c.FullNameAr, c.Email, c.Phone,
+                c.CompanyName, c.CompanyNameAr, c.IsVip, c.IsActive, c.CreatedAt))
             .ToList();
 
         return new PagedResult<CustomerDto>(dtos, paged.TotalCount, paged.Page, paged.PageSize);
@@ -264,7 +265,7 @@ public class CustomersControllerListTests
     {
         var items = new List<CustomerDto>
         {
-            new(Guid.NewGuid(), "Ali", "Hassan", "ali@crm.test", null, false, DateTime.UtcNow)
+            new(Guid.NewGuid(), "Ali Hassan", null, "ali@crm.test", null, null, null, false, true, DateTime.UtcNow)
         };
         _mediator.Setup(m => m.Send(It.IsAny<ListCustomersQuery>(), default))
                  .ReturnsAsync(new PagedResult<CustomerDto>(items, 1, 1, 20));

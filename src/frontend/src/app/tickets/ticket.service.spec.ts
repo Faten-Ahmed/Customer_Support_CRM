@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { TicketService, TicketListParams, TicketPage, TicketDetail } from './ticket.service';
+import { TicketService, TicketListParams, TicketPage, TicketDetail, SlaStatus } from './ticket.service';
 
 const emptyPage: TicketPage = { items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 };
 
@@ -168,7 +168,7 @@ describe('TicketService', () => {
     it('should POST to /api/v1/tickets and return the new ticket', () => {
       const payload = {
         customerId: 'c1', departmentId: 'd1', categoryId: 'cat1',
-        subject: 'Test', description: 'Desc', priority: 'High',
+        subject: 'Test', subjectAr: 'اختبار', description: 'Desc', descriptionAr: 'وصف', priority: 'High',
         customFields: [{ definitionId: 'f1', value: 'val' }],
       };
 
@@ -261,5 +261,57 @@ describe('TicketService — getHistory()', () => {
     });
     const req = httpMock.expectOne(r => r.url === `/api/v1/tickets/${TICKET_ID}/history`);
     req.flush({ items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 });
+  });
+});
+
+describe('TicketService — getSla()', () => {
+  let service: TicketService;
+  let httpMock: HttpTestingController;
+
+  const TICKET_ID = 'ticket-77';
+
+  const mockSla: SlaStatus = {
+    isPaused: false,
+    firstResponse: {
+      dueAt: '2026-08-26T12:00:00Z',
+      elapsedPercent: 45,
+      breached: false,
+      remainingLabel: '2h 15m',
+    },
+    resolution: {
+      dueAt: '2026-08-28T12:00:00Z',
+      elapsedPercent: 10,
+      breached: false,
+      remainingLabel: '46h 30m',
+    },
+  };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), TicketService],
+    });
+    service = TestBed.inject(TicketService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('should GET /api/v1/tickets/{id}/sla', () => {
+    service.getSla(TICKET_ID).subscribe(sla => {
+      expect(sla.firstResponse.elapsedPercent).toBe(45);
+      expect(sla.resolution.remainingLabel).toBe('46h 30m');
+      expect(sla.isPaused).toBe(false);
+    });
+    const req = httpMock.expectOne(`/api/v1/tickets/${TICKET_ID}/sla`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockSla);
+  });
+
+  it('should reflect isPaused true when ticket is OnHold', () => {
+    service.getSla(TICKET_ID).subscribe(sla => {
+      expect(sla.isPaused).toBe(true);
+    });
+    const req = httpMock.expectOne(`/api/v1/tickets/${TICKET_ID}/sla`);
+    req.flush({ ...mockSla, isPaused: true });
   });
 });

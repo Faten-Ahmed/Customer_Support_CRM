@@ -21,9 +21,14 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-BE-021  
-**Goal:** Implement `GET /api/tickets/{id}` — returns full ticket detail (subject, description, status, SLA info, assignee, category, messages summary) for Admin/Manager/Agent.
+**Goal:** Implement `GET /api/v1/tickets/{id}` — returns full ticket detail (subject, description, status, SLA info, assignee, category, messages summary) for Admin/Manager/Agent.
 
 **Architecture:** `GetTicketQuery(id)` → handler fetches `Ticket` with related data (assignee name, category name, SLA record) via `ITicketRepository.FindByIdDetailedAsync`, maps to `TicketDetailDto`. Returns 404 if not found.
+
+> **⚠️ Implementation divergences from original plan:**
+> - `TicketDetailDto` includes additional fields: `SubjectAr`, `DescriptionAr`, `DepartmentId`, `CategoryId`
+> - `DepartmentName` and `CategoryName` are resolved via separate `ITicketRepository` methods (`GetDepartmentNameAsync`, `GetCategoryNameAsync`) — not via EF Core navigation properties / joins
+> - Full `TicketDetailDto` signature: `(Guid Id, string TicketNumber, Guid CustomerId, string CustomerName, string Subject, string SubjectAr, string Description, string DescriptionAr, string Status, string Priority, string Channel, Guid? AssignedToUserId, string? AssignedToName, Guid? DepartmentId, string? DepartmentName, Guid? CategoryId, string? CategoryName, string? CustomFieldValues, SlaInfoDto? Sla, DateTime CreatedAt, DateTime UpdatedAt, DateTime? ResolvedAt, DateTime? ClosedAt)`
 
 **Tech Stack:** .NET 10, ASP.NET Core, MediatR, EF Core, xUnit, Moq
 
@@ -133,7 +138,9 @@ public record TicketDetailDto(
     Guid CustomerId,
     string CustomerName,
     string Subject,
+    string? SubjectAr,
     string Description,
+    string? DescriptionAr,
     string Status,
     string Priority,
     string Channel,
@@ -178,7 +185,9 @@ public class GetTicketQueryHandler : IRequestHandler<GetTicketQuery, TicketDetai
             CustomerId: ticket.CustomerId,
             CustomerName: ticket.Customer?.FullName ?? "Unknown",
             Subject: ticket.Subject,
+            SubjectAr: ticket.SubjectAr,
             Description: ticket.Description,
+            DescriptionAr: ticket.DescriptionAr,
             Status: ticket.Status.ToString(),
             Priority: ticket.Priority.ToString(),
             Channel: ticket.Channel.ToString(),
@@ -269,7 +278,7 @@ public class TicketsControllerGetTests
         _mediator.Setup(m => m.Send(It.Is<GetTicketQuery>(q => q.TicketId == id), default))
                  .ReturnsAsync(new TicketDetailDto(
                      id, "TKT-001", Guid.NewGuid(), "Ali Hassan",
-                     "Cannot login", "Description goes here",
+                     "Cannot login", null, "Description goes here", null,
                      "New", "High", "Internal",
                      null, null, null, null, null, null,
                      DateTime.UtcNow, DateTime.UtcNow, null, null));

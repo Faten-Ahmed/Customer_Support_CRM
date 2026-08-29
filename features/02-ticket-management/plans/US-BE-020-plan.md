@@ -78,7 +78,7 @@ public class CreateTicketPortalCommandHandlerTests
     public async Task Handle_VerifiedCustomer_CreatesTicketWithPortalChannel()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Ali", "Hassan", "ali@portal.test");
+        var customer = Customer.Create("Ali Hassan", "ali@portal.test");
         var cred = CustomerCredential.Create(customerId, "hash");
         cred.VerifyEmail();
 
@@ -103,7 +103,7 @@ public class CreateTicketPortalCommandHandlerTests
     public async Task Handle_UnverifiedEmail_ThrowsUnauthorizedAccessException()
     {
         var customerId = Guid.NewGuid();
-        var customer = Customer.Create("Ali", "Hassan", "ali@portal.test");
+        var customer = Customer.Create("Ali Hassan", "ali@portal.test");
         var cred = CustomerCredential.Create(customerId, "hash"); // Not verified
 
         _customerRepo.Setup(r => r.FindByIdAsync(customerId, default)).ReturnsAsync(customer);
@@ -153,7 +153,9 @@ public record CreateTicketPortalCommand(
     TicketPriority Priority,
     Guid? CategoryId,
     string? CustomFieldValues,
-    Guid PortalCustomerId) : IRequest<TicketSummaryDto>;
+    Guid PortalCustomerId,
+    string? SubjectAr = null,
+    string? DescriptionAr = null) : IRequest<TicketSummaryDto>;
 
 public class CreateTicketPortalCommandHandler
     : IRequestHandler<CreateTicketPortalCommand, TicketSummaryDto>
@@ -191,14 +193,16 @@ public class CreateTicketPortalCommandHandler
             channel: TicketChannel.Portal,
             createdByUserId: cmd.PortalCustomerId,
             categoryId: cmd.CategoryId,
-            customFieldValues: cmd.CustomFieldValues);
+            customFieldValues: cmd.CustomFieldValues,
+            subjectAr: cmd.SubjectAr,
+            descriptionAr: cmd.DescriptionAr);
 
         await _tickets.AddAsync(ticket, ct);
         await _tickets.SaveChangesAsync(ct);
 
         return new TicketSummaryDto(
             ticket.Id, ticket.TicketNumber, ticket.CustomerId,
-            $"{customer.FirstName} {customer.LastName}",
+            customer.FullName,
             ticket.Subject, ticket.Status.ToString(), ticket.Priority.ToString(),
             ticket.Channel.ToString(), null, null, ticket.CreatedAt, ticket.UpdatedAt);
     }
@@ -222,6 +226,8 @@ public class CreateTicketPortalCommandValidator
         RuleFor(x => x.Subject).NotEmpty().MaximumLength(500);
         RuleFor(x => x.Description).NotEmpty().MaximumLength(10000);
         RuleFor(x => x.PortalCustomerId).NotEmpty();
+        RuleFor(x => x.SubjectAr).MaximumLength(500).When(x => x.SubjectAr is not null);
+        RuleFor(x => x.DescriptionAr).MaximumLength(10000).When(x => x.DescriptionAr is not null);
     }
 }
 ```

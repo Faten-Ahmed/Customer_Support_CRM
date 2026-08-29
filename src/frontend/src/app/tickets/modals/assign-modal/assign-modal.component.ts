@@ -19,7 +19,7 @@ export interface AssignModalData {
     <h2 mat-dialog-title>Assign Ticket</h2>
     <mat-dialog-content>
       <form [formGroup]="form">
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Agent</mat-label>
           <mat-select formControlName="agentId">
             @for (a of data.agents; track a.id) {

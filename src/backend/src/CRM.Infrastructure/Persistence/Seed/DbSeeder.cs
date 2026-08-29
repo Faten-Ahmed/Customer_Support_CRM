@@ -17,9 +17,9 @@ public static class DbSeeder
         if (!await db.Users.AnyAsync())
         {
             db.Users.AddRange(
-                CreateUser("admin@azmsquad.com",  "P@ssw0rd!", "System", "Admin",   UserRole.Admin,   requiresPasswordChange: false),
-                CreateUser("manager@azmsquad.com", "P@ssw0rd!", "Sara",   "Manager", UserRole.Manager, requiresPasswordChange: false),
-                CreateUser("agent@azmsquad.com",   "P@ssw0rd!", "Omar",   "Hassan",  UserRole.Agent,   requiresPasswordChange: false)
+                CreateUser("admin@azmsquad.com",   "P@ssw0rd!", "System", "النظام",  "Admin",   "مدير",   UserRole.Admin,   requiresPasswordChange: false),
+                CreateUser("manager@azmsquad.com", "P@ssw0rd!", "Sara",   "سارة",    "Manager", "مديرة",  UserRole.Manager, requiresPasswordChange: false),
+                CreateUser("agent@azmsquad.com",   "P@ssw0rd!", "Omar",   "عمر",     "Hassan",  "حسن",    UserRole.Agent,   requiresPasswordChange: false)
             );
 
             await db.SaveChangesAsync();
@@ -27,10 +27,12 @@ public static class DbSeeder
     }
 
     private static User CreateUser(
-        string email, string password, string firstName, string lastName,
+        string email, string password,
+        string firstName, string firstNameAr,
+        string lastName, string lastNameAr,
         UserRole role, bool requiresPasswordChange)
     {
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
-        return User.CreateSeeded(email, hash, firstName, lastName, role, requiresPasswordChange);
+        return User.CreateSeeded(email, hash, firstName, firstNameAr, lastName, lastNameAr, role, requiresPasswordChange);
     }
 }

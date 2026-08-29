@@ -18,7 +18,7 @@ public class EscalateTicketCommandHandlerTests
 
     private static Ticket MakeInProgressTicket()
     {
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.High, TicketChannel.Internal, Guid.NewGuid());
         ticket.Assign(Guid.NewGuid(), Guid.NewGuid());
         ticket.ChangeStatus(TicketStatus.InProgress, Guid.NewGuid());
@@ -44,7 +44,7 @@ public class EscalateTicketCommandHandlerTests
     public async Task Handle_NewTicket_ThrowsInvalidOperationException()
     {
         var id = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
 
         _repo.Setup(r => r.FindByIdDetailedAsync(id, default)).ReturnsAsync(ticket);

@@ -22,7 +22,7 @@
 **As an** agent, **I want to** view a customer's full profile, **so that** I understand their history before handling their ticket.
 
 ## Acceptance Criteria
-- [ ] `GET /customers/{id}` returns `200` with full customer object including `contacts[]`, `isVip`, `companyName`, `ticketCount`
+- [ ] `GET /customers/{id}` returns `200` with full customer object including `contacts[]`, `isVip`, `companyName`, `fullNameAr`, `companyNameAr`, `ticketCount`
 - [ ] Soft-deleted customer returns `404` (not exposed to agents)
 - [ ] Customer not found returns `404`
 - [ ] Response does NOT include `PasswordHash` or internal security fields

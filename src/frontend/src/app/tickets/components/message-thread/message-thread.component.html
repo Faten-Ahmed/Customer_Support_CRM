@@ -3,13 +3,13 @@
   @if (hasMore) {
     <div class="load-more">
       <button mat-stroked-button (click)="loadMore()" [disabled]="loading()">
-        {{ loading() ? 'Loading…' : 'Load earlier messages' }}
+        {{ loading() ? ('common.loading' | translate) : ('ticket.loadEarlier' | translate) }}
       </button>
     </div>
   }
 
   @if (messages().length === 0 && !loading()) {
-    <p class="empty-thread">No messages yet.</p>
+    <p class="empty-thread">{{ 'ticket.noMessages' | translate }}</p>
   }
 
   @for (msg of messages(); track msg.id) {
@@ -18,7 +18,7 @@
       <!-- Internal note — yellow, full width -->
       <div class="msg-internal">
         <div class="msg-internal-header">
-          <span class="internal-label">Internal Note</span>
+          <span class="internal-label">{{ 'ticket.internalNote' | translate }}</span>
           <span class="msg-meta">{{ msg.authorName }}</span>
           <span class="msg-time">{{ msg.createdAt | date:'shortTime' }}</span>
         </div>

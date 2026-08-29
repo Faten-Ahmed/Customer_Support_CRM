@@ -78,7 +78,7 @@ public class CreateInternalUserCommandHandlerTests
 
         var result = await _handler.Handle(
             new CreateInternalUserCommand(
-                "Ahmed Al-Farsi", "agent@test.com", "TempPass123!",
+                "Ahmed", "Al-Farsi", "agent@test.com", "TempPass123!",
                 UserRole.Agent, deptId),
             default);
 
@@ -94,7 +94,7 @@ public class CreateInternalUserCommandHandlerTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(
                 new CreateInternalUserCommand(
-                    "Ahmed", "agent@test.com", "Pass1!", UserRole.Agent, null),
+                    "Ahmed", "Al-Farsi", "agent@test.com", "Pass1!", UserRole.Agent, null),
                 default));
     }
 
@@ -105,7 +105,7 @@ public class CreateInternalUserCommandHandlerTests
 
         var result = await _handler.Handle(
             new CreateInternalUserCommand(
-                "Admin User", "admin@test.com", "Pass1!", UserRole.Admin, null),
+                "Admin", "User", "admin@test.com", "Pass1!", UserRole.Admin, null),
             default);
 
         Assert.Equal("Admin", result.Role);
@@ -119,7 +119,7 @@ public class CreateInternalUserCommandHandlerTests
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(
                 new CreateInternalUserCommand(
-                    "User", "existing@test.com", "Pass1!", UserRole.Agent, Guid.NewGuid()),
+                    "Test", "User", "existing@test.com", "Pass1!", UserRole.Agent, Guid.NewGuid()),
                 default));
 
         Assert.Contains("409", ex.Message);
@@ -148,17 +148,23 @@ private readonly List<UserDepartment> _departments = new();
 public IReadOnlyList<UserDepartment> Departments => _departments.AsReadOnly();
 
 public static User CreateInternal(
-    Guid id, string firstName, string lastName, string email, UserRole role)
+    Guid id, string firstName, string lastName, string email, UserRole role,
+    string? firstNameAr = null, string? lastNameAr = null,
+    string? jobTitle = null, string? jobTitleAr = null)
     => new()
     {
         Id = id,
         FirstName = firstName,
         LastName = lastName,
+        FirstNameAr = firstNameAr,
+        LastNameAr = lastNameAr,
+        JobTitle = jobTitle,
+        JobTitleAr = jobTitleAr,
         Email = email,
         Role = role,
         IsActive = true,
         AvailabilityStatus = AvailabilityStatus.Offline,
-        CreatedAt = DateTime.UtcNow
+        CreatedAt = DateTimeOffset.UtcNow
     };
 
 public void SetPassword(string passwordHash, bool mustChange = false)
@@ -169,11 +175,17 @@ public void SetPassword(string passwordHash, bool mustChange = false)
 
 public void Deactivate() => IsActive = false;
 public void Reactivate() => IsActive = true;
-public void UpdateProfile(string fullName)
+public void UpdateProfile(
+    string firstName, string lastName,
+    string? firstNameAr = null, string? lastNameAr = null,
+    string? jobTitle = null, string? jobTitleAr = null)
 {
-    var parts = fullName.Split(' ', 2);
-    FirstName = parts[0];
-    LastName = parts.Length > 1 ? parts[1] : string.Empty;
+    FirstName = firstName;
+    LastName = lastName;
+    FirstNameAr = firstNameAr;
+    LastNameAr = lastNameAr;
+    JobTitle = jobTitle;
+    JobTitleAr = jobTitleAr;
 }
 
 public void ReplaceDepartments(IEnumerable<UserDepartment> newDepartments)
@@ -228,13 +240,18 @@ namespace CRM.Application.Admin.Users.DTOs;
 
 public record UserProfileDto(
     Guid Id,
-    string FullName,
+    string FirstName,
+    string LastName,
+    string? FirstNameAr,
+    string? LastNameAr,
+    string? JobTitle,
+    string? JobTitleAr,
     string Email,
     string Role,
     bool IsActive,
     bool PasswordMustChange,
     string AvailabilityStatus,
-    DateTime CreatedAt);
+    DateTimeOffset CreatedAt);
 ```
 
 - [ ] **Step 8: Implement CreateInternalUserCommand**
@@ -250,11 +267,16 @@ using MediatR;
 namespace CRM.Application.Admin.Users.Commands;
 
 public record CreateInternalUserCommand(
-    string FullName,
+    string FirstName,
+    string LastName,
     string Email,
     string Password,
     UserRole Role,
-    Guid? PrimaryDepartmentId) : IRequest<UserProfileDto>;
+    Guid? PrimaryDepartmentId,
+    string? FirstNameAr = null,
+    string? LastNameAr = null,
+    string? JobTitle = null,
+    string? JobTitleAr = null) : IRequest<UserProfileDto>;
 
 public class CreateInternalUserCommandHandler
     : IRequestHandler<CreateInternalUserCommand, UserProfileDto>
@@ -285,13 +307,16 @@ public class CreateInternalUserCommandHandler
             throw new InvalidOperationException(
                 "409: A user with this email already exists.");
 
-        var parts = cmd.FullName.Split(' ', 2);
         var user = User.CreateInternal(
             Guid.NewGuid(),
-            parts[0],
-            parts.Length > 1 ? parts[1] : string.Empty,
+            cmd.FirstName,
+            cmd.LastName,
             cmd.Email,
-            cmd.Role);
+            cmd.Role,
+            cmd.FirstNameAr,
+            cmd.LastNameAr,
+            cmd.JobTitle,
+            cmd.JobTitleAr);
 
         user.SetPassword(_hasher.Hash(cmd.Password), mustChange: true);
 
@@ -318,8 +343,8 @@ public class CreateInternalUserCommandHandler
     }
 
     internal static UserProfileDto Map(User u)
-        => new(u.Id, $"{u.FirstName} {u.LastName}".Trim(),
-               u.Email, u.Role.ToString(), u.IsActive,
+        => new(u.Id, u.FirstName, u.LastName, u.FirstNameAr, u.LastNameAr,
+               u.JobTitle, u.JobTitleAr, u.Email, u.Role.ToString(), u.IsActive,
                u.PasswordMustChange, u.AvailabilityStatus.ToString(), u.CreatedAt);
 }
 ```
@@ -384,8 +409,9 @@ public class AdminUsersController : ControllerBase
         {
             var result = await _mediator.Send(
                 new CreateInternalUserCommand(
-                    req.FullName, req.Email, req.Password, role,
-                    req.PrimaryDepartmentId), ct);
+                    req.FirstName, req.LastName, req.Email, req.Password, role,
+                    req.PrimaryDepartmentId, req.FirstNameAr, req.LastNameAr,
+                    req.JobTitle, req.JobTitleAr), ct);
             return StatusCode(201, new { data = result });
         }
         catch (InvalidOperationException ex) when (ex.Message.StartsWith("409"))
@@ -396,8 +422,10 @@ public class AdminUsersController : ControllerBase
 }
 
 public record CreateUserRequest(
-    string FullName, string Email, string Password,
-    string Role, Guid? PrimaryDepartmentId);
+    string FirstName, string LastName, string Email, string Password,
+    string Role, Guid? PrimaryDepartmentId,
+    string? FirstNameAr = null, string? LastNameAr = null,
+    string? JobTitle = null, string? JobTitleAr = null);
 ```
 
 - [ ] **Step 12: Write controller test**
@@ -440,14 +468,15 @@ public class AdminUsersControllerCreateTests
     {
         _mediator.Setup(m => m.Send(It.IsAny<CreateInternalUserCommand>(), default))
                  .ReturnsAsync(new UserProfileDto(
-                     Guid.NewGuid(), "Ahmed Al-Farsi", "ahmed@test.com",
-                     "Agent", true, true, "Offline", DateTime.UtcNow));
+                     Guid.NewGuid(), "Ahmed", "Al-Farsi", null, null, null, null,
+                     "ahmed@test.com", "Agent", true, true, "Offline", DateTimeOffset.UtcNow));
 
         var response = await BuildClient().PostAsJsonAsync(
             "/api/admin/users",
             new
             {
-                fullName = "Ahmed Al-Farsi",
+                firstName = "Ahmed",
+                lastName = "Al-Farsi",
                 email = "ahmed@test.com",
                 password = "TempPass123!",
                 role = "Agent",
@@ -465,8 +494,8 @@ public class AdminUsersControllerCreateTests
 
         var response = await BuildClient().PostAsJsonAsync(
             "/api/admin/users",
-            new { fullName = "X", email = "dup@test.com", password = "P", role = "Agent",
-                  primaryDepartmentId = Guid.NewGuid() });
+            new { firstName = "X", lastName = "Y", email = "dup@test.com", password = "P",
+                  role = "Agent", primaryDepartmentId = Guid.NewGuid() });
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }

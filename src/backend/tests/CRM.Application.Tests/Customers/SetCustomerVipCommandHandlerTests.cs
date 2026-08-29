@@ -18,7 +18,7 @@ public class SetCustomerVipCommandHandlerTests
     public async Task Handle_ExistingCustomer_SetsVipStatus()
     {
         var id = Guid.NewGuid();
-        var customer = Customer.Create("Alice", "alice@example.com", null, null);
+        var customer = Customer.Create("Alice", "أليس", "alice@example.com", null, null);
         _repo.Setup(r => r.FindByIdAsync(id, default)).ReturnsAsync(customer);
 
         await _handler.Handle(new SetCustomerVipCommand(id, true), default);

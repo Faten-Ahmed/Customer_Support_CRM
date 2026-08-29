@@ -1,11 +1,13 @@
 using CRM.Application.Admin.Users.Commands;
 using CRM.Application.Common;
+using CRM.Application.Sla.Jobs;
 using CRM.Domain.Auth;
 using CRM.Domain.Branches;
 using CRM.Domain.Categories;
 using CRM.Domain.Channels;
 using CRM.Domain.Customers;
 using CRM.Domain.Departments;
+using CRM.Domain.Sla;
 using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
 using CRM.Domain.Users;
@@ -13,8 +15,10 @@ using CRM.Infrastructure.Channels;
 using CRM.Infrastructure.Email;
 using CRM.Infrastructure.Identity;
 using CRM.Infrastructure.Jobs;
+using CRM.Infrastructure.Notifications;
 using CRM.Infrastructure.Persistence;
 using CRM.Infrastructure.Persistence.Repositories;
+using CRM.Infrastructure.Persistence.Repositories.Sla;
 using CRM.Infrastructure.Storage;
 using Minio;
 using Hangfire;
@@ -80,6 +84,17 @@ public static class DependencyInjection
         services.AddScoped<ITwilioHealthChecker, TwilioHealthChecker>();
         services.AddScoped<ILiveChatSessionRepository, LiveChatSessionRepository>();
         services.AddScoped<ICategoryExistenceChecker, CategoryExistenceChecker>();
+
+        // SLA repositories
+        services.AddScoped<ISlaPolicyRepository, SlaPolicyRepository>();
+        services.AddScoped<IBusinessHoursRepository, BusinessHoursRepository>();
+        services.AddScoped<ITicketSlaRepository, TicketSlaRepository>();
+
+        // SLA jobs
+        services.AddScoped<SlaMonitorJob>();
+
+        // Notification service (stub until Feature 05)
+        services.AddScoped<INotificationService, StubNotificationService>();
 
         services.Configure<MinIOSettings>(configuration.GetSection("MinIO"));
         services.AddScoped<IStorageService, StorageService>();

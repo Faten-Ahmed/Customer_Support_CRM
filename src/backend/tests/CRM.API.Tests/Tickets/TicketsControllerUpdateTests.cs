@@ -47,13 +47,15 @@ public class TicketsControllerUpdateTests
         _mediator.Setup(m => m.Send(It.IsAny<UpdateTicketCommand>(), It.IsAny<CancellationToken>()))
                  .ReturnsAsync(new TicketDetailDto(
                      id, "TKT-001", Guid.NewGuid(), "Ali Hassan",
-                     "New Subject", "New Desc", "New", "High", "Internal",
-                     null, null, null, null, null, null,
+                     "New Subject", "موضوع جديد",
+                     "New Desc", "وصف جديد",
+                     "New", "High", "Internal",
+                     null, null, null, null, null, null, null, null,
                      DateTime.UtcNow, DateTime.UtcNow, null, null));
 
         var client = BuildClient();
         var response = await client.PutAsJsonAsync($"/api/v1/tickets/{id}",
-            new { subject = "New Subject", description = "New Desc", priority = 2 });
+            new { subject = "New Subject", subjectAr = "عنوان جديد", description = "New Desc", descriptionAr = "وصف جديد", priority = 2 });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -66,7 +68,7 @@ public class TicketsControllerUpdateTests
 
         var client = BuildClient();
         var response = await client.PutAsJsonAsync($"/api/v1/tickets/{Guid.NewGuid()}",
-            new { subject = "S", description = "D", priority = 0 });
+            new { subject = "S", subjectAr = "موضوع", description = "D", descriptionAr = "وصف", priority = 0 });
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }

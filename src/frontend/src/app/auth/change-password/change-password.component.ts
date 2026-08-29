@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../auth.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 function passwordStrengthValidator(): ValidatorFn {
   return (control: AbstractControl) => {
@@ -23,7 +24,7 @@ function confirmMatchValidator(group: AbstractControl) {
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, TranslatePipe],
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss',
 })
@@ -34,6 +35,7 @@ export class ChangePasswordComponent {
 
   form = this.fb.group(
     {
+      email: ['', [Validators.required, Validators.email]],
       currentPassword: ['', Validators.required],
       newPassword: ['', [Validators.required, passwordStrengthValidator()]],
       confirmPassword: ['', Validators.required],
@@ -42,21 +44,27 @@ export class ChangePasswordComponent {
   );
 
   submitting = false;
+  serverError = '';
 
   onSubmit(): void {
     if (this.form.invalid) return;
     this.submitting = true;
-    const { currentPassword, newPassword, confirmPassword } = this.form.value as {
+    this.serverError = '';
+    const { email, currentPassword, newPassword, confirmPassword } = this.form.value as {
+      email: string;
       currentPassword: string;
       newPassword: string;
       confirmPassword: string;
     };
-    this.authService.changePassword(currentPassword, newPassword, confirmPassword).subscribe({
+    this.authService.changePassword(email, currentPassword, newPassword, confirmPassword).subscribe({
       next: () => this.router.navigate(['/app']),
-      error: (err: { error?: { code?: string } }) => {
+      error: (err: any) => {
         this.submitting = false;
-        if (err.error?.code === 'INVALID_CURRENT_PASSWORD') {
+        const message: string = err?.error?.error ?? '';
+        if (err?.status === 401 || err?.error?.code === 'INVALID_CURRENT_PASSWORD' || message.toLowerCase().includes('current password')) {
           this.form.get('currentPassword')!.setErrors({ invalid: true });
+        } else if (message) {
+          this.serverError = message;
         }
       },
     });

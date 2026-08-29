@@ -54,6 +54,7 @@ describe('CustomerService', () => {
   describe('create()', () => {
     const dto: CreateCustomerDto = {
       fullName: 'Jane Doe',
+      fullNameAr: 'جين دو',
       email: 'jane@example.com',
       phone: '555-0100',
       companyName: 'Acme',

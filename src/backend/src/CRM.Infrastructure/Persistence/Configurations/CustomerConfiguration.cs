@@ -12,9 +12,11 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Id).ValueGeneratedOnAdd();
         builder.Property(c => c.FullName).IsRequired().HasMaxLength(200);
+        builder.Property(c => c.FullNameAr).IsRequired().HasMaxLength(200);
         builder.Property(c => c.Email).IsRequired().HasMaxLength(256);
         builder.Property(c => c.Phone).HasMaxLength(50);
         builder.Property(c => c.CompanyName).HasMaxLength(200);
+        builder.Property(c => c.CompanyNameAr).HasMaxLength(200);
         builder.Property(c => c.PasswordHash).HasMaxLength(500);
         builder.Property(c => c.IsVip).IsRequired();
         builder.Property(c => c.IsActive).IsRequired().HasDefaultValue(true);

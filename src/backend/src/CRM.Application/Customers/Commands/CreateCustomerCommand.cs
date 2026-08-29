@@ -6,9 +6,11 @@ namespace CRM.Application.Customers.Commands;
 
 public record CreateCustomerCommand(
     string FullName,
+    string FullNameAr,
     string Email,
     string? Phone,
-    string? CompanyName) : IRequest<CustomerDto>;
+    string? CompanyName,
+    string? CompanyNameAr) : IRequest<CustomerDto>;
 
 public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, CustomerDto>
 {
@@ -22,16 +24,18 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
         if (existing is not null)
             throw new InvalidOperationException($"A customer with email '{cmd.Email}' already exists.");
 
-        var customer = Customer.Create(cmd.FullName, cmd.Email, cmd.Phone, cmd.CompanyName);
+        var customer = Customer.Create(cmd.FullName, cmd.FullNameAr, cmd.Email, cmd.Phone, cmd.CompanyName, cmd.CompanyNameAr);
         await _repo.AddAsync(customer, ct);
         await _repo.SaveChangesAsync(ct);
 
         return new CustomerDto(
             customer.Id,
             customer.FullName,
+            customer.FullNameAr,
             customer.Email,
             customer.Phone,
             customer.CompanyName,
+            customer.CompanyNameAr,
             customer.IsVip,
             customer.IsActive,
             customer.CreatedAt);

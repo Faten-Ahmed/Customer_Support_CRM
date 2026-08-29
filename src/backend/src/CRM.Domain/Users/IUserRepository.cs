@@ -36,4 +36,8 @@ public interface IUserRepository
         UserRole? role, Guid? departmentId, bool? isActive, string? search,
         int page, int pageSize, CancellationToken ct = default);
     Task<UserDetailProjection?> GetDetailAsync(Guid userId, CancellationToken ct = default);
+    Task ReplaceUserDepartmentsAsync(
+        Guid userId, IReadOnlyList<UserDepartment> departments, CancellationToken ct = default);
+    Task ReplaceUserSkillsAsync(
+        Guid userId, IReadOnlyList<Guid> categoryIds, CancellationToken ct = default);
 }

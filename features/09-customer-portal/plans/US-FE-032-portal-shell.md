@@ -25,7 +25,14 @@
 
 **Architecture:** `PortalShellComponent` is a standalone layout component wrapping all `/portal/**` routes. It uses `@angular/localize` for i18n and sets `document.documentElement.dir` to `rtl` or `ltr` on language toggle, along with applying Angular Material's `dir` attribute. Unauthenticated routes (`/portal/login`, `/portal/register`) use a separate `PortalAuthLayoutComponent` with no nav.
 
-**Tech Stack:** Angular 21, TypeScript, Angular Material, `@angular/localize`, Jasmine, TestBed
+**Tech Stack:** Angular 21, TypeScript, Angular Material, `@angular/localize`, Vitest, TestBed
+
+> **⚠️ Implementation divergences from original plan:**
+> - `portalAuthGuard` checks `auth.user()?.role === 'Customer'` where `auth` is `AuthStore` (JWT-decoded user), not a portal-specific user store
+> - Portal login (`portal-login.component.ts`) uses `authService.portalLogin()` which hits the shared `/api/v1/auth/login` endpoint; on success `res.role === 'Customer'` → navigate `/portal/dashboard`, else show `STAFF_NOT_ALLOWED` error
+> - Staff attempting to use portal login see an error banner with a link back to `/login` (not redirected silently)
+> - Customer attempting to use staff `/login` see `PORTAL_USERS_NOT_ALLOWED` error with a link to `/portal/login`
+> - `portal.routes.ts` inline guard: `if (auth.isAuthenticated() && auth.user()?.role === 'Customer') return true; return router.createUrlTree(['/portal/login'])`
 
 ---
 

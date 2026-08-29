@@ -21,9 +21,16 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-BE-001  
-**Goal:** Implement `POST /api/auth/login-internal` — validates staff credentials, issues JWT access token (15 min), sets HttpOnly refresh token cookie (7 days).
+**Goal:** Implement `POST /api/v1/auth/login` — validates credentials for both staff **and** portal customers, issues JWT access token (15 min), sets HttpOnly refresh token cookie (7 days).
 
-**Architecture:** `LoginInternalCommand` flows through MediatR pipeline (FluentValidation behavior runs first) → handler fetches user by email, verifies BCrypt hash, checks `IsActive` and `RequiresPasswordChange` flags, calls `TokenService` to mint tokens; raw refresh token returned to controller, SHA-256 hash persisted in `RefreshTokens` table.
+**Architecture:** `LoginInternalCommand` flows through MediatR pipeline (FluentValidation behavior runs first) → handler first tries to find a `User` (staff) by email; if none found, tries `Customer`; verifies BCrypt hash, checks `IsActive` and `RequiresPasswordChange` flags, calls `TokenService` to mint tokens; raw refresh token returned to controller, SHA-256 hash persisted in `RefreshTokens` table.
+
+> **⚠️ Implementation divergences from original plan:**
+> - Route is `/api/v1/auth/login` (not `/api/auth/login-internal`)
+> - `LoginInternalCommand` handles customer logins too (not just staff)
+> - `LoginResponse` DTO does **not** include `PrimaryDepartmentId` or `DepartmentIds`
+> - `AuthController.Login` returns **flat** JSON (no nested `user` object); 423 is returned when `RequiresPasswordChange` is true, before reaching the Ok response
+> - `ITokenService` has a second overload: `CreateAccessToken(Guid id, string email, string role, string fullName)`
 
 **Tech Stack:** .NET 10, ASP.NET Core, MediatR, FluentValidation, BCrypt.Net-Next, System.IdentityModel.Tokens.Jwt, EF Core, xUnit, Moq
 
@@ -310,12 +317,15 @@ Expected: FAIL — `LoginInternalCommand` and `LoginInternalCommandHandler` do n
 // src/CRM.Application/Auth/DTOs/LoginResponse.cs
 namespace CRM.Application.Auth.DTOs;
 
+// ⚠️ Implemented without PrimaryDepartmentId / DepartmentIds
 public record LoginResponse(
     string AccessToken,
     string RefreshToken,
     bool RequiresPasswordChange,
     Guid UserId,
-    string FullName,
+    string Email,
+    string FirstName,
+    string LastName,
     string Role);
 ```
 
@@ -368,7 +378,9 @@ public class LoginInternalCommandHandler : IRequestHandler<LoginInternalCommand,
             RefreshToken: rawToken,
             RequiresPasswordChange: user.RequiresPasswordChange,
             UserId: user.Id,
-            FullName: $"{user.FirstName} {user.LastName}",
+            Email: user.Email,
+            FirstName: user.FirstName,
+            LastName: user.LastName,
             Role: user.Role.ToString());
     }
 }
@@ -453,7 +465,7 @@ public class AuthControllerLoginTests
     {
         _mediator.Setup(m => m.Send(It.IsAny<LoginInternalCommand>(), default))
                  .ReturnsAsync(new LoginResponse("jwt", "raw-refresh", false,
-                     Guid.NewGuid(), "Ali Hassan", "Agent"));
+                     Guid.NewGuid(), "Ali", "Hassan", "agent@crm.test", "Agent", null, Array.Empty<Guid>()));
 
         var client = BuildClient();
         var response = await client.PostAsJsonAsync("/api/auth/login-internal",
@@ -482,7 +494,7 @@ public class AuthControllerLoginTests
     {
         _mediator.Setup(m => m.Send(It.IsAny<LoginInternalCommand>(), default))
                  .ReturnsAsync(new LoginResponse("jwt", "raw-refresh", false,
-                     Guid.NewGuid(), "Ali Hassan", "Agent"));
+                     Guid.NewGuid(), "Ali", "Hassan", "agent@crm.test", "Agent", null, Array.Empty<Guid>()));
 
         var client = BuildClient();
         var response = await client.PostAsJsonAsync("/api/auth/login-internal",
@@ -506,6 +518,8 @@ Expected: FAIL — `AuthController` does not exist yet.
 
 ```csharp
 // src/CRM.API/Controllers/AuthController.cs
+// ⚠️ Route is /api/v1/auth (not /api/auth). Response is flat — no nested user object.
+// RequiresPasswordChange → 423 before Ok; customer logins share this same endpoint.
 using CRM.Application.Auth.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -513,40 +527,52 @@ using Microsoft.AspNetCore.Mvc;
 namespace CRM.API.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/v1/auth")]
 public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;
     public AuthController(IMediator mediator) => _mediator = mediator;
 
-    [HttpPost("login-internal")]
-    public async Task<IActionResult> LoginInternal(
-        [FromBody] LoginInternalCommand command, CancellationToken ct)
+    public sealed class LoginRequest
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(
+        [FromBody] LoginRequest request, CancellationToken ct)
     {
         try
         {
+            var command = new LoginInternalCommand(request.Email, request.Password);
             var result = await _mediator.Send(command, ct);
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
+
+            if (result.RequiresPasswordChange)
+                return StatusCode(423, new { code = "PASSWORD_CHANGE_REQUIRED" });
 
             return Ok(new
             {
                 result.AccessToken,
                 result.RequiresPasswordChange,
-                result.UserId,
-                result.FullName,
-                result.Role
+                UserId = result.UserId,
+                result.Email,
+                result.FirstName,
+                result.LastName,
+                result.Role,
             });
         }
-        catch (UnauthorizedAccessException ex)
+        catch (UnauthorizedAccessException)
         {
-            return Unauthorized(new { error = ex.Message });
+            return Unauthorized(new { code = "INVALID_CREDENTIALS" });
         }
     }
 }

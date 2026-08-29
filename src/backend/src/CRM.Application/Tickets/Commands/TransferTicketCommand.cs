@@ -1,26 +1,25 @@
+using CRM.Application.Sla.Commands;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
-using CRM.Domain.Users;
 using MediatR;
 
 namespace CRM.Application.Tickets.Commands;
 
 public record TransferTicketCommand(
     Guid TicketId,
-    Guid? TargetDepartmentId,
-    Guid? TargetAgentId,
-    string Reason,
+    Guid DepartmentId,
+    string TransferNote,
     Guid TransferredByUserId) : IRequest;
 
 public class TransferTicketCommandHandler : IRequestHandler<TransferTicketCommand>
 {
     private readonly ITicketRepository _tickets;
-    private readonly IUserRepository _users;
+    private readonly IMediator _mediator;
 
-    public TransferTicketCommandHandler(ITicketRepository tickets, IUserRepository users)
+    public TransferTicketCommandHandler(ITicketRepository tickets, IMediator mediator)
     {
         _tickets = tickets;
-        _users = users;
+        _mediator = mediator;
     }
 
     public async Task Handle(TransferTicketCommand cmd, CancellationToken ct)
@@ -32,15 +31,14 @@ public class TransferTicketCommandHandler : IRequestHandler<TransferTicketComman
             throw new InvalidOperationException(
                 $"Cannot transfer a ticket in {ticket.Status} status.");
 
-        if (cmd.TargetAgentId.HasValue)
-        {
-            var agent = await _users.FindByIdAsync(cmd.TargetAgentId.Value, ct)
-                ?? throw new KeyNotFoundException("Target agent not found.");
-            if (!agent.IsActive)
-                throw new InvalidOperationException("Cannot transfer to inactive agent.");
-        }
+        var departmentActive = await _tickets.IsDepartmentActiveAsync(cmd.DepartmentId, ct);
+        if (!departmentActive)
+            throw new InvalidOperationException("Target department not found or is inactive.");
 
-        ticket.Transfer(cmd.TargetDepartmentId, cmd.TargetAgentId, cmd.Reason, cmd.TransferredByUserId);
+        ticket.Transfer(cmd.DepartmentId, cmd.TransferNote, cmd.TransferredByUserId);
         await _tickets.SaveChangesAsync(ct);
+
+        await _mediator.Send(
+            new RecalculateSlaOnTransferCommand(cmd.TicketId, cmd.DepartmentId), ct);
     }
 }

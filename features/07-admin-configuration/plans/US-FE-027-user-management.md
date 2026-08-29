@@ -80,7 +80,7 @@ describe('UserService', () => {
   });
 
   it('create() should POST /api/v1/admin/users', () => {
-    service.create({ fullName: 'Omar', email: 'omar@test.com', role: 'Agent', tempPassword: 'Temp1234!', primaryDepartmentId: 'd1' }).subscribe();
+    service.create({ firstName: 'Omar', lastName: 'Ali', email: 'omar@test.com', role: 'Agent', tempPassword: 'Temp1234!', primaryDepartmentId: 'd1' }).subscribe();
     const req = httpMock.expectOne('/api/v1/admin/users');
     expect(req.request.method).toBe('POST');
     req.flush({ id: 'u1' });
@@ -119,7 +119,12 @@ import { Observable } from 'rxjs';
 
 export interface StaffUser {
   id: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
+  firstNameAr?: string;
+  lastNameAr?: string;
+  jobTitle?: string;
+  jobTitleAr?: string;
   email: string;
   role: string;
   primaryDepartmentId?: string;
@@ -155,7 +160,7 @@ export class UserService {
     return this.http.get<StaffUser>(`/api/v1/admin/users/${id}`);
   }
 
-  create(payload: { fullName: string; email: string; role: string; tempPassword: string; primaryDepartmentId: string }): Observable<StaffUser> {
+  create(payload: { firstName: string; lastName: string; firstNameAr?: string; lastNameAr?: string; jobTitle?: string; jobTitleAr?: string; email: string; role: string; tempPassword: string; primaryDepartmentId: string }): Observable<StaffUser> {
     return this.http.post<StaffUser>('/api/v1/admin/users', payload);
   }
 
@@ -212,8 +217,8 @@ import { UserListComponent } from './user-list.component';
 import { UserService, StaffUser } from './user.service';
 
 const mockUsers: StaffUser[] = [
-  { id: 'u1', fullName: 'Omar Ali', email: 'omar@test.com', role: 'Agent', isActive: true, availabilityStatus: 'Available' },
-  { id: 'u2', fullName: 'Sara Noor', email: 'sara@test.com', role: 'Manager', isActive: false },
+  { id: 'u1', firstName: 'Omar', lastName: 'Ali', email: 'omar@test.com', role: 'Agent', isActive: true, availabilityStatus: 'Available' },
+  { id: 'u2', firstName: 'Sara', lastName: 'Noor', email: 'sara@test.com', role: 'Manager', isActive: false },
 ];
 
 describe('UserListComponent', () => {
@@ -304,7 +309,7 @@ export class UserListComponent implements OnInit {
   readonly searchControl = new FormControl('');
   readonly roleFilter = new FormControl('');
 
-  displayedColumns = ['fullName', 'email', 'role', 'department', 'status', 'availability', 'lastLogin'];
+  displayedColumns = ['name', 'email', 'role', 'department', 'status', 'availability', 'lastLogin'];
 
   ngOnInit(): void {
     this.loadUsers();
@@ -361,10 +366,10 @@ export class UserListComponent implements OnInit {
   </div>
 
   <mat-table [dataSource]="users()" class="w-full">
-    <ng-container matColumnDef="fullName">
+    <ng-container matColumnDef="name">
       <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
       <mat-cell *matCellDef="let u">
-        <a [routerLink]="['/admin/users', u.id]" class="text-blue-600 hover:underline">{{ u.fullName }}</a>
+        <a [routerLink]="['/admin/users', u.id]" class="text-blue-600 hover:underline">{{ u.firstName + ' ' + u.lastName }}</a>
       </mat-cell>
     </ng-container>
     <ng-container matColumnDef="email">
@@ -421,7 +426,12 @@ import { UserService } from './user.service';
     <h2 mat-dialog-title>New Staff User</h2>
     <mat-dialog-content>
       <form [formGroup]="form" class="flex flex-col gap-3">
-        <mat-form-field appearance="outline"><mat-label>Full Name</mat-label><input matInput formControlName="fullName" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>First Name</mat-label><input matInput formControlName="firstName" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Last Name</mat-label><input matInput formControlName="lastName" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>First Name (Arabic)</mat-label><input matInput formControlName="firstNameAr" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Last Name (Arabic)</mat-label><input matInput formControlName="lastNameAr" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Job Title</mat-label><input matInput formControlName="jobTitle" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Job Title (Arabic)</mat-label><input matInput formControlName="jobTitleAr" /></mat-form-field>
         <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput type="email" formControlName="email" /></mat-form-field>
         <mat-form-field appearance="outline"><mat-label>Temporary Password</mat-label><input matInput type="password" formControlName="tempPassword" /></mat-form-field>
         <mat-form-field appearance="outline">
@@ -445,7 +455,12 @@ export class UserFormDialogComponent {
   private readonly userService = inject(UserService);
 
   form = this.fb.group({
-    fullName: ['', Validators.required],
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    firstNameAr: [''],
+    lastNameAr: [''],
+    jobTitle: [''],
+    jobTitleAr: [''],
     email: ['', [Validators.required, Validators.email]],
     tempPassword: ['', [Validators.required, Validators.minLength(8)]],
     role: ['Agent', Validators.required],

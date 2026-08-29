@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.API.Controllers;
 
-public record CreateCustomerRequest(string FullName, string Email, string? Phone, string? CompanyName);
-public record UpdateCustomerRequest(string FullName, string? Phone, string? CompanyName);
+public record CreateCustomerRequest(string FullName, string FullNameAr, string Email, string? Phone, string? CompanyName, string? CompanyNameAr);
+public record UpdateCustomerRequest(string FullName, string FullNameAr, string? Phone, string? CompanyName, string? CompanyNameAr);
 public record SetVipRequest(bool IsVip);
 public record AddContactRequest(string Type, string Value, bool IsPrimary);
 
@@ -32,7 +32,7 @@ public class CustomersController : ControllerBase
     {
         try
         {
-            var command = new CreateCustomerCommand(req.FullName, req.Email, req.Phone, req.CompanyName);
+            var command = new CreateCustomerCommand(req.FullName, req.FullNameAr, req.Email, req.Phone, req.CompanyName, req.CompanyNameAr);
             var dto = await _mediator.Send(command, ct);
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
         }
@@ -105,7 +105,7 @@ public class CustomersController : ControllerBase
     {
         try
         {
-            var command = new UpdateCustomerCommand(id, req.FullName, req.Phone, req.CompanyName);
+            var command = new UpdateCustomerCommand(id, req.FullName, req.FullNameAr, req.Phone, req.CompanyName, req.CompanyNameAr);
             var dto = await _mediator.Send(command, ct);
             return Ok(dto);
         }

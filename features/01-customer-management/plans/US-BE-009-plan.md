@@ -87,54 +87,89 @@ namespace CRM.Domain.Customers;
 public class Customer
 {
     public Guid Id { get; private set; }
-    public string FirstName { get; private set; } = null!;
-    public string LastName { get; private set; } = null!;
+    public string FullName { get; private set; } = null!;
+    public string? FullNameAr { get; private set; }
     public string Email { get; private set; } = null!;
     public string? Phone { get; private set; }
+    public string? CompanyName { get; private set; }
+    public string? CompanyNameAr { get; private set; }
+    public string? JobTitle { get; private set; }
+    public string? Country { get; private set; }
+    public string? City { get; private set; }
+    public string? ExternalId { get; private set; }
     public bool IsVip { get; private set; }
+    public bool IsActive { get; private set; } = true;
     public bool IsDeleted { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime UpdatedAt { get; private set; }
+    public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset UpdatedAt { get; private set; }
 
     private readonly List<CustomerContact> _contacts = new();
     public IReadOnlyList<CustomerContact> Contacts => _contacts.AsReadOnly();
 
     private Customer() { }
 
-    public static Customer Create(string firstName, string lastName, string email,
-        string? phone = null, bool isVip = false)
+    public static Customer Create(
+        string fullName,
+        string email,
+        string? phone = null,
+        string? fullNameAr = null,
+        string? companyName = null,
+        string? companyNameAr = null,
+        string? jobTitle = null,
+        string? country = null,
+        string? city = null,
+        string? externalId = null,
+        bool isVip = false)
         => new()
         {
             Id = Guid.NewGuid(),
-            FirstName = firstName,
-            LastName = lastName,
+            FullName = fullName,
+            FullNameAr = fullNameAr,
             Email = email.ToLowerInvariant(),
             Phone = phone,
+            CompanyName = companyName,
+            CompanyNameAr = companyNameAr,
+            JobTitle = jobTitle,
+            Country = country,
+            City = city,
+            ExternalId = externalId,
             IsVip = isVip,
+            IsActive = true,
             IsDeleted = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
         };
 
-    public void Update(string firstName, string lastName, string? phone)
+    public void Update(
+        string fullName,
+        string? fullNameAr = null,
+        string? phone = null,
+        string? companyName = null,
+        string? companyNameAr = null,
+        string? jobTitle = null,
+        string? country = null,
+        string? city = null)
     {
-        FirstName = firstName;
-        LastName = lastName;
+        FullName = fullName;
+        FullNameAr = fullNameAr;
         Phone = phone;
-        UpdatedAt = DateTime.UtcNow;
+        CompanyName = companyName;
+        CompanyNameAr = companyNameAr;
+        JobTitle = jobTitle;
+        Country = country;
+        City = city;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public void SetVip(bool isVip)
     {
         IsVip = isVip;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
-    public void SoftDelete()
-    {
-        IsDeleted = true;
-        UpdatedAt = DateTime.UtcNow;
-    }
+    public void Deactivate() { IsActive = false; UpdatedAt = DateTimeOffset.UtcNow; }
+    public void Reactivate() { IsActive = true; UpdatedAt = DateTimeOffset.UtcNow; }
+    public void SoftDelete() { IsDeleted = true; UpdatedAt = DateTimeOffset.UtcNow; }
 
     public void AddContact(string type, string value, bool isPrimary)
         => _contacts.Add(CustomerContact.Create(Id, type, value, isPrimary));
@@ -199,12 +234,12 @@ public class CreateCustomerCommandHandlerTests
              .ReturnsAsync((Customer?)null);
 
         var result = await _handler.Handle(
-            new CreateCustomerCommand("John", "Doe", "john@example.com", "+971501234567", false),
+            new CreateCustomerCommand("John Doe", "john@example.com", Phone: "+971501234567"),
             default);
 
         Assert.NotEqual(Guid.Empty, result.Id);
         Assert.Equal("john@example.com", result.Email);
-        Assert.Equal("John", result.FirstName);
+        Assert.Equal("John Doe", result.FullName);
         _repo.Verify(r => r.AddAsync(It.IsAny<Customer>(), default), Times.Once);
         _repo.Verify(r => r.SaveChangesAsync(default), Times.Once);
     }
@@ -212,12 +247,12 @@ public class CreateCustomerCommandHandlerTests
     [Fact]
     public async Task Handle_DuplicateEmail_ThrowsInvalidOperationException()
     {
-        var existing = Customer.Create("Jane", "Smith", "jane@example.com");
+        var existing = Customer.Create("Jane Smith", "jane@example.com");
         _repo.Setup(r => r.FindByEmailAsync("jane@example.com", default)).ReturnsAsync(existing);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(
-                new CreateCustomerCommand("Jane", "Other", "jane@example.com", null, false),
+                new CreateCustomerCommand("Jane Other", "jane@example.com"),
                 default));
     }
 
@@ -233,7 +268,7 @@ public class CreateCustomerCommandHandlerTests
              .Returns(Task.CompletedTask);
 
         await _handler.Handle(
-            new CreateCustomerCommand("Big", "Client", "vip@example.com", null, true),
+            new CreateCustomerCommand("Big Client", "vip@example.com", IsVip: true),
             default);
 
         Assert.NotNull(captured);
@@ -258,12 +293,20 @@ namespace CRM.Application.Customers.DTOs;
 
 public record CustomerDto(
     Guid Id,
-    string FirstName,
-    string LastName,
+    string FullName,
+    string? FullNameAr,
     string Email,
     string? Phone,
+    string? CompanyName,
+    string? CompanyNameAr,
+    string? JobTitle,
+    string? Country,
+    string? City,
+    string? ExternalId,
     bool IsVip,
-    DateTime CreatedAt);
+    bool IsActive,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt);
 ```
 
 - [ ] **Step 4: Create command and handler**
@@ -277,11 +320,17 @@ using MediatR;
 namespace CRM.Application.Customers.Commands;
 
 public record CreateCustomerCommand(
-    string FirstName,
-    string LastName,
+    string FullName,
     string Email,
-    string? Phone,
-    bool IsVip) : IRequest<CustomerDto>;
+    string? FullNameAr = null,
+    string? Phone = null,
+    string? CompanyName = null,
+    string? CompanyNameAr = null,
+    string? JobTitle = null,
+    string? Country = null,
+    string? City = null,
+    string? ExternalId = null,
+    bool IsVip = false) : IRequest<CustomerDto>;
 
 public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, CustomerDto>
 {
@@ -295,13 +344,18 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
         if (existing is not null)
             throw new InvalidOperationException($"A customer with email '{cmd.Email}' already exists.");
 
-        var customer = Customer.Create(cmd.FirstName, cmd.LastName, cmd.Email, cmd.Phone, cmd.IsVip);
+        var customer = Customer.Create(
+            cmd.FullName, cmd.Email, cmd.Phone, cmd.FullNameAr,
+            cmd.CompanyName, cmd.CompanyNameAr, cmd.JobTitle,
+            cmd.Country, cmd.City, cmd.ExternalId, cmd.IsVip);
         await _customers.AddAsync(customer, ct);
         await _customers.SaveChangesAsync(ct);
 
         return new CustomerDto(
-            customer.Id, customer.FirstName, customer.LastName,
-            customer.Email, customer.Phone, customer.IsVip, customer.CreatedAt);
+            customer.Id, customer.FullName, customer.FullNameAr,
+            customer.Email, customer.Phone, customer.CompanyName, customer.CompanyNameAr,
+            customer.JobTitle, customer.Country, customer.City, customer.ExternalId,
+            customer.IsVip, customer.IsActive, customer.CreatedAt, customer.UpdatedAt);
     }
 }
 ```
@@ -319,10 +373,14 @@ public class CreateCustomerCommandValidator : AbstractValidator<CreateCustomerCo
 {
     public CreateCustomerCommandValidator()
     {
-        RuleFor(x => x.FirstName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.FullName).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.FullNameAr).MaximumLength(200).When(x => x.FullNameAr is not null);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
-        RuleFor(x => x.Phone).MaximumLength(30).When(x => x.Phone is not null);
+        RuleFor(x => x.Phone).MaximumLength(50).When(x => x.Phone is not null);
+        RuleFor(x => x.CompanyName).MaximumLength(200).When(x => x.CompanyName is not null);
+        RuleFor(x => x.CompanyNameAr).MaximumLength(200).When(x => x.CompanyNameAr is not null);
+        RuleFor(x => x.JobTitle).MaximumLength(200).When(x => x.JobTitle is not null);
+        RuleFor(x => x.ExternalId).MaximumLength(100).When(x => x.ExternalId is not null);
     }
 }
 ```
@@ -391,12 +449,13 @@ public class CustomersControllerCreateTests
     {
         var id = Guid.NewGuid();
         _mediator.Setup(m => m.Send(It.IsAny<CreateCustomerCommand>(), default))
-                 .ReturnsAsync(new CustomerDto(id, "John", "Doe", "john@example.com",
-                     "+971501234567", false, DateTime.UtcNow));
+                 .ReturnsAsync(new CustomerDto(id, "John Doe", null, "john@example.com",
+                     "+971501234567", null, null, null, null, null, null,
+                     false, true, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
 
         var client = BuildClient();
         var response = await client.PostAsJsonAsync("/api/customers",
-            new { firstName = "John", lastName = "Doe", email = "john@example.com",
+            new { fullName = "John Doe", email = "john@example.com",
                   phone = "+971501234567", isVip = false });
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -411,7 +470,7 @@ public class CustomersControllerCreateTests
 
         var client = BuildClient();
         var response = await client.PostAsJsonAsync("/api/customers",
-            new { firstName = "Jane", lastName = "Doe", email = "dup@example.com",
+            new { fullName = "Jane Doe", email = "dup@example.com",
                   phone = (string?)null, isVip = false });
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
@@ -423,7 +482,7 @@ public class CustomersControllerCreateTests
         var factory = new WebApplicationFactory<Program>();
         var client = factory.CreateClient();
         var response = await client.PostAsJsonAsync("/api/customers",
-            new { firstName = "X", lastName = "Y", email = "x@y.com", isVip = false });
+            new { fullName = "X Y", email = "x@y.com", isVip = false });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }

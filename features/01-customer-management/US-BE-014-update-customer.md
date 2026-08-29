@@ -22,7 +22,7 @@
 **As an** agent, **I want to** update a customer's profile details, **so that** the record stays accurate.
 
 ## Acceptance Criteria
-- [ ] `PUT /customers/{id}` accepts partial updates: `fullName`, `phone`, `companyName`, `country`, `city`
+- [ ] `PUT /customers/{id}` accepts partial updates: `fullName`, `fullNameAr`, `phone`, `companyName`, `companyNameAr`, `country`, `city`
 - [ ] `email` field is ignored if supplied (cannot change email — BR-CUST-002); no error is thrown, email is silently excluded
 - [ ] Returns `200` with the updated customer object
 - [ ] Updating a soft-deleted customer returns `404`

@@ -49,7 +49,13 @@ describe('AuthService', () => {
     const token = makeJwt({ sub: '1', role: 'Agent', passwordMustChange: false });
     const mockResponse: LoginResponse = {
       accessToken: token,
-      user: { id: '1', email: 'staff@azmsquad.com', role: 'Agent', passwordMustChange: false },
+      refreshToken: '',
+      requiresPasswordChange: false,
+      userId: '1',
+      email: 'staff@azmsquad.com',
+      firstName: 'Staff',
+      lastName: 'User',
+      role: 'Agent',
     };
 
     service.login('staff@azmsquad.com', 'Password1!').subscribe(res => {
@@ -63,7 +69,7 @@ describe('AuthService', () => {
 
     expect(service.isAuthenticated()).toBe(true);
     expect(authStore.getToken()).toBe(token);
-    expect(service.currentUser()).toEqual(mockResponse.user);
+    expect(service.currentUser()).toEqual(mockResponse);
   });
 
   it('should store token in localStorage on successful login', () => {
@@ -199,6 +205,7 @@ describe('AuthService — portal methods', () => {
   it('portalRegister() should POST to /api/v1/auth/portal/register', () => {
     const payload: PortalRegisterPayload = {
       fullName: 'Jane Doe',
+      fullNameAr: 'جين دو',
       email: 'jane@example.com',
       password: 'Secure123!',
       confirmPassword: 'Secure123!',

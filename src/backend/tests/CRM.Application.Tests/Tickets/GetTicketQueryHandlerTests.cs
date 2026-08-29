@@ -21,7 +21,7 @@ public class GetTicketQueryHandlerTests
     {
         var id = Guid.NewGuid();
         var ticket = Ticket.Create(
-            Guid.NewGuid(), "Cannot login", "Description",
+            Guid.NewGuid(), "Cannot login", "لا أستطيع تسجيل الدخول", "Description", "الوصف",
             TicketPriority.High, TicketChannel.Internal, Guid.NewGuid());
 
         _repo.Setup(r => r.FindByIdDetailedAsync(id, default)).ReturnsAsync(ticket);

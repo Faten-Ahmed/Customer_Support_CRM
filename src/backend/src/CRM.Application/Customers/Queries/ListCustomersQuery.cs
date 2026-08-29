@@ -7,9 +7,11 @@ namespace CRM.Application.Customers.Queries;
 public record CustomerListItemDto(
     Guid Id,
     string FullName,
+    string FullNameAr,
     string Email,
     string? Phone,
     string? CompanyName,
+    string? CompanyNameAr,
     bool IsVip,
     bool IsActive,
     int TicketCount,
@@ -41,7 +43,7 @@ public class ListCustomersQueryHandler
         var paged = await _repo.ListAsync(filter, ct);
 
         var items = paged.Items.Select(c => new CustomerListItemDto(
-            c.Id, c.FullName, c.Email, c.Phone, c.CompanyName,
+            c.Id, c.FullName, c.FullNameAr, c.Email, c.Phone, c.CompanyName, c.CompanyNameAr,
             c.IsVip, c.IsActive, c.TicketCount, c.CreatedAt)).ToList();
 
         return new PagedResult<CustomerListItemDto>(

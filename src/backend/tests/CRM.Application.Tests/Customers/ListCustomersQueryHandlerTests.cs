@@ -21,7 +21,7 @@ public class ListCustomersQueryHandlerTests
     {
         var customers = new List<CustomerSummaryProjection>
         {
-            new(Guid.NewGuid(), "Ali Hassan", "ali@example.com", null, null, false, true, 3, DateTime.UtcNow),
+            new(Guid.NewGuid(), "Ali Hassan", "علي حسن", "ali@example.com", null, null, null, false, true, 3, DateTime.UtcNow),
         };
 
         _repo.Setup(r => r.ListAsync(It.IsAny<CustomerFilter>(), default))

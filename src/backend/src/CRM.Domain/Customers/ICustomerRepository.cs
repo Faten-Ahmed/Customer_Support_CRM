@@ -14,9 +14,11 @@ public record CustomerFilter(
 public record CustomerSummaryProjection(
     Guid Id,
     string FullName,
+    string FullNameAr,
     string Email,
     string? Phone,
     string? CompanyName,
+    string? CompanyNameAr,
     bool IsVip,
     bool IsActive,
     int TicketCount,

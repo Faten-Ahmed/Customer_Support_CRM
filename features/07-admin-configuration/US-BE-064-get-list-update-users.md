@@ -23,8 +23,8 @@
 
 ## Acceptance Criteria
 - [ ] `GET /admin/users` returns paginated list; filter by `role`, `departmentId`, `isActive`, `search`
-- [ ] `GET /admin/users/{id}` returns full profile including `departments[]`, `skills[]`, `availabilityStatus`
-- [ ] `PUT /admin/users/{id}` updates `fullName`, `primaryDepartmentId`; returns updated object
+- [ ] `GET /admin/users/{id}` returns full profile including `firstName`, `lastName`, `firstNameAr`, `lastNameAr`, `jobTitle`, `jobTitleAr`, `departments[]`, `skills[]`, `availabilityStatus`
+- [ ] `PUT /admin/users/{id}` updates `firstName`, `lastName`, `firstNameAr`, `lastNameAr`, `jobTitle`, `jobTitleAr`, `primaryDepartmentId`; returns updated object
 - [ ] Role cannot be changed via `PUT` — field is ignored if supplied (BR-ADM-003)
 - [ ] Response does NOT include `PasswordHash`
 

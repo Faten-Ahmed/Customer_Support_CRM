@@ -21,9 +21,14 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Story:** US-BE-019  
-**Goal:** Implement `POST /api/tickets` — allows Admin/Manager/Agent to open a ticket for a customer with subject, description, category, priority, channel, and custom field values.
+**Goal:** Implement `POST /api/v1/tickets` — allows Admin/Manager/Agent to open a ticket for a customer with subject, description, category, priority, channel, and custom field values.
 
 **Architecture:** `CreateTicketInternalCommand` → handler validates customer exists, validates custom field values against field definitions, creates `Ticket` aggregate (status = New), persists, publishes `TicketCreatedEvent` for SLA clock start. Returns `TicketSummaryDto`.
+
+> **⚠️ Implementation divergences from original plan:**
+> - `SubjectAr` and `DescriptionAr` are **required** fields in the API request (not optional). Both must be non-empty strings.
+> - `ITicketRepository` has additional lookup methods added for name resolution: `GetDepartmentNameAsync`, `GetCategoryNameAsync`, `IsDepartmentActiveAsync`
+> - Route is `/api/v1/tickets` (versioned prefix)
 
 **Tech Stack:** .NET 10, ASP.NET Core, MediatR, FluentValidation, EF Core, xUnit, Moq
 
@@ -140,7 +145,9 @@ public class Ticket
     public Guid? DepartmentId { get; private set; }
     public Guid? CategoryId { get; private set; }
     public string Subject { get; private set; } = null!;
+    public string? SubjectAr { get; private set; }
     public string Description { get; private set; } = null!;
+    public string? DescriptionAr { get; private set; }
     public TicketStatus Status { get; private set; }
     public TicketPriority Priority { get; private set; }
     public TicketChannel Channel { get; private set; }
@@ -165,7 +172,9 @@ public class Ticket
         Guid createdByUserId,
         Guid? departmentId = null,
         Guid? categoryId = null,
-        string? customFieldValues = null)
+        string? customFieldValues = null,
+        string? subjectAr = null,
+        string? descriptionAr = null)
     {
         var ticket = new Ticket
         {
@@ -173,7 +182,9 @@ public class Ticket
             TicketNumber = GenerateNumber(),
             CustomerId = customerId,
             Subject = subject,
+            SubjectAr = subjectAr,
             Description = description,
+            DescriptionAr = descriptionAr,
             Status = TicketStatus.New,
             Priority = priority,
             Channel = channel,
@@ -354,6 +365,7 @@ public record TicketSummaryDto(
     Guid CustomerId,
     string CustomerName,
     string Subject,
+    string? SubjectAr,
     string Status,
     string Priority,
     string Channel,
@@ -384,7 +396,9 @@ public record CreateTicketInternalCommand(
     Guid CreatedByUserId,
     Guid? DepartmentId,
     Guid? CategoryId,
-    string? CustomFieldValues) : IRequest<TicketSummaryDto>;
+    string? CustomFieldValues,
+    string? SubjectAr = null,
+    string? DescriptionAr = null) : IRequest<TicketSummaryDto>;
 
 public class CreateTicketInternalCommandHandler
     : IRequestHandler<CreateTicketInternalCommand, TicketSummaryDto>
@@ -416,7 +430,9 @@ public class CreateTicketInternalCommandHandler
             createdByUserId: cmd.CreatedByUserId,
             departmentId: cmd.DepartmentId,
             categoryId: cmd.CategoryId,
-            customFieldValues: cmd.CustomFieldValues);
+            customFieldValues: cmd.CustomFieldValues,
+            subjectAr: cmd.SubjectAr,
+            descriptionAr: cmd.DescriptionAr);
 
         await _tickets.AddAsync(ticket, ct);
         await _tickets.SaveChangesAsync(ct);
@@ -424,7 +440,7 @@ public class CreateTicketInternalCommandHandler
         return new TicketSummaryDto(
             ticket.Id, ticket.TicketNumber, ticket.CustomerId,
             $"{customer.FirstName} {customer.LastName}",
-            ticket.Subject, ticket.Status.ToString(), ticket.Priority.ToString(),
+            ticket.Subject, ticket.SubjectAr, ticket.Status.ToString(), ticket.Priority.ToString(),
             ticket.Channel.ToString(), ticket.AssignedToUserId, null,
             ticket.CreatedAt, ticket.UpdatedAt);
     }
@@ -447,7 +463,9 @@ public class CreateTicketInternalCommandValidator
     {
         RuleFor(x => x.CustomerId).NotEmpty();
         RuleFor(x => x.Subject).NotEmpty().MaximumLength(500);
+        RuleFor(x => x.SubjectAr).MaximumLength(500).When(x => x.SubjectAr is not null);
         RuleFor(x => x.Description).NotEmpty().MaximumLength(10000);
+        RuleFor(x => x.DescriptionAr).When(x => x.DescriptionAr is not null);
         RuleFor(x => x.CreatedByUserId).NotEmpty();
     }
 }
@@ -519,7 +537,7 @@ public class TicketsControllerCreateTests
         var id = Guid.NewGuid();
         _mediator.Setup(m => m.Send(It.IsAny<CreateTicketInternalCommand>(), default))
                  .ReturnsAsync(new TicketSummaryDto(id, "TKT-001", Guid.NewGuid(),
-                     "Ali Hassan", "Cannot login", "New", "High", "Internal",
+                     "Ali Hassan", "Cannot login", null, "New", "High", "Internal",
                      null, null, DateTime.UtcNow, DateTime.UtcNow));
 
         var client = BuildClient();

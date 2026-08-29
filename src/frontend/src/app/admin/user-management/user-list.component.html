@@ -13,7 +13,6 @@
       <mat-option value="Admin">Admin</mat-option>
       <mat-option value="Manager">Manager</mat-option>
       <mat-option value="Agent">Agent</mat-option>
-      <mat-option value="Customer">Customer</mat-option>
     </mat-select>
   </mat-form-field>
 
@@ -48,6 +47,11 @@
       <td mat-cell *matCellDef="let user">{{ user.role }}</td>
     </ng-container>
 
+    <ng-container matColumnDef="department">
+      <th mat-header-cell *matHeaderCellDef>Department</th>
+      <td mat-cell *matCellDef="let user">{{ user.primaryDepartmentName ?? '—' }}</td>
+    </ng-container>
+
     <ng-container matColumnDef="isActive">
       <th mat-header-cell *matHeaderCellDef>Active</th>
       <td mat-cell *matCellDef="let user">{{ user.isActive ? 'Yes' : 'No' }}</td>
@@ -56,6 +60,9 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Actions</th>
       <td mat-cell *matCellDef="let user">
+        <button mat-icon-button color="primary" (click)="openEditDialog(user)" title="Edit">
+          <mat-icon>edit</mat-icon>
+        </button>
         @if (user.isActive) {
           <button mat-icon-button color="warn" (click)="deactivate(user)" title="Deactivate">
             <mat-icon>block</mat-icon>

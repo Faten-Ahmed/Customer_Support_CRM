@@ -35,7 +35,7 @@ Admin Configuration covers all system setup and maintenance operations: user man
 
 **BR-ADM-001** Exactly 4 roles exist: `Admin`, `Manager`, `Agent`, `Customer`. Customer accounts are created via portal registration or customer-management endpoints — not through the admin user management endpoints (which are for internal staff only).
 
-**BR-ADM-002** `POST /admin/users` requires `primaryDepartmentId` for `Agent` and `Manager` roles. `Admin` role has no department requirement.
+**BR-ADM-002** `POST /admin/users` requires `primaryDepartmentId` for `Agent` and `Manager` roles. `Admin` role has no department requirement. User profile fields use separate `firstName` + `lastName` (both required) instead of a combined `fullName`. Optional bilingual fields `firstNameAr`, `lastNameAr` support Arabic display. Optional professional fields `jobTitle` and `jobTitleAr` are also supported.
 
 **BR-ADM-003** A user's role cannot be changed via `PUT /admin/users/{id}`. Role changes require a separate workflow not in v1 scope (must deactivate and recreate). This prevents accidental privilege escalation.
 
@@ -142,7 +142,7 @@ Field definitions extend the ticket schema per department.
 ## Workflows
 
 ### W-ADM-01: Onboard New Agent
-1. Admin calls `POST /admin/users` with role `Agent`, email, temp password, `primaryDepartmentId`.
+1. Admin calls `POST /admin/users` with role `Agent`, `firstName`, `lastName`, email, temp password, `primaryDepartmentId`; optionally `firstNameAr`, `lastNameAr`, `jobTitle`, `jobTitleAr`.
 2. System creates user with `PasswordMustChange = true`.
 3. Admin optionally calls `PUT /admin/users/{id}/departments` to add secondary departments.
 4. Admin optionally calls `PUT /admin/users/{id}/skills` to assign category skills.

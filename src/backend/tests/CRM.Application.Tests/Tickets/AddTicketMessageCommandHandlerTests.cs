@@ -28,7 +28,7 @@ public class AddTicketMessageCommandHandlerTests
     {
         var ticketId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Medium, TicketChannel.Internal, agentId);
         ticket.Assign(agentId, agentId);
         ticket.ChangeStatus(TicketStatus.InProgress, agentId);
@@ -48,7 +48,7 @@ public class AddTicketMessageCommandHandlerTests
     public async Task Handle_InternalNote_IsMarkedInternal()
     {
         var ticketId = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
 
         _ticketRepo.Setup(r => r.FindByIdAsync(ticketId, default)).ReturnsAsync(ticket);
@@ -69,7 +69,7 @@ public class AddTicketMessageCommandHandlerTests
     public async Task Handle_ClosedTicket_ThrowsInvalidOperationException()
     {
         var ticketId = Guid.NewGuid();
-        var ticket = Ticket.Create(Guid.NewGuid(), "S", "D",
+        var ticket = Ticket.Create(Guid.NewGuid(), "S", "موضوع", "D", "وصف",
             TicketPriority.Low, TicketChannel.Internal, Guid.NewGuid());
         ticket.ChangeStatus(TicketStatus.Closed, Guid.NewGuid());
 

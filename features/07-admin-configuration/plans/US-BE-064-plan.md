@@ -92,8 +92,9 @@ public class UserQueryHandlerTests
     {
         var userId = Guid.NewGuid();
         var projection = new UserDetailProjection(
-            userId, "Ahmed Al-Farsi", "ahmed@test.com", "Agent",
-            true, false, "Offline", DateTime.UtcNow,
+            userId, "Ahmed", "Al-Farsi", null, null, null, null,
+            "ahmed@test.com", "Agent",
+            true, false, "Offline", DateTimeOffset.UtcNow,
             new List<DepartmentAssignmentProjection>(),
             new List<SkillProjection>());
 
@@ -115,16 +116,17 @@ public class UserQueryHandlerTests
     }
 
     [Fact]
-    public async Task Update_ValidUser_UpdatesFullName()
+    public async Task Update_ValidUser_UpdatesName()
     {
         var user = User.CreateInternal(
             Guid.NewGuid(), "Ahmed", "Old", "a@test.com", UserRole.Agent);
         _repo.Setup(r => r.FindByIdAsync(user.Id, default)).ReturnsAsync(user);
 
         var result = await _updateHandler.Handle(
-            new UpdateUserCommand(user.Id, "Ahmed Updated"), default);
+            new UpdateUserCommand(user.Id, "Ahmed", "Updated"), default);
 
-        Assert.Equal("Ahmed Updated", result.FullName);
+        Assert.Equal("Ahmed", result.FirstName);
+        Assert.Equal("Updated", result.LastName);
         _repo.Verify(r => r.SaveChangesAsync(default), Times.Once);
     }
 }
@@ -145,8 +147,10 @@ Expected: FAIL — queries do not exist yet.
 namespace CRM.Application.Admin.Users.DTOs;
 
 public record UserSummaryDto(
-    Guid Id, string FullName, string Email, string Role,
-    bool IsActive, string AvailabilityStatus, DateTime CreatedAt,
+    Guid Id, string FirstName, string LastName,
+    string? FirstNameAr, string? LastNameAr,
+    string Email, string Role,
+    bool IsActive, string AvailabilityStatus, DateTimeOffset CreatedAt,
     Guid? PrimaryDepartmentId, string? PrimaryDepartmentName);
 ```
 
@@ -155,9 +159,12 @@ public record UserSummaryDto(
 namespace CRM.Application.Admin.Users.DTOs;
 
 public record UserDetailDto(
-    Guid Id, string FullName, string Email, string Role,
+    Guid Id, string FirstName, string LastName,
+    string? FirstNameAr, string? LastNameAr,
+    string? JobTitle, string? JobTitleAr,
+    string Email, string Role,
     bool IsActive, bool PasswordMustChange, string AvailabilityStatus,
-    DateTime CreatedAt,
+    DateTimeOffset CreatedAt,
     IReadOnlyList<DepartmentAssignmentDto> Departments,
     IReadOnlyList<SkillDto> Skills);
 
@@ -171,13 +178,18 @@ Add to `src/CRM.Domain/Users/IUserRepository.cs`:
 
 ```csharp
 public record UserSummaryProjection(
-    Guid Id, string FullName, string Email, string Role,
-    bool IsActive, string AvailabilityStatus, DateTime CreatedAt,
+    Guid Id, string FirstName, string LastName,
+    string? FirstNameAr, string? LastNameAr,
+    string Email, string Role,
+    bool IsActive, string AvailabilityStatus, DateTimeOffset CreatedAt,
     Guid? PrimaryDepartmentId, string? PrimaryDepartmentName);
 
 public record UserDetailProjection(
-    Guid Id, string FullName, string Email, string Role,
-    bool IsActive, bool PasswordMustChange, string AvailabilityStatus, DateTime CreatedAt,
+    Guid Id, string FirstName, string LastName,
+    string? FirstNameAr, string? LastNameAr,
+    string? JobTitle, string? JobTitleAr,
+    string Email, string Role,
+    bool IsActive, bool PasswordMustChange, string AvailabilityStatus, DateTimeOffset CreatedAt,
     IReadOnlyList<DepartmentAssignmentProjection> Departments,
     IReadOnlyList<SkillProjection> Skills);
 
@@ -223,7 +235,8 @@ public class ListUsersQueryHandler
 
         var dtos = paged.Items
             .Select(p => new UserSummaryDto(
-                p.Id, p.FullName, p.Email, p.Role, p.IsActive,
+                p.Id, p.FirstName, p.LastName, p.FirstNameAr, p.LastNameAr,
+                p.Email, p.Role, p.IsActive,
                 p.AvailabilityStatus, p.CreatedAt,
                 p.PrimaryDepartmentId, p.PrimaryDepartmentName))
             .ToList();
@@ -265,7 +278,10 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, UserDetailDto>
             .ToList();
 
         return new UserDetailDto(
-            projection.Id, projection.FullName, projection.Email, projection.Role,
+            projection.Id, projection.FirstName, projection.LastName,
+            projection.FirstNameAr, projection.LastNameAr,
+            projection.JobTitle, projection.JobTitleAr,
+            projection.Email, projection.Role,
             projection.IsActive, projection.PasswordMustChange, projection.AvailabilityStatus,
             projection.CreatedAt, departments, skills);
     }
@@ -282,7 +298,14 @@ using MediatR;
 
 namespace CRM.Application.Admin.Users.Commands;
 
-public record UpdateUserCommand(Guid UserId, string FullName) : IRequest<UserProfileDto>;
+public record UpdateUserCommand(
+    Guid UserId,
+    string FirstName,
+    string LastName,
+    string? FirstNameAr = null,
+    string? LastNameAr = null,
+    string? JobTitle = null,
+    string? JobTitleAr = null) : IRequest<UserProfileDto>;
 
 public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserProfileDto>
 {
@@ -295,7 +318,8 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserP
         var user = await _users.FindByIdAsync(cmd.UserId, ct)
             ?? throw new KeyNotFoundException($"User {cmd.UserId} not found.");
 
-        user.UpdateProfile(cmd.FullName);
+        user.UpdateProfile(cmd.FirstName, cmd.LastName,
+            cmd.FirstNameAr, cmd.LastNameAr, cmd.JobTitle, cmd.JobTitleAr);
         await _users.SaveChangesAsync(ct);
 
         return CreateInternalUserCommandHandler.Map(user);
@@ -349,13 +373,18 @@ public async Task<IActionResult> Update(
 {
     try
     {
-        var result = await _mediator.Send(new UpdateUserCommand(id, req.FullName), ct);
+        var result = await _mediator.Send(new UpdateUserCommand(
+            id, req.FirstName, req.LastName,
+            req.FirstNameAr, req.LastNameAr, req.JobTitle, req.JobTitleAr), ct);
         return Ok(new { data = result });
     }
     catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
 }
 
-public record UpdateUserRequest(string FullName);
+public record UpdateUserRequest(
+    string FirstName, string LastName,
+    string? FirstNameAr = null, string? LastNameAr = null,
+    string? JobTitle = null, string? JobTitleAr = null);
 ```
 
 - [ ] **Step 10: Write controller tests**
