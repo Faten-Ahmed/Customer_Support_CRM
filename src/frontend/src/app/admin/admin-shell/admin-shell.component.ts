@@ -20,7 +20,6 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { label: 'Departments', icon: 'business', route: 'departments', roles: ['Admin', 'Manager'] },
   { label: 'Branches', icon: 'location_on', route: 'branches', roles: ['Admin', 'Manager'] },
   { label: 'Categories', icon: 'category', route: 'categories', roles: ['Admin', 'Manager'] },
-  { label: 'Field Definitions', icon: 'list_alt', route: 'field-definitions', roles: ['Admin'] },
   { label: 'Templates', icon: 'quick_reference', route: 'templates', roles: ['Admin'] },
   { label: 'Channels', icon: 'hub', route: 'channels', roles: ['Admin'] },
 ];
