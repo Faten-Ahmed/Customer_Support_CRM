@@ -1,0 +1,47 @@
+<div style="display: flex; align-items: center; margin-bottom: 16px;">
+  <h2 style="margin: 0; flex: 1;">Departments</h2>
+  <button mat-flat-button color="primary" (click)="openNewDepartmentDialog()">
+    <mat-icon>add</mat-icon> New Department
+  </button>
+</div>
+
+@if (loading()) {
+  <div style="text-align: center; padding: 40px;">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else {
+  <table mat-table [dataSource]="departments()" class="mat-elevation-z2" style="width: 100%;">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let dept">{{ dept.name }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="nameAr">
+      <th mat-header-cell *matHeaderCellDef>Name (AR)</th>
+      <td mat-cell *matCellDef="let dept">{{ dept.nameAr ?? '—' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="isActive">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let dept">{{ dept.isActive ? 'Active' : 'Inactive' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let dept">
+        @if (dept.isActive) {
+          <button mat-icon-button color="warn" (click)="deactivate(dept)" title="Deactivate">
+            <mat-icon>block</mat-icon>
+          </button>
+        } @else {
+          <button mat-icon-button color="primary" (click)="reactivate(dept)" title="Reactivate">
+            <mat-icon>check_circle</mat-icon>
+          </button>
+        }
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+}

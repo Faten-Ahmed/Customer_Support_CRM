@@ -1,0 +1,58 @@
+<div style="display: flex; align-items: center; margin-bottom: 16px;">
+  <h2 style="margin: 0; flex: 1;">Categories</h2>
+  <button mat-flat-button color="primary" (click)="openNewCategoryDialog()">
+    <mat-icon>add</mat-icon> New Category
+  </button>
+</div>
+
+@if (loading()) {
+  <div style="text-align: center; padding: 40px;">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else {
+  <div class="category-tree">
+    @for (cat of categories(); track cat.id) {
+      <div class="category-node">
+        <div class="category-row" style="display: flex; align-items: center; padding: 8px 0;">
+          <mat-icon style="margin-right: 8px;">folder</mat-icon>
+          <span style="flex: 1; font-weight: 500;">{{ cat.name }}</span>
+          <span style="margin-right: 16px; font-size: 12px; color: gray;">
+            {{ cat.isActive ? 'Active' : 'Inactive' }}
+          </span>
+          @if (cat.isActive) {
+            <button mat-icon-button color="warn" (click)="deactivate(cat)" title="Deactivate">
+              <mat-icon>block</mat-icon>
+            </button>
+          } @else {
+            <button mat-icon-button color="primary" (click)="reactivate(cat)" title="Reactivate">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          }
+        </div>
+
+        @if (cat.children && cat.children.length > 0) {
+          <div style="padding-left: 32px;">
+            @for (child of cat.children; track child.id) {
+              <div class="category-row" style="display: flex; align-items: center; padding: 6px 0;">
+                <mat-icon style="margin-right: 8px; font-size: 18px;">subdirectory_arrow_right</mat-icon>
+                <span style="flex: 1;">{{ child.name }}</span>
+                <span style="margin-right: 16px; font-size: 12px; color: gray;">
+                  {{ child.isActive ? 'Active' : 'Inactive' }}
+                </span>
+                @if (child.isActive) {
+                  <button mat-icon-button color="warn" (click)="deactivate(child)" title="Deactivate">
+                    <mat-icon>block</mat-icon>
+                  </button>
+                } @else {
+                  <button mat-icon-button color="primary" (click)="reactivate(child)" title="Reactivate">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,46 @@
+@if (loading()) {
+  <div style="text-align: center; padding: 40px;">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else if (user()) {
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ user()!.firstName }} {{ user()!.lastName }}</mat-card-title>
+      <mat-card-subtitle>{{ user()!.email }} &bull; {{ user()!.role }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content style="margin-top: 16px;">
+      <p><strong>Status:</strong> {{ user()!.isActive ? 'Active' : 'Inactive' }}</p>
+      <p><strong>Job Title:</strong> {{ user()!.jobTitle ?? '—' }}</p>
+      <p><strong>Availability:</strong> {{ user()!.availabilityStatus }}</p>
+
+      <h4>Departments</h4>
+      <mat-chip-set>
+        @for (dept of user()!.departments; track dept.departmentId) {
+          <mat-chip>{{ dept.departmentName }}{{ dept.isPrimary ? ' (Primary)' : '' }}</mat-chip>
+        }
+      </mat-chip-set>
+
+      <h4>Skills</h4>
+      <mat-chip-set>
+        @for (skill of user()!.skills; track skill.categoryId) {
+          <mat-chip>{{ skill.categoryName }}</mat-chip>
+        }
+      </mat-chip-set>
+    </mat-card-content>
+
+    <mat-card-actions>
+      @if (user()!.isActive) {
+        <button mat-flat-button color="warn" (click)="deactivate()">
+          <mat-icon>block</mat-icon> Deactivate
+        </button>
+      } @else {
+        <button mat-flat-button color="primary" (click)="reactivate()">
+          <mat-icon>check_circle</mat-icon> Reactivate
+        </button>
+      }
+    </mat-card-actions>
+  </mat-card>
+} @else {
+  <p>User not found.</p>
+}
