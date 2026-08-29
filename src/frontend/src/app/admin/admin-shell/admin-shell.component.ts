@@ -20,7 +20,7 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { label: 'Departments', icon: 'business', route: 'departments', roles: ['Admin', 'Manager'] },
   { label: 'Branches', icon: 'location_on', route: 'branches', roles: ['Admin', 'Manager'] },
   { label: 'Categories', icon: 'category', route: 'categories', roles: ['Admin', 'Manager'] },
-  { label: 'Templates', icon: 'quick_reference', route: 'templates', roles: ['Admin'] },
+  { label: 'Templates', icon: 'article', route: 'templates', roles: ['Admin'] },
 ];
 
 @Component({

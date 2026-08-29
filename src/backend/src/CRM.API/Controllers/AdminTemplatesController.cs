@@ -24,7 +24,10 @@ public class AdminTemplatesController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken ct = default)
-        => Ok(await _mediator.Send(new ListGlobalTemplatesQuery(search, page, pageSize), ct));
+    {
+        var result = await _mediator.Send(new ListGlobalTemplatesQuery(search, page, pageSize), ct);
+        return Ok(new { data = result.Items, meta = new { result.Page, result.PageSize, result.TotalCount, result.TotalPages } });
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create(

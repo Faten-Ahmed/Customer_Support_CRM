@@ -8,6 +8,7 @@ import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dial
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TemplateService, QuickReplyTemplate } from './template.service';
 
 @Component({
@@ -17,7 +18,7 @@ import { TemplateService, QuickReplyTemplate } from './template.service';
   template: `
     <h2 mat-dialog-title>New Global Template</h2>
     <mat-dialog-content>
-      <form [formGroup]="form" style="display:flex;flex-direction:column;gap:12px;min-width:400px;padding-top:8px;">
+      <form [formGroup]="form" style="display:flex;flex-direction:column;gap:12px;min-width:420px;padding-top:8px;">
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <mat-form-field>
@@ -29,11 +30,6 @@ import { TemplateService, QuickReplyTemplate } from './template.service';
             <input matInput formControlName="titleAr" dir="rtl" />
           </mat-form-field>
         </div>
-
-        <mat-form-field>
-          <mat-label>Category (optional)</mat-label>
-          <input matInput formControlName="category" />
-        </mat-form-field>
 
         <mat-form-field>
           <mat-label>Content</mat-label>
@@ -61,7 +57,6 @@ export class TemplateFormDialogComponent {
   readonly form = this.fb.nonNullable.group({
     title:     ['', Validators.required],
     titleAr:   ['', Validators.required],
-    category:  [''],
     content:   ['', Validators.required],
     contentAr: ['', Validators.required],
   });
@@ -72,7 +67,6 @@ export class TemplateFormDialogComponent {
     this.templateService.create({
       title: v.title, titleAr: v.titleAr,
       content: v.content, contentAr: v.contentAr,
-      category: v.category || undefined,
     }).subscribe({ next: result => this.dialogRef.close(result), error: () => {} });
   }
 }
@@ -80,7 +74,10 @@ export class TemplateFormDialogComponent {
 @Component({
   selector: 'app-template-list',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule],
+  imports: [
+    CommonModule, MatTableModule, MatButtonModule, MatIconModule,
+    MatDialogModule, MatProgressSpinnerModule, MatTooltipModule,
+  ],
   template: `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <h2 style="margin:0;">Quick Reply Templates</h2>
@@ -88,6 +85,7 @@ export class TemplateFormDialogComponent {
         <mat-icon>add</mat-icon> New Template
       </button>
     </div>
+
     @if (loading()) {
       <div style="display:flex;justify-content:center;padding:40px;">
         <mat-spinner diameter="40" />
@@ -97,28 +95,14 @@ export class TemplateFormDialogComponent {
 
         <ng-container matColumnDef="title">
           <mat-header-cell *matHeaderCellDef>Title</mat-header-cell>
-          <mat-cell *matCellDef="let t">
-            <div>{{ t.title }}</div>
-            @if (t.titleAr) {
-              <div style="font-size:12px;color:#666;" dir="rtl">{{ t.titleAr }}</div>
-            }
-          </mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="category">
-          <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
-          <mat-cell *matCellDef="let t">{{ t.category || '—' }}</mat-cell>
+          <mat-cell *matCellDef="let t">{{ t.title }}</mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="content">
           <mat-header-cell *matHeaderCellDef>Content</mat-header-cell>
-          <mat-cell *matCellDef="let t">
-            <div style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.content }}</div>
-            @if (t.contentAr) {
-              <div style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#666;" dir="rtl">
-                {{ t.contentAr }}
-              </div>
-            }
+          <mat-cell *matCellDef="let t"
+            style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ t.content }}
           </mat-cell>
         </ng-container>
 
@@ -134,6 +118,7 @@ export class TemplateFormDialogComponent {
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
       </mat-table>
+
       @if (templates().length === 0) {
         <p style="text-align:center;color:#666;padding:32px;">No global templates yet.</p>
       }
@@ -146,7 +131,7 @@ export class TemplateListComponent implements OnInit {
 
   readonly templates = signal<QuickReplyTemplate[]>([]);
   readonly loading = signal(false);
-  readonly displayedColumns = ['title', 'category', 'content', 'actions'];
+  readonly displayedColumns = ['title', 'content', 'actions'];
 
   ngOnInit(): void { this.load(); }
 
