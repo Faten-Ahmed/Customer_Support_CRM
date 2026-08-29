@@ -1,5 +1,9 @@
 using CRM.Domain.Auth;
+using CRM.Domain.Branches;
+using CRM.Domain.Categories;
 using CRM.Domain.Customers;
+using CRM.Domain.Departments;
+using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
 using CRM.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +24,11 @@ public class AppDbContext : DbContext
     public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
     public DbSet<TicketHistory> TicketHistory => Set<TicketHistory>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<Branch> Branches => Set<Branch>();
+    public DbSet<TicketCategory> TicketCategories => Set<TicketCategory>();
+    public DbSet<TicketFieldDefinition> TicketFieldDefinitions => Set<TicketFieldDefinition>();
+    public DbSet<QuickReplyTemplate> QuickReplyTemplates => Set<QuickReplyTemplate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
