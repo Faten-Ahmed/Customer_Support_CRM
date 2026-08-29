@@ -41,12 +41,11 @@ export const routes: Routes = [
     children: [
       { path: 'customers', children: CUSTOMERS_ROUTES },
       { path: 'tickets', children: TICKETS_ROUTES },
+      {
+        path: 'admin',
+        loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
+      },
     ],
-  },
-
-  {
-    path: 'admin',
-    loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
   },
 
   { path: '403', component: ForbiddenComponent },
