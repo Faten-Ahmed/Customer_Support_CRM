@@ -17,9 +17,29 @@ export const ADMIN_ROUTES: Routes = [
           import('./departments/department-list.component').then(m => m.DepartmentListComponent),
       },
       {
+        path: 'branches',
+        loadComponent: () =>
+          import('./branches/branch-list.component').then(m => m.BranchListComponent),
+      },
+      {
         path: 'categories',
         loadComponent: () =>
           import('./categories/category-tree.component').then(m => m.CategoryTreeComponent),
+      },
+      {
+        path: 'field-definitions',
+        loadComponent: () =>
+          import('./field-definitions/field-definition-list.component').then(m => m.FieldDefinitionListComponent),
+      },
+      {
+        path: 'templates',
+        loadComponent: () =>
+          import('./templates/template-list.component').then(m => m.TemplateListComponent),
+      },
+      {
+        path: 'channels',
+        loadComponent: () =>
+          import('./channels/channel-status.component').then(m => m.ChannelStatusComponent),
       },
     ],
   },
