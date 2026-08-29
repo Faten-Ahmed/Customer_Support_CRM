@@ -27,8 +27,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.AvailabilityStatus)
                .IsRequired()
-               .HasConversion<int>()
-               .HasDefaultValue(AvailabilityStatus.Offline);
+               .HasConversion<int>();
 
         builder.Property(u => u.IsActive).IsRequired().HasDefaultValue(true);
         builder.Property(u => u.RequiresPasswordChange).IsRequired().HasDefaultValue(false);
