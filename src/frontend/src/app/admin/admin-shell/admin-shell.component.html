@@ -5,7 +5,7 @@
   <span>Admin Configuration</span>
 </mat-toolbar>
 
-<mat-sidenav-container style="height: calc(100vh - 64px)">
+<mat-sidenav-container style="height: calc(100vh - 128px)">
   <mat-sidenav mode="side" opened [style.width]="collapsed() ? '56px' : '200px'">
     <mat-nav-list>
       @for (item of visibleNavItems(); track item.route) {
@@ -20,7 +20,7 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div style="padding: 24px;">
+    <div style="padding: 24px; overflow-y: auto; height: 100%;">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>
