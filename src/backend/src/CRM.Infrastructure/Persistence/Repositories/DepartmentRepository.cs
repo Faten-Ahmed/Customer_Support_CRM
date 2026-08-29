@@ -1,21 +1,28 @@
 using CRM.Domain.Departments;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRM.Infrastructure.Persistence.Repositories;
 
 public class DepartmentRepository : IDepartmentRepository
 {
-    public Task<Department?> FindByIdAsync(Guid id, CancellationToken ct = default)
-        => Task.FromResult<Department?>(null);
+    private readonly AppDbContext _context;
 
-    public Task<IReadOnlyList<Department>> ListAsync(CancellationToken ct = default)
-        => Task.FromResult<IReadOnlyList<Department>>(new List<Department>());
+    public DepartmentRepository(AppDbContext context) => _context = context;
 
-    public Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
-        => Task.FromResult(false);
+    public async Task<Department?> FindByIdAsync(Guid id, CancellationToken ct = default)
+        => await _context.Departments.FirstOrDefaultAsync(d => d.Id == id, ct);
 
-    public Task AddAsync(Department dept, CancellationToken ct = default)
-        => Task.CompletedTask;
+    public async Task<IReadOnlyList<Department>> ListAsync(CancellationToken ct = default)
+        => await _context.Departments
+            .OrderBy(d => d.Name)
+            .ToListAsync(ct);
 
-    public Task SaveChangesAsync(CancellationToken ct = default)
-        => Task.CompletedTask;
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
+        => await _context.Departments.AnyAsync(d => d.Name == name, ct);
+
+    public async Task AddAsync(Department dept, CancellationToken ct = default)
+        => await _context.Departments.AddAsync(dept, ct);
+
+    public async Task SaveChangesAsync(CancellationToken ct = default)
+        => await _context.SaveChangesAsync(ct);
 }

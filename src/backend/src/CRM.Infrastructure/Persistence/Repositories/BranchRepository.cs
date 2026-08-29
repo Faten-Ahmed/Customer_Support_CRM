@@ -1,18 +1,23 @@
 using CRM.Domain.Branches;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRM.Infrastructure.Persistence.Repositories;
 
 public class BranchRepository : IBranchRepository
 {
-    public Task<Branch?> FindByIdAsync(Guid id, CancellationToken ct = default)
-        => Task.FromResult<Branch?>(null);
+    private readonly AppDbContext _context;
 
-    public Task<IReadOnlyList<Branch>> ListAsync(CancellationToken ct = default)
-        => Task.FromResult<IReadOnlyList<Branch>>(new List<Branch>());
+    public BranchRepository(AppDbContext context) => _context = context;
 
-    public Task AddAsync(Branch branch, CancellationToken ct = default)
-        => Task.CompletedTask;
+    public async Task<Branch?> FindByIdAsync(Guid id, CancellationToken ct = default)
+        => await _context.Branches.FirstOrDefaultAsync(b => b.Id == id, ct);
 
-    public Task SaveChangesAsync(CancellationToken ct = default)
-        => Task.CompletedTask;
+    public async Task<IReadOnlyList<Branch>> ListAsync(CancellationToken ct = default)
+        => await _context.Branches.OrderBy(b => b.Name).ToListAsync(ct);
+
+    public async Task AddAsync(Branch branch, CancellationToken ct = default)
+        => await _context.Branches.AddAsync(branch, ct);
+
+    public async Task SaveChangesAsync(CancellationToken ct = default)
+        => await _context.SaveChangesAsync(ct);
 }

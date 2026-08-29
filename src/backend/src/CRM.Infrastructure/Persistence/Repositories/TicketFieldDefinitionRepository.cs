@@ -1,19 +1,34 @@
 using CRM.Domain.Tickets;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRM.Infrastructure.Persistence.Repositories;
 
 public class TicketFieldDefinitionRepository : ITicketFieldDefinitionRepository
 {
-    public Task<TicketFieldDefinition?> FindByIdAsync(Guid id, CancellationToken ct = default)
-        => Task.FromResult<TicketFieldDefinition?>(null);
+    private readonly AppDbContext _context;
 
-    public Task<IReadOnlyList<TicketFieldDefinition>> GetActiveAsync(
+    public TicketFieldDefinitionRepository(AppDbContext context) => _context = context;
+
+    public async Task<TicketFieldDefinition?> FindByIdAsync(Guid id, CancellationToken ct = default)
+        => await _context.TicketFieldDefinitions.FirstOrDefaultAsync(f => f.Id == id, ct);
+
+    public async Task<IReadOnlyList<TicketFieldDefinition>> GetActiveAsync(
         Guid? departmentId, Guid? categoryId, CancellationToken ct = default)
-        => Task.FromResult<IReadOnlyList<TicketFieldDefinition>>(new List<TicketFieldDefinition>());
+    {
+        var query = _context.TicketFieldDefinitions.Where(f => f.IsActive);
 
-    public Task AddAsync(TicketFieldDefinition field, CancellationToken ct = default)
-        => Task.CompletedTask;
+        if (departmentId.HasValue)
+            query = query.Where(f => f.DepartmentId == departmentId.Value);
 
-    public Task SaveChangesAsync(CancellationToken ct = default)
-        => Task.CompletedTask;
+        if (categoryId.HasValue)
+            query = query.Where(f => f.CategoryId == categoryId.Value);
+
+        return await query.OrderBy(f => f.SortOrder).ToListAsync(ct);
+    }
+
+    public async Task AddAsync(TicketFieldDefinition field, CancellationToken ct = default)
+        => await _context.TicketFieldDefinitions.AddAsync(field, ct);
+
+    public async Task SaveChangesAsync(CancellationToken ct = default)
+        => await _context.SaveChangesAsync(ct);
 }

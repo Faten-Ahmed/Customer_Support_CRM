@@ -63,7 +63,7 @@ public class CustomerRepository : ICustomerRepository
             .Skip((filter.Page - 1) * filter.PageSize)
             .Take(filter.PageSize)
             .Select(c => new CustomerSummaryProjection(
-                c.Id, c.FullName, c.Email, c.Phone, c.CompanyName,
+                c.Id, c.FullName, c.FullNameAr, c.Email, c.Phone, c.CompanyName, c.CompanyNameAr,
                 c.IsVip, c.IsActive, 0, c.CreatedAt))
             .ToListAsync(ct);
 
