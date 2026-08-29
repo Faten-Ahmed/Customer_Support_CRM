@@ -3,41 +3,63 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CategoryService, Category } from './category.service';
+
+export interface CategoryDialogData {
+  parents: Category[];
+  preSelectedParentId?: string;
+}
 
 @Component({
   selector: 'app-category-form-dialog',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
+    CommonModule, ReactiveFormsModule, MatDialogModule,
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule,
   ],
   template: `
-    <h2 mat-dialog-title>New Category</h2>
+    <h2 mat-dialog-title>{{ data.preSelectedParentId ? 'New Sub-category' : 'New Category' }}</h2>
     <mat-dialog-content>
-      <form [formGroup]="form" style="display: flex; flex-direction: column; gap: 12px; min-width: 280px; padding-top: 8px;">
+      <form [formGroup]="form" style="display:flex;flex-direction:column;gap:12px;min-width:300px;padding-top:8px;">
+
+        @if (!data.preSelectedParentId) {
+          <mat-form-field>
+            <mat-label>Parent Category (optional)</mat-label>
+            <mat-select formControlName="parentId">
+              <mat-option [value]="null">— None (root category) —</mat-option>
+              @for (p of data.parents; track p.id) {
+                <mat-option [value]="p.id">{{ p.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <p style="margin:0;font-size:13px;color:#555;">
+            Adding child under: <strong>{{ parentName }}</strong>
+          </p>
+        }
+
         <mat-form-field>
           <mat-label>Name</mat-label>
           <input matInput formControlName="name" />
         </mat-form-field>
+
         <mat-form-field>
           <mat-label>Name (Arabic)</mat-label>
           <input matInput formControlName="nameAr" dir="rtl" />
         </mat-form-field>
+
         <mat-form-field>
           <mat-label>Sort Order</mat-label>
           <input matInput formControlName="sortOrder" type="number" />
         </mat-form-field>
+
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -47,25 +69,32 @@ import { CategoryService, Category } from './category.service';
   `,
 })
 export class CategoryFormDialogComponent {
+  readonly data = inject<CategoryDialogData>(MAT_DIALOG_DATA);
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<CategoryFormDialogComponent>);
   private readonly categoryService = inject(CategoryService);
 
+  readonly parentName = this.data.parents.find(p => p.id === this.data.preSelectedParentId)?.name ?? '';
+
   readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
     nameAr: [''],
-    sortOrder: [0, Validators.required],
+    parentId: [this.data.preSelectedParentId ?? null as string | null],
+    sortOrder: [0],
   });
 
   submit(): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    this.categoryService
-      .create({ name: v.name, nameAr: v.nameAr || undefined, sortOrder: v.sortOrder })
-      .subscribe({
-        next: result => this.dialogRef.close(result),
-        error: () => {},
-      });
+    this.categoryService.create({
+      name: v.name,
+      nameAr: v.nameAr || undefined,
+      parentId: v.parentId ?? undefined,
+      sortOrder: v.sortOrder,
+    }).subscribe({
+      next: result => this.dialogRef.close(result),
+      error: () => {},
+    });
   }
 }
 
@@ -73,11 +102,8 @@ export class CategoryFormDialogComponent {
   selector: 'app-category-tree',
   standalone: true,
   imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    MatProgressSpinnerModule,
+    CommonModule, MatButtonModule, MatIconModule,
+    MatDialogModule, MatProgressSpinnerModule, MatChipsModule, MatTooltipModule,
   ],
   templateUrl: './category-tree.component.html',
 })
@@ -88,53 +114,33 @@ export class CategoryTreeComponent implements OnInit {
   readonly categories = signal<Category[]>([]);
   readonly loading = signal(false);
 
-  ngOnInit(): void {
-    this.loadCategories();
-  }
+  ngOnInit(): void { this.load(); }
 
-  loadCategories(): void {
+  load(): void {
     this.loading.set(true);
     this.categoryService.list().subscribe({
-      next: res => {
-        this.categories.set(this.buildTree(res.data ?? []));
-        this.loading.set(false);
-      },
+      next: res => { this.categories.set(res.data ?? []); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
   }
 
-  private buildTree(flat: Category[]): Category[] {
-    const map = new Map<string, Category>();
-    const roots: Category[] = [];
-    flat.forEach(c => map.set(c.id, { ...c, children: [] }));
-    map.forEach(c => {
-      if (c.parentCategoryId) {
-        const parent = map.get(c.parentCategoryId);
-        if (parent) {
-          parent.children = parent.children ?? [];
-          parent.children.push(c);
-        } else {
-          roots.push(c);
-        }
-      } else {
-        roots.push(c);
-      }
-    });
-    return roots;
+  openNewRootDialog(): void {
+    this.dialog.open(CategoryFormDialogComponent, {
+      data: { parents: this.categories() } satisfies CategoryDialogData,
+    }).afterClosed().subscribe(result => { if (result) this.load(); });
   }
 
-  openNewCategoryDialog(): void {
-    const ref = this.dialog.open(CategoryFormDialogComponent);
-    ref.afterClosed().subscribe(result => {
-      if (result) this.loadCategories();
-    });
+  openNewChildDialog(parent: Category): void {
+    this.dialog.open(CategoryFormDialogComponent, {
+      data: { parents: this.categories(), preSelectedParentId: parent.id } satisfies CategoryDialogData,
+    }).afterClosed().subscribe(result => { if (result) this.load(); });
   }
 
   deactivate(cat: Category): void {
-    this.categoryService.deactivate(cat.id).subscribe(() => this.loadCategories());
+    this.categoryService.deactivate(cat.id).subscribe(() => this.load());
   }
 
   reactivate(cat: Category): void {
-    this.categoryService.reactivate(cat.id).subscribe(() => this.loadCategories());
+    this.categoryService.reactivate(cat.id).subscribe(() => this.load());
   }
 }

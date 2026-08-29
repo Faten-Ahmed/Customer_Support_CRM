@@ -1,58 +1,85 @@
-<div style="display: flex; align-items: center; margin-bottom: 16px;">
-  <h2 style="margin: 0; flex: 1;">Categories</h2>
-  <button mat-flat-button color="primary" (click)="openNewCategoryDialog()">
+<div style="display:flex;align-items:center;margin-bottom:16px;">
+  <h2 style="margin:0;flex:1;">Categories</h2>
+  <button mat-flat-button color="primary" (click)="openNewRootDialog()">
     <mat-icon>add</mat-icon> New Category
   </button>
 </div>
 
 @if (loading()) {
-  <div style="text-align: center; padding: 40px;">
+  <div style="text-align:center;padding:40px;">
     <mat-spinner diameter="40"></mat-spinner>
   </div>
+} @else if (categories().length === 0) {
+  <p style="color:#888;text-align:center;padding:32px;">No categories yet. Create one to get started.</p>
 } @else {
-  <div class="category-tree">
+  <div style="border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
+
     @for (cat of categories(); track cat.id) {
-      <div class="category-node">
-        <div class="category-row" style="display: flex; align-items: center; padding: 8px 0;">
-          <mat-icon style="margin-right: 8px;">folder</mat-icon>
-          <span style="flex: 1; font-weight: 500;">{{ cat.name }}</span>
-          <span style="margin-right: 16px; font-size: 12px; color: gray;">
-            {{ cat.isActive ? 'Active' : 'Inactive' }}
-          </span>
-          @if (cat.isActive) {
-            <button mat-icon-button color="warn" (click)="deactivate(cat)" title="Deactivate">
-              <mat-icon>block</mat-icon>
-            </button>
-          } @else {
-            <button mat-icon-button color="primary" (click)="reactivate(cat)" title="Reactivate">
-              <mat-icon>check_circle</mat-icon>
-            </button>
+      <!-- Parent row -->
+      <div style="display:flex;align-items:center;padding:12px 16px;background:#fafafa;border-bottom:1px solid #e0e0e0;">
+        <mat-icon style="margin-right:8px;color:#1976d2;">folder</mat-icon>
+
+        <div style="flex:1;">
+          <div style="font-weight:600;">{{ cat.name }}</div>
+          @if (cat.nameAr) {
+            <div style="font-size:12px;color:#666;" dir="rtl">{{ cat.nameAr }}</div>
           }
         </div>
 
-        @if (cat.children && cat.children.length > 0) {
-          <div style="padding-left: 32px;">
-            @for (child of cat.children; track child.id) {
-              <div class="category-row" style="display: flex; align-items: center; padding: 6px 0;">
-                <mat-icon style="margin-right: 8px; font-size: 18px;">subdirectory_arrow_right</mat-icon>
-                <span style="flex: 1;">{{ child.name }}</span>
-                <span style="margin-right: 16px; font-size: 12px; color: gray;">
-                  {{ child.isActive ? 'Active' : 'Inactive' }}
-                </span>
-                @if (child.isActive) {
-                  <button mat-icon-button color="warn" (click)="deactivate(child)" title="Deactivate">
-                    <mat-icon>block</mat-icon>
-                  </button>
-                } @else {
-                  <button mat-icon-button color="primary" (click)="reactivate(child)" title="Reactivate">
-                    <mat-icon>check_circle</mat-icon>
-                  </button>
-                }
-              </div>
+        <mat-chip [color]="cat.isActive ? 'primary' : 'warn'" highlighted style="margin-right:8px;">
+          {{ cat.isActive ? 'Active' : 'Inactive' }}
+        </mat-chip>
+
+        <button mat-icon-button color="primary" (click)="openNewChildDialog(cat)"
+                matTooltip="Add sub-category" [disabled]="!cat.isActive">
+          <mat-icon>add_circle_outline</mat-icon>
+        </button>
+
+        @if (cat.isActive) {
+          <button mat-icon-button color="warn" (click)="deactivate(cat)" matTooltip="Deactivate (cascades to children)">
+            <mat-icon>block</mat-icon>
+          </button>
+        } @else {
+          <button mat-icon-button color="accent" (click)="reactivate(cat)" matTooltip="Reactivate">
+            <mat-icon>check_circle</mat-icon>
+          </button>
+        }
+      </div>
+
+      <!-- Child rows -->
+      @if (cat.children && cat.children.length > 0) {
+        @for (child of cat.children; track child.id) {
+          <div style="display:flex;align-items:center;padding:10px 16px 10px 48px;border-bottom:1px solid #f0f0f0;background:#fff;">
+            <mat-icon style="margin-right:8px;font-size:18px;color:#888;">subdirectory_arrow_right</mat-icon>
+
+            <div style="flex:1;">
+              <div>{{ child.name }}</div>
+              @if (child.nameAr) {
+                <div style="font-size:12px;color:#666;" dir="rtl">{{ child.nameAr }}</div>
+              }
+            </div>
+
+            <mat-chip [color]="child.isActive ? 'primary' : 'warn'" highlighted style="margin-right:8px;">
+              {{ child.isActive ? 'Active' : 'Inactive' }}
+            </mat-chip>
+
+            @if (child.isActive) {
+              <button mat-icon-button color="warn" (click)="deactivate(child)" matTooltip="Deactivate">
+                <mat-icon>block</mat-icon>
+              </button>
+            } @else {
+              <button mat-icon-button color="accent" (click)="reactivate(child)" matTooltip="Reactivate">
+                <mat-icon>check_circle</mat-icon>
+              </button>
             }
           </div>
         }
-      </div>
+      } @else {
+        <div style="padding:8px 48px;font-size:12px;color:#aaa;border-bottom:1px solid #f0f0f0;background:#fff;">
+          No sub-categories
+        </div>
+      }
     }
+
   </div>
 }
