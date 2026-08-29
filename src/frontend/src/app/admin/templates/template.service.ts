@@ -5,17 +5,22 @@ import { Observable } from 'rxjs';
 export interface QuickReplyTemplate {
   id: string;
   title: string;
+  titleAr: string;
   content: string;
+  contentAr: string;
   category?: string;
   scope: 'Global' | 'Personal';
   createdByUserId: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateTemplatePayload {
   title: string;
+  titleAr: string;
   content: string;
+  contentAr: string;
   category?: string;
 }
 

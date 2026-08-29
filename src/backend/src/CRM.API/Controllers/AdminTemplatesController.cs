@@ -31,7 +31,8 @@ public class AdminTemplatesController : ControllerBase
         [FromBody] GlobalTemplateRequest req, CancellationToken ct)
     {
         var result = await _mediator.Send(
-            new CreateGlobalTemplateCommand(CurrentUserId, req.Title!, req.Content!, req.Category), ct);
+            new CreateGlobalTemplateCommand(
+                CurrentUserId, req.Title!, req.TitleAr!, req.Content!, req.ContentAr!, req.Category), ct);
         return StatusCode(201, new { data = result });
     }
 
@@ -42,7 +43,8 @@ public class AdminTemplatesController : ControllerBase
         try
         {
             var result = await _mediator.Send(
-                new UpdateGlobalTemplateCommand(id, req.Title, req.Content, req.Category), ct);
+                new UpdateGlobalTemplateCommand(
+                    id, req.Title, req.TitleAr, req.Content, req.ContentAr, req.Category), ct);
             return Ok(new { data = result });
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
@@ -64,4 +66,7 @@ public class AdminTemplatesController : ControllerBase
     }
 }
 
-public record GlobalTemplateRequest(string? Title, string? Content, string? Category);
+public record GlobalTemplateRequest(
+    string? Title, string? TitleAr,
+    string? Content, string? ContentAr,
+    string? Category);

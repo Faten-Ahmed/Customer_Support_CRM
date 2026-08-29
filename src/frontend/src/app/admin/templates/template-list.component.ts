@@ -17,19 +17,34 @@ import { TemplateService, QuickReplyTemplate } from './template.service';
   template: `
     <h2 mat-dialog-title>New Global Template</h2>
     <mat-dialog-content>
-      <form [formGroup]="form" style="display:flex;flex-direction:column;gap:12px;min-width:360px;padding-top:8px;">
-        <mat-form-field>
-          <mat-label>Title</mat-label>
-          <input matInput formControlName="title" />
-        </mat-form-field>
+      <form [formGroup]="form" style="display:flex;flex-direction:column;gap:12px;min-width:400px;padding-top:8px;">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <mat-form-field>
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>العنوان (Arabic)</mat-label>
+            <input matInput formControlName="titleAr" dir="rtl" />
+          </mat-form-field>
+        </div>
+
         <mat-form-field>
           <mat-label>Category (optional)</mat-label>
           <input matInput formControlName="category" />
         </mat-form-field>
+
         <mat-form-field>
           <mat-label>Content</mat-label>
-          <textarea matInput formControlName="content" rows="5"></textarea>
+          <textarea matInput formControlName="content" rows="4"></textarea>
         </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>المحتوى (Arabic)</mat-label>
+          <textarea matInput formControlName="contentAr" rows="4" dir="rtl"></textarea>
+        </mat-form-field>
+
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -44,16 +59,21 @@ export class TemplateFormDialogComponent {
   private readonly templateService = inject(TemplateService);
 
   readonly form = this.fb.nonNullable.group({
-    title: ['', Validators.required],
-    category: [''],
-    content: ['', Validators.required],
+    title:     ['', Validators.required],
+    titleAr:   ['', Validators.required],
+    category:  [''],
+    content:   ['', Validators.required],
+    contentAr: ['', Validators.required],
   });
 
   submit(): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    this.templateService.create({ title: v.title, content: v.content, category: v.category || undefined })
-      .subscribe({ next: result => this.dialogRef.close(result), error: () => {} });
+    this.templateService.create({
+      title: v.title, titleAr: v.titleAr,
+      content: v.content, contentAr: v.contentAr,
+      category: v.category || undefined,
+    }).subscribe({ next: result => this.dialogRef.close(result), error: () => {} });
   }
 }
 
@@ -74,20 +94,34 @@ export class TemplateFormDialogComponent {
       </div>
     } @else {
       <mat-table [dataSource]="templates()">
+
         <ng-container matColumnDef="title">
           <mat-header-cell *matHeaderCellDef>Title</mat-header-cell>
-          <mat-cell *matCellDef="let t">{{ t.title }}</mat-cell>
+          <mat-cell *matCellDef="let t">
+            <div>{{ t.title }}</div>
+            @if (t.titleAr) {
+              <div style="font-size:12px;color:#666;" dir="rtl">{{ t.titleAr }}</div>
+            }
+          </mat-cell>
         </ng-container>
+
         <ng-container matColumnDef="category">
           <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
           <mat-cell *matCellDef="let t">{{ t.category || '—' }}</mat-cell>
         </ng-container>
+
         <ng-container matColumnDef="content">
-          <mat-header-cell *matHeaderCellDef>Content Preview</mat-header-cell>
-          <mat-cell *matCellDef="let t" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-            {{ t.content }}
+          <mat-header-cell *matHeaderCellDef>Content</mat-header-cell>
+          <mat-cell *matCellDef="let t">
+            <div style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.content }}</div>
+            @if (t.contentAr) {
+              <div style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#666;" dir="rtl">
+                {{ t.contentAr }}
+              </div>
+            }
           </mat-cell>
         </ng-container>
+
         <ng-container matColumnDef="actions">
           <mat-header-cell *matHeaderCellDef></mat-header-cell>
           <mat-cell *matCellDef="let t">
@@ -96,6 +130,7 @@ export class TemplateFormDialogComponent {
             </button>
           </mat-cell>
         </ng-container>
+
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
       </mat-table>

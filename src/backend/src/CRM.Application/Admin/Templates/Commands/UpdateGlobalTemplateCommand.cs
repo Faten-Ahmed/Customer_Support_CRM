@@ -5,7 +5,10 @@ using MediatR;
 namespace CRM.Application.Admin.Templates.Commands;
 
 public record UpdateGlobalTemplateCommand(
-    Guid TemplateId, string? Title, string? Content, string? Category)
+    Guid TemplateId,
+    string? Title, string? TitleAr,
+    string? Content, string? ContentAr,
+    string? Category)
     : IRequest<TemplateDto>;
 
 public class UpdateGlobalTemplateCommandHandler
@@ -25,7 +28,7 @@ public class UpdateGlobalTemplateCommandHandler
             throw new InvalidOperationException(
                 "Only Global templates can be edited via this endpoint.");
 
-        template.Update(cmd.Title, cmd.Content, cmd.Category);
+        template.Update(cmd.Title, cmd.TitleAr, cmd.Content, cmd.ContentAr, cmd.Category);
         await _templates.SaveChangesAsync(ct);
 
         return CreateGlobalTemplateCommandHandler.Map(template);
