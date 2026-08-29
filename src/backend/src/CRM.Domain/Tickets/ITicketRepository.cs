@@ -53,5 +53,7 @@ public interface ITicketRepository
         int page,
         int pageSize,
         CancellationToken ct = default);
+    Task<int> CountOpenForDepartmentAsync(Guid departmentId, CancellationToken ct = default);
+    Task<int> CountOpenForCategoryAsync(Guid categoryId, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
 }

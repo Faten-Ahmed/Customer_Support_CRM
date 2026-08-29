@@ -1,3 +1,4 @@
+using CRM.Domain.Common;
 using CRM.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +24,6 @@ public class UserRepository : IUserRepository
     public Task SaveChangesAsync(CancellationToken ct = default)
         => _db.SaveChangesAsync(ct);
 
-    // Stub until agent-department assignment domain is implemented (US-BE-063+)
     public Task<IReadOnlyList<Guid>> GetDepartmentIdsAsync(Guid userId, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<Guid>>(new List<Guid>());
 
@@ -32,4 +32,22 @@ public class UserRepository : IUserRepository
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == agentId, ct);
         return user is { IsActive: true, Role: UserRole.Agent };
     }
+
+    public Task<bool> ExistsWithEmailAsync(string email, CancellationToken ct = default)
+        => _db.Users.AnyAsync(u => u.Email == email, ct);
+
+    public Task<int> CountActiveAdminsAsync(CancellationToken ct = default)
+        => _db.Users.CountAsync(u => u.IsActive && u.Role == UserRole.Admin, ct);
+
+    public async Task AddAsync(User user, CancellationToken ct = default)
+        => await _db.Users.AddAsync(user, ct);
+
+    public Task<PagedResult<UserSummaryProjection>> ListAsync(
+        UserRole? role, Guid? departmentId, bool? isActive, string? search,
+        int page, int pageSize, CancellationToken ct = default)
+        => Task.FromResult(new PagedResult<UserSummaryProjection>(
+            new List<UserSummaryProjection>(), 0, page, pageSize));
+
+    public Task<UserDetailProjection?> GetDetailAsync(Guid userId, CancellationToken ct = default)
+        => Task.FromResult<UserDetailProjection?>(null);
 }

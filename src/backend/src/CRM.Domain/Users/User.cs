@@ -7,10 +7,21 @@ public class User
     public string PasswordHash { get; private set; } = null!;
     public string FirstName { get; private set; } = null!;
     public string LastName { get; private set; } = null!;
+    public string FirstNameAr { get; private set; } = null!;
+    public string LastNameAr { get; private set; } = null!;
+    public string? JobTitle { get; private set; }
+    public string? JobTitleAr { get; private set; }
     public UserRole Role { get; private set; }
     public bool IsActive { get; private set; }
     public bool RequiresPasswordChange { get; private set; }
+    public AvailabilityStatus AvailabilityStatus { get; private set; }
     public DateTime CreatedAt { get; private set; }
+
+    private readonly List<UserDepartment> _departments = new();
+    public IReadOnlyList<UserDepartment> Departments => _departments.AsReadOnly();
+
+    private readonly List<UserSkill> _skills = new();
+    public IReadOnlyList<UserSkill> Skills => _skills.AsReadOnly();
 
     private User() { }
 
@@ -20,11 +31,67 @@ public class User
         RequiresPasswordChange = false;
     }
 
+    public void SetPassword(string passwordHash, bool mustChange)
+    {
+        PasswordHash = passwordHash;
+        RequiresPasswordChange = mustChange;
+    }
+
+    public void Deactivate() => IsActive = false;
+    public void Reactivate() => IsActive = true;
+
+    public void UpdateProfile(
+        string firstName, string lastName,
+        string? firstNameAr = null, string? lastNameAr = null,
+        string? jobTitle = null, string? jobTitleAr = null)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        if (firstNameAr is not null) FirstNameAr = firstNameAr;
+        if (lastNameAr is not null) LastNameAr = lastNameAr;
+        JobTitle = jobTitle;
+        JobTitleAr = jobTitleAr;
+    }
+
+    public void ReplaceDepartments(IEnumerable<UserDepartment> newDepartments)
+    {
+        _departments.Clear();
+        _departments.AddRange(newDepartments);
+    }
+
+    public void ReplaceSkills(IEnumerable<UserSkill> newSkills)
+    {
+        _skills.Clear();
+        _skills.AddRange(newSkills);
+    }
+
+    public static User CreateInternal(
+        Guid id, string firstName, string lastName, string email, UserRole role,
+        string? firstNameAr = null, string? lastNameAr = null,
+        string? jobTitle = null, string? jobTitleAr = null)
+        => new()
+        {
+            Id = id,
+            FirstName = firstName,
+            LastName = lastName,
+            FirstNameAr = firstNameAr ?? string.Empty,
+            LastNameAr = lastNameAr ?? string.Empty,
+            JobTitle = jobTitle,
+            JobTitleAr = jobTitleAr,
+            Email = email,
+            Role = role,
+            IsActive = true,
+            AvailabilityStatus = AvailabilityStatus.Offline,
+            CreatedAt = DateTime.UtcNow
+        };
+
     public static User CreateSeeded(
         string email,
         string passwordHash,
         string firstName,
+        string firstNameAr,
         string lastName,
+        string lastNameAr,
         UserRole role,
         bool requiresPasswordChange)
         => new()
@@ -33,10 +100,13 @@ public class User
             Email = email,
             PasswordHash = passwordHash,
             FirstName = firstName,
+            FirstNameAr = firstNameAr,
             LastName = lastName,
+            LastNameAr = lastNameAr,
             Role = role,
             IsActive = true,
             RequiresPasswordChange = requiresPasswordChange,
+            AvailabilityStatus = AvailabilityStatus.Offline,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -49,17 +119,22 @@ public class User
         bool requiresPasswordChange = false,
         Guid? id = null,
         string firstName = "Test",
-        string lastName = "User")
+        string firstNameAr = "اختبار",
+        string lastName = "User",
+        string lastNameAr = "مستخدم")
         => new()
         {
             Id = id ?? Guid.NewGuid(),
             Email = email,
             PasswordHash = passwordHash,
             FirstName = firstName,
+            FirstNameAr = firstNameAr,
             LastName = lastName,
+            LastNameAr = lastNameAr,
             Role = role,
             IsActive = isActive,
             RequiresPasswordChange = requiresPasswordChange,
+            AvailabilityStatus = AvailabilityStatus.Offline,
             CreatedAt = DateTime.UtcNow
         };
 }

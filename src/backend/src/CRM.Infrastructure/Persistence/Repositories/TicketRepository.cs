@@ -119,6 +119,12 @@ public class TicketRepository : ITicketRepository
         return new PagedResult<CustomerTicketProjection>(items, total, page, pageSize);
     }
 
+    public Task<int> CountOpenForDepartmentAsync(Guid departmentId, CancellationToken ct = default)
+        => Task.FromResult(0);
+
+    public Task<int> CountOpenForCategoryAsync(Guid categoryId, CancellationToken ct = default)
+        => Task.FromResult(0);
+
     public Task SaveChangesAsync(CancellationToken ct = default)
         => _db.SaveChangesAsync(ct);
 }
