@@ -1,3 +1,4 @@
+using CRM.Domain.KnowledgeBase;
 using CRM.Domain.Sla;
 using CRM.Domain.Tickets.Enums;
 using CRM.Domain.Users;
@@ -24,6 +25,18 @@ public static class DbSeeder
                 CreateUser("agent@azmsquad.com",   "P@ssw0rd!", "Omar",   "عمر",     "Hassan",  "حسن",    UserRole.Agent,   requiresPasswordChange: false)
             );
 
+            await db.SaveChangesAsync();
+        }
+
+        if (!await db.KbCategories.AnyAsync())
+        {
+            db.KbCategories.AddRange(
+                KbCategory.Create("General"),
+                KbCategory.Create("Account & Billing"),
+                KbCategory.Create("Technical Support"),
+                KbCategory.Create("Getting Started"),
+                KbCategory.Create("Policies & Compliance")
+            );
             await db.SaveChangesAsync();
         }
 
