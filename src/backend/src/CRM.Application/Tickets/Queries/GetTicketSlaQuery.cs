@@ -40,15 +40,17 @@ public class GetTicketSlaQueryHandler : IRequestHandler<GetTicketSlaQuery, Ticke
         hours ??= await _businessHours.FindGlobalAsync(ct);
 
         var now = DateTime.UtcNow;
+        // When paused, freeze elapsed time at the pause moment so the clock stops counting
+        var effectiveCeiling = sla.ClockPausedAt ?? now;
 
         var firstResponse = ComputeClock(
             sla.ClockStartedAt, sla.FirstResponseDue,
-            sla.FirstResponseAt ?? now,
+            sla.FirstResponseAt ?? effectiveCeiling,
             sla.AccumulatedPauseMinutes, sla.FirstResponseBreached, hours);
 
         var resolution = ComputeClock(
             sla.ClockStartedAt, sla.ResolutionDue,
-            now, sla.AccumulatedPauseMinutes, sla.ResolutionBreached, hours);
+            effectiveCeiling, sla.AccumulatedPauseMinutes, sla.ResolutionBreached, hours);
 
         return new TicketSlaDto(
             IsPaused: sla.ClockPausedAt.HasValue,
