@@ -159,6 +159,13 @@ public class Ticket
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void RecordSlaRecalculation(string oldPolicyId, string newPolicyId)
+    {
+        _history.Add(TicketHistory.Create(
+            Id, "SlaRecalculated", oldPolicyId, newPolicyId, Guid.Empty));
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void RecordEscalationReason(string reason, Guid escalatedBy)
     {
         _history.Add(TicketHistory.Create(Id, "EscalationReason", null, reason, escalatedBy));

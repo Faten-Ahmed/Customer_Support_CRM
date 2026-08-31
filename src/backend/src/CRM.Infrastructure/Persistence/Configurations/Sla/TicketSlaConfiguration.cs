@@ -10,6 +10,7 @@ public class TicketSlaConfiguration : IEntityTypeConfiguration<TicketSla>
     {
         builder.ToTable("TicketSlas");
         builder.HasKey(s => s.Id);
+        builder.Property(s => s.FirstResponseBreachTier).HasConversion<string>().HasMaxLength(20);
         builder.Property(s => s.BreachTier).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(s => s.TicketId).IsUnique();
     }

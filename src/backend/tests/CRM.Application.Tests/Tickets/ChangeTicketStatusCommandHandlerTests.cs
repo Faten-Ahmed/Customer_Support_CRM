@@ -11,13 +11,15 @@ public class ChangeTicketStatusCommandHandlerTests
 {
     private readonly Mock<ITicketRepository> _repo = new();
     private readonly Mock<ITicketSlaRepository> _slaRepo = new();
+    private readonly Mock<IBusinessHoursRepository> _hoursRepo = new();
     private readonly ChangeTicketStatusCommandHandler _handler;
 
     public ChangeTicketStatusCommandHandlerTests()
     {
         _slaRepo.Setup(r => r.FindByTicketIdAsync(It.IsAny<Guid>(), default))
                 .ReturnsAsync((TicketSla?)null);
-        _handler = new ChangeTicketStatusCommandHandler(_repo.Object, _slaRepo.Object);
+        _hoursRepo.Setup(r => r.FindGlobalAsync(default)).ReturnsAsync((BusinessHours?)null);
+        _handler = new ChangeTicketStatusCommandHandler(_repo.Object, _slaRepo.Object, _hoursRepo.Object);
     }
 
     [Fact]

@@ -15,6 +15,7 @@ public class TicketSla
     public DateTime? FirstResponseAt { get; private set; }
     public bool FirstResponseBreached { get; private set; }
     public bool ResolutionBreached { get; private set; }
+    public SlaBreachTier FirstResponseBreachTier { get; private set; }
     public SlaBreachTier BreachTier { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -43,13 +44,20 @@ public class TicketSla
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void ResumeClock()
+    public void ResumeClock(int businessPauseMinutes)
     {
         if (ClockPausedAt.HasValue)
         {
-            AccumulatedPauseMinutes += (int)(DateTime.UtcNow - ClockPausedAt.Value).TotalMinutes;
+            AccumulatedPauseMinutes += businessPauseMinutes;
             ClockPausedAt = null;
         }
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateFirstResponseBreachTier(SlaBreachTier tier)
+    {
+        FirstResponseBreachTier = tier;
+        if (tier >= SlaBreachTier.Breach) FirstResponseBreached = true;
         UpdatedAt = DateTime.UtcNow;
     }
 

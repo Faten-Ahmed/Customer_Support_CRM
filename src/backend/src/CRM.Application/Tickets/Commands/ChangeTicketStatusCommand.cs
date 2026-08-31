@@ -1,3 +1,4 @@
+using CRM.Application.Sla;
 using CRM.Application.Tickets.Services;
 using CRM.Domain.Sla;
 using CRM.Domain.Tickets;
@@ -15,13 +16,16 @@ public class ChangeTicketStatusCommandHandler : IRequestHandler<ChangeTicketStat
 {
     private readonly ITicketRepository _tickets;
     private readonly ITicketSlaRepository _slaRepo;
+    private readonly IBusinessHoursRepository _businessHours;
 
     public ChangeTicketStatusCommandHandler(
         ITicketRepository tickets,
-        ITicketSlaRepository slaRepo)
+        ITicketSlaRepository slaRepo,
+        IBusinessHoursRepository businessHours)
     {
         _tickets = tickets;
         _slaRepo = slaRepo;
+        _businessHours = businessHours;
     }
 
     public async Task Handle(ChangeTicketStatusCommand cmd, CancellationToken ct)
@@ -40,9 +44,22 @@ public class ChangeTicketStatusCommandHandler : IRequestHandler<ChangeTicketStat
         if (sla is not null)
         {
             if (cmd.NewStatus == TicketStatus.OnHold)
+            {
                 sla.PauseClock();
-            else if (previousStatus == TicketStatus.OnHold)
-                sla.ResumeClock();
+            }
+            else if (previousStatus == TicketStatus.OnHold && sla.ClockPausedAt.HasValue)
+            {
+                BusinessHours? hours = null;
+                if (ticket.DepartmentId.HasValue)
+                    hours = await _businessHours.FindByDepartmentAsync(ticket.DepartmentId.Value, ct);
+                hours ??= await _businessHours.FindGlobalAsync(ct);
+
+                var businessPauseMinutes = hours is not null
+                    ? BusinessTimeCalculator.ElapsedBusinessMinutes(sla.ClockPausedAt.Value, DateTime.UtcNow, hours)
+                    : (int)(DateTime.UtcNow - sla.ClockPausedAt.Value).TotalMinutes;
+
+                sla.ResumeClock(businessPauseMinutes);
+            }
         }
 
         await _tickets.SaveChangesAsync(ct);

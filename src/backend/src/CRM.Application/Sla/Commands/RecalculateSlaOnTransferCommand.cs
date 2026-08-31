@@ -65,7 +65,9 @@ public class RecalculateSlaOnTransferCommandHandler
         if (remainingFirstResponse == 0) newFirstResponseDue = now;
         if (remainingResolution == 0) newResolutionDue = now;
 
+        var oldPolicyId = sla.SlaPolicyId.ToString();
         sla.RecalculateDeadlines(policy.Id, newFirstResponseDue, newResolutionDue);
+        ticket.RecordSlaRecalculation(oldPolicyId, policy.Id.ToString());
 
         await _slaRepo.SaveChangesAsync(ct);
     }
