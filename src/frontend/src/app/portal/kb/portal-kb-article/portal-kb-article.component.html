@@ -2,17 +2,23 @@
   <div class="portal-page">
     <nav class="breadcrumb">
       <a routerLink="/portal/kb" i18n="@@portalKb.article.breadcrumbHome">Knowledge Base</a>
-      <span class="breadcrumb-sep">/</span>
-      <span>{{ label(article()!.categoryName) }}</span>
+      @if (article()!.categoryName) {
+        <span class="breadcrumb-sep">/</span>
+        <span>{{ article()!.categoryName }}</span>
+      }
     </nav>
 
-    <h1 class="page-title">{{ label(article()!.title) }}</h1>
-    <p class="article-updated">
-      <span i18n="@@portalKb.article.lastUpdated">Last updated:</span>
-      {{ article()!.updatedAt | date }}
-    </p>
+    <h1 class="page-title">{{ articleTitle(article()!) }}</h1>
+    @if (article()!.publishedAt) {
+      <p class="article-updated">
+        <span i18n="@@portalKb.article.lastUpdated">Last updated:</span>
+        {{ article()!.updatedAt | date }}
+      </p>
+    }
 
-    <div class="article-content" [innerHTML]="safeContent()"></div>
+    <div class="article-content">
+      <pre class="article-body">{{ articleContent(article()!) }}</pre>
+    </div>
 
     <div class="article-feedback">
       @if (!feedbackGiven()) {

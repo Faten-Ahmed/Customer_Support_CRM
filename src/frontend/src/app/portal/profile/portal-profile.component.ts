@@ -61,11 +61,6 @@ import { PortalProfileService, PortalProfile } from '../services/portal-profile.
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>City</mat-label>
-                <input matInput formControlName="city" />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Company</mat-label>
                 <input matInput formControlName="companyName" />
               </mat-form-field>
@@ -109,7 +104,6 @@ export class PortalProfileComponent implements OnInit {
     fullNameAr: [{ value: '', disabled: true }],
     email: [{ value: '', disabled: true }],
     phone: [{ value: '', disabled: true }],
-    city: [{ value: '', disabled: true }],
     companyName: [{ value: '', disabled: true }],
   });
 
@@ -123,7 +117,6 @@ export class PortalProfileComponent implements OnInit {
           fullNameAr: p.fullNameAr,
           email: p.email,
           phone: p.phone ?? '',
-          city: p.city ?? '',
           companyName: p.companyName ?? '',
         });
         this.loading.set(false);
@@ -137,7 +130,6 @@ export class PortalProfileComponent implements OnInit {
     this.form.get('fullName')!.enable();
     this.form.get('fullNameAr')!.enable();
     this.form.get('phone')!.enable();
-    this.form.get('city')!.enable();
   }
 
   cancelEdit(): void {
@@ -147,7 +139,6 @@ export class PortalProfileComponent implements OnInit {
         fullName: p.fullName,
         fullNameAr: p.fullNameAr,
         phone: p.phone ?? '',
-        city: p.city ?? '',
         companyName: p.companyName ?? '',
       });
     }
@@ -162,7 +153,6 @@ export class PortalProfileComponent implements OnInit {
       fullName: val.fullName ?? undefined,
       fullNameAr: val.fullNameAr ?? undefined,
       phone: val.phone ?? undefined,
-      city: val.city ?? undefined,
     }).subscribe({
       next: res => {
         this.profile.set(res.data);
@@ -178,6 +168,5 @@ export class PortalProfileComponent implements OnInit {
     this.form.get('fullName')!.disable();
     this.form.get('fullNameAr')!.disable();
     this.form.get('phone')!.disable();
-    this.form.get('city')!.disable();
   }
 }

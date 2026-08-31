@@ -1,6 +1,7 @@
 using CRM.Application.KnowledgeBase.Queries;
 using CRM.Domain.Common;
 using CRM.Domain.KnowledgeBase;
+using CRM.Domain.Users;
 using Moq;
 using Xunit;
 
@@ -9,11 +10,18 @@ namespace CRM.Application.Tests.KnowledgeBase;
 public class ListKbArticlesQueryHandlerTests
 {
     private readonly Mock<IKbArticleRepository> _repo = new();
+    private readonly Mock<IKbCategoryRepository> _categories = new();
+    private readonly Mock<IUserRepository> _users = new();
     private readonly ListKbArticlesQueryHandler _handler;
 
     public ListKbArticlesQueryHandlerTests()
     {
-        _handler = new ListKbArticlesQueryHandler(_repo.Object);
+        _categories.Setup(c => c.ListActiveAsync(default))
+            .ReturnsAsync(new List<KbCategory>());
+        _users.Setup(u => u.FindByIdsAsync(It.IsAny<IEnumerable<Guid>>(), default))
+            .ReturnsAsync(new List<User>());
+
+        _handler = new ListKbArticlesQueryHandler(_repo.Object, _categories.Object, _users.Object);
     }
 
     [Fact]

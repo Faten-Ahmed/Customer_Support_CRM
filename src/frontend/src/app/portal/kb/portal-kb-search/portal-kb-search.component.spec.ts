@@ -5,18 +5,17 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { PortalKbSearchComponent } from './portal-kb-search.component';
-import { PortalKbService, KbArticleSummary } from '../../services/portal-kb.service';
+import { PortalKbService, PortalKbSearchResult } from '../../services/portal-kb.service';
 import { I18nService } from '../../../shared/services/i18n.service';
 
-const mockResults: KbArticleSummary[] = [
+const mockResults: PortalKbSearchResult[] = [
   {
     id: 'a1',
-    title: { en: 'Reset Password', ar: 'إعادة تعيين كلمة المرور' },
-    excerpt: { en: 'Steps to reset', ar: 'خطوات' },
+    title: 'Reset Password',
+    titleAr: 'إعادة تعيين كلمة المرور',
     categoryId: 'c1',
-    categoryName: { en: 'Account', ar: 'الحساب' },
-    featured: false,
-    updatedAt: '',
+    visibility: 'Public',
+    excerpt: 'Steps to reset your password.',
   },
 ];
 
@@ -58,6 +57,11 @@ describe('PortalKbSearchComponent', () => {
   it('should display search results', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.textContent).toContain('Reset Password');
+  });
+
+  it('should return Arabic title when lang is ar', () => {
+    mockI18n.lang.mockReturnValue('ar');
+    expect(component.articleTitle(mockResults[0])).toBe('إعادة تعيين كلمة المرور');
   });
 
   it('should show empty state when no results', () => {

@@ -8,11 +8,15 @@ namespace CRM.Application.Tests.KnowledgeBase;
 public class GetKbArticleQueryHandlerTests
 {
     private readonly Mock<IKbArticleRepository> _repo = new();
+    private readonly Mock<IKbCategoryRepository> _categories = new();
     private readonly GetKbArticleQueryHandler _handler;
 
     public GetKbArticleQueryHandlerTests()
     {
-        _handler = new GetKbArticleQueryHandler(_repo.Object);
+        _categories.Setup(c => c.FindByIdAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync((KbCategory?)null);
+
+        _handler = new GetKbArticleQueryHandler(_repo.Object, _categories.Object);
     }
 
     [Fact]

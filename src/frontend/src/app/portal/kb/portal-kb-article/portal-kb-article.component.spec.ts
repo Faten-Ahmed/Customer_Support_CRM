@@ -5,17 +5,21 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { PortalKbArticleComponent } from './portal-kb-article.component';
-import { PortalKbService, KbArticle } from '../../services/portal-kb.service';
+import { PortalKbService, PortalKbArticle } from '../../services/portal-kb.service';
 import { I18nService } from '../../../shared/services/i18n.service';
 
-const mockArticle: KbArticle = {
+const mockArticle: PortalKbArticle = {
   id: 'a1',
-  title: { en: 'Reset Password', ar: 'إعادة تعيين كلمة المرور' },
-  excerpt: { en: 'Steps', ar: 'خطوات' },
-  content: { en: '<p>Step 1: Go to login page</p>', ar: '<p>الخطوة 1</p>' },
+  title: 'Reset Password',
+  titleAr: 'إعادة تعيين كلمة المرور',
+  content: 'Step 1: Go to login page',
+  contentAr: 'الخطوة 1: اذهب إلى صفحة تسجيل الدخول',
   categoryId: 'c1',
-  categoryName: { en: 'Account', ar: 'الحساب' },
-  featured: false,
+  categoryName: 'Account',
+  visibility: 'Public',
+  status: 'Published',
+  publishedAt: '2025-01-01T00:00:00Z',
+  createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };
 
@@ -55,9 +59,19 @@ describe('PortalKbArticleComponent', () => {
     expect(component.article()).toBeTruthy();
   });
 
-  it('should render article title in current language', () => {
+  it('should render article title in English', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.textContent).toContain('Reset Password');
+  });
+
+  it('should return Arabic title when lang is ar', () => {
+    mockI18n.lang.mockReturnValue('ar');
+    expect(component.articleTitle(mockArticle)).toBe('إعادة تعيين كلمة المرور');
+  });
+
+  it('should return Arabic content when lang is ar', () => {
+    mockI18n.lang.mockReturnValue('ar');
+    expect(component.articleContent(mockArticle)).toBe('الخطوة 1: اذهب إلى صفحة تسجيل الدخول');
   });
 
   it('should record thumbsUp feedback', () => {

@@ -12,7 +12,12 @@
     <div class="spinner-wrap">
       <mat-spinner diameter="40" />
     </div>
-  } @else if (results().length === 0) {
+  } @else if (errorMsg()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMsg() }}</span>
+    </div>
+  } @else if (results().length === 0 && query) {
     <div class="empty-state">
       <mat-icon class="empty-icon">search_off</mat-icon>
       <p class="empty-title" i18n="@@portalKb.search.noResults">No articles found</p>
@@ -25,9 +30,8 @@
     <div class="result-list">
       @for (article of results(); track article.id) {
         <a [routerLink]="['/portal/kb', article.id]" class="result-card">
-          <p class="result-title">{{ label(article.title) }}</p>
-          <p class="result-excerpt">{{ label(article.excerpt) }}</p>
-          <p class="result-category">{{ label(article.categoryName) }}</p>
+          <p class="result-title">{{ articleTitle(article) }}</p>
+          <p class="result-excerpt">{{ article.excerpt }}</p>
         </a>
       }
     </div>

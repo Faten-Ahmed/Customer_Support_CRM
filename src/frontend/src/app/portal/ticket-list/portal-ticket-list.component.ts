@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTableModule } from '@angular/material/table';
 import { PortalTicketService, PortalTicketPage } from '../services/portal-ticket.service';
 
 @Component({
@@ -17,15 +18,16 @@ import { PortalTicketService, PortalTicketPage } from '../services/portal-ticket
   imports: [
     CommonModule, DatePipe, RouterLink, ReactiveFormsModule,
     MatCardModule, MatButtonModule, MatIconModule,
-    MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule, MatChipsModule,
+    MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule,
+    MatChipsModule, MatTableModule,
   ],
   template: `
     <div class="list-wrap">
       <div class="list-header">
         <h1>My Tickets</h1>
-        <button mat-flat-button color="primary" routerLink="/portal/tickets/new">
-          <mat-icon>add</mat-icon> New Ticket
-        </button>
+        <a mat-flat-button color="primary" routerLink="/portal/tickets/new">
+          <mat-icon>add</mat-icon> Submit New Ticket
+        </a>
       </div>
 
       <mat-form-field appearance="outline" class="filter-field">
@@ -45,57 +47,82 @@ import { PortalTicketService, PortalTicketPage } from '../services/portal-ticket
       @if (loading()) {
         <div class="center"><mat-spinner diameter="48" /></div>
       } @else if (tickets().length === 0) {
-        <div class="empty">
-          <mat-icon class="empty-icon">inbox</mat-icon>
-          <p>No tickets found.</p>
-          <a routerLink="/portal/tickets/new" mat-stroked-button>Submit a ticket</a>
-        </div>
+        <mat-card class="empty-card">
+          <mat-card-content>
+            <mat-icon class="empty-icon">confirmation_number</mat-icon>
+            <p>No tickets found. Click <strong>Submit New Ticket</strong> to get started.</p>
+          </mat-card-content>
+        </mat-card>
       } @else {
-        <div class="card-list">
-          @for (ticket of tickets(); track ticket.ticketNumber) {
-            <mat-card class="ticket-card" [routerLink]="['/portal/tickets', ticket.id]">
-              <mat-card-content>
-                <div class="card-top">
-                  <span class="ticket-num">{{ ticket.ticketNumber }}</span>
-                  <mat-chip [class]="'chip-' + ticket.status.toLowerCase()">{{ ticket.status }}</mat-chip>
-                </div>
-                <p class="ticket-subject">{{ ticket.subject }}</p>
-                <div class="card-bottom">
-                  <span class="priority">{{ ticket.priority }}</span>
-                  <span class="date">{{ ticket.createdAt | date:'mediumDate' }}</span>
-                </div>
-              </mat-card-content>
-            </mat-card>
-          }
-        </div>
+        <mat-card>
+          <table mat-table [dataSource]="tickets()" class="full-width">
+
+            <ng-container matColumnDef="ticketNumber">
+              <th mat-header-cell *matHeaderCellDef>Ticket #</th>
+              <td mat-cell *matCellDef="let t">{{ t.ticketNumber }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="subject">
+              <th mat-header-cell *matHeaderCellDef>Subject</th>
+              <td mat-cell *matCellDef="let t">{{ t.subject }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let t">
+                <mat-chip [class]="'chip-' + t.status.toLowerCase()">{{ t.status }}</mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="priority">
+              <th mat-header-cell *matHeaderCellDef>Priority</th>
+              <td mat-cell *matCellDef="let t">{{ t.priority }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Submitted</th>
+              <td mat-cell *matCellDef="let t">{{ t.createdAt | date:'mediumDate' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns;"
+                class="clickable-row"
+                [routerLink]="['/portal/tickets', row.id]"></tr>
+          </table>
+        </mat-card>
       }
     </div>
   `,
   styles: [`
-    .list-wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .list-wrap { max-width: 900px; }
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
     h1 { margin: 0; font-size: 22px; font-weight: 600; }
     .filter-field { width: 200px; margin-bottom: 16px; display: block; }
     .center { display: flex; justify-content: center; padding: 48px; }
-    .empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px; color: #888; }
-    .empty-icon { font-size: 48px; height: 48px; width: 48px; }
 
-    .card-list { display: flex; flex-direction: column; gap: 12px; }
-    .ticket-card { cursor: pointer; transition: box-shadow 0.15s; }
-    .ticket-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-    .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .ticket-num { font-size: 11px; color: #888; font-family: monospace; }
-    .ticket-subject { margin: 0 0 10px; font-size: 15px; font-weight: 500; color: #212121; }
-    .card-bottom { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+    .empty-card { text-align: center; padding: 40px; }
+    .empty-icon {
+      font-size: 48px; width: 48px; height: 48px;
+      color: #bbb; display: block; margin: 0 auto 16px;
+    }
 
-    .chip-new { background: #e3f2fd !important; color: #1565c0 !important; }
-    .chip-assigned { background: #fff3e0 !important; color: #e65100 !important; }
+    .full-width { width: 100%; }
+    .clickable-row { cursor: pointer; }
+    .clickable-row:hover { background: #f5f5f5; }
+
+    .chip-new        { background: #e3f2fd !important; color: #1565c0 !important; }
+    .chip-assigned   { background: #fff3e0 !important; color: #e65100 !important; }
     .chip-inprogress { background: #f3e5f5 !important; color: #6a1b9a !important; }
-    .chip-onhold { background: #fafafa !important; color: #616161 !important; }
-    .chip-resolved { background: #e8f5e9 !important; color: #2e7d32 !important; }
-    .chip-reopened { background: #fce4ec !important; color: #880e4f !important; }
-    .chip-closed { background: #f5f5f5 !important; color: #9e9e9e !important; }
-    .chip-escalated { background: #fff8e1 !important; color: #f57f17 !important; }
+    .chip-onhold     { background: #fafafa !important; color: #616161 !important; }
+    .chip-resolved   { background: #e8f5e9 !important; color: #2e7d32 !important; }
+    .chip-reopened   { background: #fce4ec !important; color: #880e4f !important; }
+    .chip-closed     { background: #f5f5f5 !important; color: #9e9e9e !important; }
+    .chip-escalated  { background: #fff8e1 !important; color: #f57f17 !important; }
   `],
 })
 export class PortalTicketListComponent implements OnInit {
@@ -104,6 +131,7 @@ export class PortalTicketListComponent implements OnInit {
   readonly tickets = signal<PortalTicketPage['items']>([]);
   readonly loading = signal(true);
   readonly statusFilter = new FormControl('');
+  readonly columns = ['ticketNumber', 'subject', 'status', 'priority', 'createdAt'];
 
   ngOnInit(): void {
     this.load();

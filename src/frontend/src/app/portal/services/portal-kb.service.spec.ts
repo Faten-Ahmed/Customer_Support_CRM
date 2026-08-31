@@ -21,15 +21,14 @@ describe('PortalKbService', () => {
     service.list().subscribe();
     const req = http.expectOne(r => r.url === '/api/v1/portal/kb/articles');
     expect(req.request.method).toBe('GET');
-    req.flush([]);
+    req.flush({ items: [], totalCount: 0 });
   });
 
-  it('list() passes categoryId and featured params', () => {
-    service.list({ categoryId: 'c1', featured: true }).subscribe();
+  it('list() passes categoryId param', () => {
+    service.list({ categoryId: 'c1' }).subscribe();
     const req = http.expectOne(r => r.url === '/api/v1/portal/kb/articles');
     expect(req.request.params.get('categoryId')).toBe('c1');
-    expect(req.request.params.get('featured')).toBe('true');
-    req.flush([]);
+    req.flush({ items: [], totalCount: 0 });
   });
 
   it('search() GETs /api/v1/portal/kb/search with q param', () => {
@@ -43,7 +42,9 @@ describe('PortalKbService', () => {
     service.getById('a1').subscribe();
     const req = http.expectOne('/api/v1/portal/kb/articles/a1');
     expect(req.request.method).toBe('GET');
-    req.flush({ id: 'a1', title: { en: 'Test', ar: 'اختبار' }, content: { en: '', ar: '' } });
+    req.flush({ id: 'a1', title: 'Test', content: 'Content here.', status: 'Published',
+      visibility: 'Public', categoryId: 'c1', createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString() });
   });
 
   it('getCategories() GETs /api/v1/portal/kb/categories', () => {

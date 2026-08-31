@@ -15,32 +15,61 @@
     </div>
   </div>
 
-  @if (featured().length > 0) {
-    <section class="kb-section">
-      <h2 class="kb-section-title" i18n="@@portalKb.home.featured">Featured Articles</h2>
+  <!-- Active category filter banner -->
+  @if (activeCategoryName()) {
+    <div class="category-filter-bar">
+      <mat-icon>folder_open</mat-icon>
+      <span>{{ activeCategoryName() }}</span>
+      <button mat-icon-button (click)="clearCategory()" class="clear-btn" title="Clear filter">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Articles section -->
+  <section class="kb-section">
+    <h2 class="kb-section-title">
+      @if (activeCategoryName()) {
+        <span i18n="@@portalKb.home.articlesInCategory">Articles</span>
+      } @else {
+        <span i18n="@@portalKb.home.recent">Recent Articles</span>
+      }
+    </h2>
+
+    @if (loading()) {
+      <div class="spinner-row">
+        <mat-spinner diameter="36" />
+      </div>
+    } @else if (articles().length === 0) {
+      <p class="empty-msg" i18n="@@portalKb.home.noArticles">No articles found in this category.</p>
+    } @else {
       <div class="kb-grid">
-        @for (article of featured(); track article.id) {
+        @for (article of articles(); track article.id) {
           <a [routerLink]="['/portal/kb', article.id]" class="kb-card">
-            <p class="kb-card-title">{{ label(article.title) }}</p>
-            <p class="kb-card-excerpt">{{ label(article.excerpt) }}</p>
+            <p class="kb-card-title">{{ articleTitle(article) }}</p>
+            @if (article.categoryName) {
+              <p class="kb-card-category">{{ article.categoryName }}</p>
+            }
+          </a>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Browse by category (only shown when no filter is active) -->
+  @if (!activeCategoryId() && categories().length > 0) {
+    <section class="kb-section">
+      <h2 class="kb-section-title" i18n="@@portalKb.home.browse">Browse by Category</h2>
+      <div class="kb-grid">
+        @for (cat of categories(); track cat.id) {
+          <a [routerLink]="['/portal/kb']" [queryParams]="{ categoryId: cat.id }" class="kb-card kb-cat-card">
+            <mat-icon class="kb-cat-icon">folder_open</mat-icon>
+            <span class="kb-card-title">{{ cat.name }}</span>
           </a>
         }
       </div>
     </section>
   }
-
-  <section class="kb-section">
-    <h2 class="kb-section-title" i18n="@@portalKb.home.browse">Browse by Category</h2>
-    <div class="kb-grid">
-      @for (cat of categories(); track cat.id) {
-        <a [routerLink]="['/portal/kb']" [queryParams]="{ categoryId: cat.id }" class="kb-card kb-cat-card">
-          <mat-icon class="kb-cat-icon">folder</mat-icon>
-          <p class="kb-card-title">{{ label(cat.name) }}</p>
-          <p class="kb-card-count">{{ cat.articleCount }} <span i18n="@@portalKb.home.articles">articles</span></p>
-        </a>
-      }
-    </div>
-  </section>
 
   <div class="kb-help-cta">
     <p class="kb-cta-title" i18n="@@portalKb.home.ctaTitle">Can't find what you're looking for?</p>

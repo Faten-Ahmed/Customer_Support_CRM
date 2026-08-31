@@ -1,10 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { PortalKbService, KbArticle } from '../../services/portal-kb.service';
+import { PortalKbService, PortalKbArticle } from '../../services/portal-kb.service';
 import { I18nService } from '../../../shared/services/i18n.service';
 
 @Component({
@@ -12,14 +11,14 @@ import { I18nService } from '../../../shared/services/i18n.service';
   standalone: true,
   imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule],
   templateUrl: './portal-kb-article.component.html',
+  styleUrl: './portal-kb-article.component.scss',
 })
 export class PortalKbArticleComponent implements OnInit {
   private readonly kbService = inject(PortalKbService);
   readonly i18n = inject(I18nService);
   private readonly route = inject(ActivatedRoute);
-  private readonly sanitizer = inject(DomSanitizer);
 
-  readonly article = signal<KbArticle | null>(null);
+  readonly article = signal<PortalKbArticle | null>(null);
   readonly feedbackGiven = signal<'up' | 'down' | null>(null);
 
   ngOnInit(): void {
@@ -27,15 +26,12 @@ export class PortalKbArticleComponent implements OnInit {
     this.kbService.getById(id).subscribe(a => this.article.set(a));
   }
 
-  label(obj: { en: string; ar: string }): string {
-    return this.i18n.lang() === 'ar' ? obj.ar : obj.en;
+  articleTitle(a: PortalKbArticle): string {
+    return this.i18n.lang() === 'ar' && a.titleAr ? a.titleAr : a.title;
   }
 
-  safeContent(): SafeHtml {
-    const a = this.article();
-    if (!a) return '';
-    const raw = this.i18n.lang() === 'ar' ? a.content.ar : a.content.en;
-    return this.sanitizer.bypassSecurityTrustHtml(raw);
+  articleContent(a: PortalKbArticle): string {
+    return (this.i18n.lang() === 'ar' && a.contentAr ? a.contentAr : a.content) ?? '';
   }
 
   submitFeedback(helpful: boolean): void {
