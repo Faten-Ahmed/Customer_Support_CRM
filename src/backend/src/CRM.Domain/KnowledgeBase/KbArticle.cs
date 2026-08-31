@@ -69,6 +69,21 @@ public class KbArticle
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void Update(
+        string title, Guid categoryId, KbVisibility visibility,
+        string? content, string? titleAr, string? contentAr)
+    {
+        if (Status != KbArticleStatus.Draft)
+            throw new InvalidOperationException("Only Draft articles can be edited.");
+        Title = title;
+        TitleAr = titleAr;
+        Content = content;
+        ContentAr = contentAr;
+        CategoryId = categoryId;
+        Visibility = visibility;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void Archive()
     {
         Status = KbArticleStatus.Archived;

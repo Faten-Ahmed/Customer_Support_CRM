@@ -38,6 +38,22 @@ public class KbArticlesController : ControllerBase
         }
     }
 
+    [HttpPatch("{id:guid}")]
+    public async Task<IActionResult> Update(
+        Guid id, [FromBody] UpdateKbArticleRequest req, CancellationToken ct)
+    {
+        Enum.TryParse<KbVisibility>(req.Visibility ?? "Internal", out var visibility);
+        try
+        {
+            var result = await _mediator.Send(new UpdateKbArticleCommand(
+                id, req.Title, req.CategoryId, visibility,
+                req.Content, req.TitleAr, req.ContentAr), ct);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return UnprocessableEntity(new { error = ex.Message }); }
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
@@ -156,6 +172,14 @@ public class KbArticlesController : ControllerBase
 }
 
 public record CreateKbArticleRequest(
+    string Title,
+    Guid CategoryId,
+    string? Content,
+    string? TitleAr,
+    string? ContentAr,
+    string? Visibility);
+
+public record UpdateKbArticleRequest(
     string Title,
     Guid CategoryId,
     string? Content,
