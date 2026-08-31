@@ -23,6 +23,7 @@ import { RejectDialogComponent } from './reject-dialog.component';
     MatChipsModule,
   ],
   templateUrl: './kb-article-detail.component.html',
+  styleUrl: './kb-article-detail.component.scss',
 })
 export class KbArticleDetailComponent implements OnInit {
   private readonly kbService = inject(KbService);
@@ -33,6 +34,10 @@ export class KbArticleDetailComponent implements OnInit {
   readonly authStore = inject(AuthStore);
 
   readonly article = signal<KbArticle | null>(null);
+
+  get canEdit(): boolean {
+    return this.article()?.status === 'Draft';
+  }
 
   get canReview(): boolean {
     const role = this.authStore.user()?.role;

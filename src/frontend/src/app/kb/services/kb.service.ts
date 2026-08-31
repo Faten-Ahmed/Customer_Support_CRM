@@ -17,6 +17,7 @@ export interface KbArticle {
   status: KbStatus;
   authorName?: string;
   publishedAt?: string;
+  rejectionNote?: string;
   createdAt: string;
 }
 
