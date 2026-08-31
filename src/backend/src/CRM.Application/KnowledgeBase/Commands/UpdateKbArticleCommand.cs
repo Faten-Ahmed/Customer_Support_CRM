@@ -17,15 +17,23 @@ public class UpdateKbArticleCommandHandler
     : IRequestHandler<UpdateKbArticleCommand, KbArticleSummaryDto>
 {
     private readonly IKbArticleRepository _articles;
+    private readonly IKbCategoryRepository _categories;
 
-    public UpdateKbArticleCommandHandler(IKbArticleRepository articles) =>
+    public UpdateKbArticleCommandHandler(
+        IKbArticleRepository articles, IKbCategoryRepository categories)
+    {
         _articles = articles;
+        _categories = categories;
+    }
 
     public async Task<KbArticleSummaryDto> Handle(
         UpdateKbArticleCommand cmd, CancellationToken ct)
     {
         var article = await _articles.FindByIdAsync(cmd.ArticleId, ct)
             ?? throw new KeyNotFoundException($"KB Article {cmd.ArticleId} not found.");
+
+        var category = await _categories.FindByIdAsync(cmd.CategoryId, ct)
+            ?? throw new KeyNotFoundException($"KB Category {cmd.CategoryId} not found or inactive.");
 
         article.Update(cmd.Title, cmd.CategoryId, cmd.Visibility,
             cmd.Content, cmd.TitleAr, cmd.ContentAr);
@@ -34,7 +42,7 @@ public class UpdateKbArticleCommandHandler
 
         return new KbArticleSummaryDto(
             article.Id, article.Title, article.TitleAr,
-            article.CategoryId, article.Status.ToString(),
+            article.CategoryId, category.Name, article.Status.ToString(),
             article.Visibility.ToString(), article.CreatedByUserId, article.CreatedAt);
     }
 }

@@ -5,6 +5,7 @@ public record KbArticleSummaryDto(
     string Title,
     string? TitleAr,
     Guid CategoryId,
+    string? CategoryName,
     string Status,
     string Visibility,
     Guid CreatedByUserId,

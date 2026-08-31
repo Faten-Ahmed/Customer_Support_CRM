@@ -41,7 +41,7 @@ public class CreateKbArticleCommandHandler
 
         return new KbArticleSummaryDto(
             article.Id, article.Title, article.TitleAr,
-            article.CategoryId, article.Status.ToString(),
+            article.CategoryId, category.Name, article.Status.ToString(),
             article.Visibility.ToString(), article.CreatedByUserId, article.CreatedAt);
     }
 }

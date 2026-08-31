@@ -15,8 +15,14 @@ public class ListKbArticlesQueryHandler
     : IRequestHandler<ListKbArticlesQuery, PagedResult<KbArticleSummaryDto>>
 {
     private readonly IKbArticleRepository _articles;
+    private readonly IKbCategoryRepository _categories;
 
-    public ListKbArticlesQueryHandler(IKbArticleRepository articles) => _articles = articles;
+    public ListKbArticlesQueryHandler(
+        IKbArticleRepository articles, IKbCategoryRepository categories)
+    {
+        _articles = articles;
+        _categories = categories;
+    }
 
     public async Task<PagedResult<KbArticleSummaryDto>> Handle(
         ListKbArticlesQuery query, CancellationToken ct)
@@ -28,9 +34,13 @@ public class ListKbArticlesQueryHandler
 
         var paged = await _articles.ListAsync(filter, query.Page, query.PageSize, ct);
 
+        var cats = await _categories.ListActiveAsync(ct);
+        var catMap = cats.ToDictionary(c => c.Id, c => c.Name);
+
         var dtos = paged.Items
             .Select(a => new KbArticleSummaryDto(
                 a.Id, a.Title, a.TitleAr, a.CategoryId,
+                catMap.GetValueOrDefault(a.CategoryId),
                 a.Status.ToString(), a.Visibility.ToString(),
                 a.CreatedByUserId, a.CreatedAt))
             .ToList();
