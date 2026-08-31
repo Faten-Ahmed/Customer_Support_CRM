@@ -40,7 +40,7 @@ export class KbArticleEditorComponent implements OnInit {
 
   articleId: string | null = null;
   isEditMode = false;
-  saving = false;
+  readonly saving = signal(false);
 
   readonly categories = signal<KbCategory[]>([]);
 
@@ -68,25 +68,25 @@ export class KbArticleEditorComponent implements OnInit {
   saveDraft(): void {
     if (this.form.invalid) return;
     const val = this.form.value as any;
-    this.saving = true;
+    this.saving.set(true);
     if (this.articleId) {
       this.kbService.update(this.articleId, val).subscribe({
         next: () => {
           this.snackBar.open('Draft saved', 'OK', { duration: 2000 });
-          this.saving = false;
+          this.saving.set(false);
         },
-        error: () => this.saving = false,
+        error: () => this.saving.set(false),
       });
     } else {
       this.kbService.create(val).subscribe({
         next: art => {
           this.articleId = art.id;
           this.isEditMode = true;
-          this.saving = false;
+          this.saving.set(false);
           this.snackBar.open('Draft saved', 'OK', { duration: 2000 });
           this.router.navigate(['/app/kb/articles', art.id, 'edit']);
         },
-        error: () => this.saving = false,
+        error: () => this.saving.set(false),
       });
     }
   }
@@ -94,7 +94,7 @@ export class KbArticleEditorComponent implements OnInit {
   submitForReview(): void {
     if (this.form.invalid) return;
     const val = this.form.value as any;
-    this.saving = true;
+    this.saving.set(true);
     const save$ = this.articleId
       ? this.kbService.update(this.articleId, val)
       : this.kbService.create(val);
@@ -107,10 +107,10 @@ export class KbArticleEditorComponent implements OnInit {
             this.snackBar.open('Submitted for review', 'OK', { duration: 3000 });
             this.router.navigate(['/app/kb']);
           },
-          error: () => this.saving = false,
+          error: () => this.saving.set(false),
         });
       },
-      error: () => this.saving = false,
+      error: () => this.saving.set(false),
     });
   }
 }

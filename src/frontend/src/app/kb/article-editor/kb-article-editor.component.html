@@ -76,13 +76,13 @@
   <div class="action-row">
     <button mat-stroked-button type="button"
             (click)="saveDraft()"
-            [disabled]="form.invalid || saving"
+            [disabled]="form.invalid || saving()"
             i18n="@@kb.editor.saveDraft">
       <mat-icon>save</mat-icon> Save Draft
     </button>
     <button mat-raised-button color="primary" type="button"
             (click)="submitForReview()"
-            [disabled]="form.invalid || saving"
+            [disabled]="form.invalid || saving()"
             i18n="@@kb.editor.submitReview">
       <mat-icon>send</mat-icon> Submit for Review
     </button>
