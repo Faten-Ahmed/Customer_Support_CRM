@@ -29,6 +29,7 @@ import { KbService, KbCategory } from '../services/kb.service';
     MatProgressSpinnerModule,
   ],
   templateUrl: './kb-article-editor.component.html',
+  styleUrl: './kb-article-editor.component.scss',
 })
 export class KbArticleEditorComponent implements OnInit {
   private readonly kbService = inject(KbService);
