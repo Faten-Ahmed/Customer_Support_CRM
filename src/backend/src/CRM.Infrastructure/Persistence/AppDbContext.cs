@@ -3,6 +3,7 @@ using CRM.Domain.Branches;
 using CRM.Domain.Categories;
 using CRM.Domain.Customers;
 using CRM.Domain.Departments;
+using CRM.Domain.KnowledgeBase;
 using CRM.Domain.Sla;
 using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
@@ -35,6 +36,8 @@ public class AppDbContext : DbContext
     public DbSet<BusinessHours> BusinessHours => Set<BusinessHours>();
     public DbSet<Holiday> Holidays => Set<Holiday>();
     public DbSet<TicketSla> TicketSlas => Set<TicketSla>();
+    public DbSet<KbCategory> KbCategories => Set<KbCategory>();
+    public DbSet<KbArticle> KbArticles => Set<KbArticle>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

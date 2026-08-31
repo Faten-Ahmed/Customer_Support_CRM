@@ -36,6 +36,11 @@ public class ExceptionMiddleware
         {
             await WriteResponse(context, HttpStatusCode.NotFound, new { error = ex.Message });
         }
+        catch (OperationCanceledException)
+        {
+            // Client disconnected — not an error
+            context.Response.StatusCode = 499;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception");

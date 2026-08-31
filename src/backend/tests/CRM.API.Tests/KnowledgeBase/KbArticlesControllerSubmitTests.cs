@@ -1,0 +1,53 @@
+using System.Net;
+using CRM.Application.KnowledgeBase.Commands;
+using MediatR;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Xunit;
+
+namespace CRM.API.Tests.KnowledgeBase;
+
+public class KbArticlesControllerSubmitTests
+{
+    private readonly Mock<IMediator> _mediator = new();
+
+    private HttpClient BuildClient(string role = "Agent")
+    {
+        var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(b => b.ConfigureServices(services =>
+            {
+                services.RemoveAll<IMediator>();
+                services.AddSingleton(_mediator.Object);
+            }));
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue(
+                "Bearer", TestJwtHelper.CreateTestToken(role: role));
+        return client;
+    }
+
+    [Fact]
+    public async Task SubmitReview_AsAuthor_Returns204()
+    {
+        _mediator.Setup(m => m.Send(It.IsAny<SubmitKbArticleForReviewCommand>(), default))
+                 .Returns(Task.CompletedTask);
+
+        var response = await BuildClient("Agent")
+            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/submit-review", null);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SubmitReview_NotAuthor_Returns403()
+    {
+        _mediator.Setup(m => m.Send(It.IsAny<SubmitKbArticleForReviewCommand>(), default))
+                 .ThrowsAsync(new UnauthorizedAccessException("Not the author."));
+
+        var response = await BuildClient("Agent")
+            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/submit-review", null);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+}

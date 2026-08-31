@@ -7,6 +7,7 @@ using CRM.Domain.Categories;
 using CRM.Domain.Channels;
 using CRM.Domain.Customers;
 using CRM.Domain.Departments;
+using CRM.Domain.KnowledgeBase;
 using CRM.Domain.Sla;
 using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
@@ -84,6 +85,10 @@ public static class DependencyInjection
         services.AddScoped<ITwilioHealthChecker, TwilioHealthChecker>();
         services.AddScoped<ILiveChatSessionRepository, LiveChatSessionRepository>();
         services.AddScoped<ICategoryExistenceChecker, CategoryExistenceChecker>();
+
+        // KB repositories
+        services.AddScoped<IKbArticleRepository, KbArticleRepository>();
+        services.AddScoped<IKbCategoryRepository, KbCategoryRepository>();
 
         // SLA repositories
         services.AddScoped<ISlaPolicyRepository, SlaPolicyRepository>();
