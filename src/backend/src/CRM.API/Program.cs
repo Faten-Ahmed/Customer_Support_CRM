@@ -110,7 +110,8 @@ try
     if (!app.Environment.IsEnvironment("Testing"))
     {
         await DbSeeder.SeedAsync(app);
-        RecurringJob.AddOrUpdate<SlaMonitorJob>(
+        var recurringJobs = app.Services.GetRequiredService<IRecurringJobManager>();
+        recurringJobs.AddOrUpdate<SlaMonitorJob>(
             "sla-monitor",
             job => job.Execute(CancellationToken.None),
             "*/5 * * * *");
