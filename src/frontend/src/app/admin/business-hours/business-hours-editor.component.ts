@@ -16,6 +16,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { BusinessHoursService, BusinessHoursCard } from './business-hours.service';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -42,6 +44,8 @@ function endAfterStartValidator(ctrl: AbstractControl): ValidationErrors | null 
     MatButtonModule,
     MatIconModule,
     MatListModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   template: `
     <div class="bh-page">
@@ -105,9 +109,11 @@ function endAfterStartValidator(ctrl: AbstractControl): ValidationErrors | null 
               </mat-list>
 
               <div class="add-holiday-row" [formGroup]="addHolidayForms[card.id]">
-                <mat-form-field appearance="outline" style="width:150px">
+                <mat-form-field appearance="outline" style="width:180px">
                   <mat-label i18n>Date</mat-label>
-                  <input matInput type="date" formControlName="date" />
+                  <input matInput [matDatepicker]="picker" formControlName="date" readonly />
+                  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>
                 <mat-form-field appearance="outline" style="flex:1">
                   <mat-label i18n>Name</mat-label>
@@ -230,8 +236,11 @@ export class BusinessHoursEditorComponent implements OnInit {
     });
   }
 
-  addHoliday(cardId: string, date: string, name: string): void {
-    if (!date || !name) return;
+  addHoliday(cardId: string, dateValue: Date | string, name: string): void {
+    if (!dateValue || !name) return;
+    const date = dateValue instanceof Date
+      ? `${dateValue.getFullYear()}-${String(dateValue.getMonth() + 1).padStart(2, '0')}-${String(dateValue.getDate()).padStart(2, '0')}`
+      : dateValue;
     this.svc.addHoliday(cardId, date, name).subscribe(res => {
       this.cards.update(cards =>
         cards.map(c => c.id === cardId
