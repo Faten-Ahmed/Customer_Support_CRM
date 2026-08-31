@@ -25,15 +25,15 @@ public class TicketFieldDefinitionConfiguration : IEntityTypeConfiguration<Ticke
                .IsRequired()
                .HasConversion<int>();
 
-        var listComparer = new ValueComparer<List<string>?>(
+        var listComparer = new ValueComparer<IReadOnlyList<string>?>(
             (a, b) => (a == null && b == null) || (a != null && b != null && a.SequenceEqual(b)),
             v => v == null ? 0 : v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
-            v => v == null ? null : v.ToList());
+            v => v == null ? null : (IReadOnlyList<string>)v.ToList());
 
         builder.Property(f => f.Options)
                .HasConversion(
                    v => v == null ? null : JsonSerializer.Serialize(v, _json),
-                   v => v == null ? null : JsonSerializer.Deserialize<List<string>>(v, _json),
+                   v => v == null ? null : (IReadOnlyList<string>?)JsonSerializer.Deserialize<List<string>>(v, _json),
                    listComparer)
                .HasColumnType("nvarchar(max)");
 
