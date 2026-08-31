@@ -43,6 +43,7 @@ public class UpdateKbArticleCommandHandler
         return new KbArticleSummaryDto(
             article.Id, article.Title, article.TitleAr,
             article.CategoryId, category.Name, article.Status.ToString(),
-            article.Visibility.ToString(), article.CreatedByUserId, article.CreatedAt);
+            article.Visibility.ToString(), article.CreatedByUserId,
+            null, article.PublishedAt, article.CreatedAt);
     }
 }

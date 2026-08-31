@@ -15,6 +15,13 @@ public class UserRepository : IUserRepository
     public Task<User?> FindByIdAsync(Guid id, CancellationToken ct = default)
         => _db.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
 
+    public async Task<IReadOnlyList<User>> FindByIdsAsync(
+        IEnumerable<Guid> ids, CancellationToken ct = default)
+    {
+        var idList = ids.Distinct().ToList();
+        return await _db.Users.Where(u => idList.Contains(u.Id)).ToListAsync(ct);
+    }
+
     public Task<List<User>> ListAgentsAsync(CancellationToken ct = default)
         => _db.Users
             .Where(u => u.IsActive && (u.Role == UserRole.Agent || u.Role == UserRole.Manager || u.Role == UserRole.Admin))

@@ -9,4 +9,6 @@ public record KbArticleSummaryDto(
     string Status,
     string Visibility,
     Guid CreatedByUserId,
+    string? AuthorName,
+    DateTime? PublishedAt,
     DateTime CreatedAt);

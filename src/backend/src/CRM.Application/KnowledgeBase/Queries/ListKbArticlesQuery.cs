@@ -1,6 +1,7 @@
 using CRM.Application.KnowledgeBase.DTOs;
 using CRM.Domain.Common;
 using CRM.Domain.KnowledgeBase;
+using CRM.Domain.Users;
 using MediatR;
 
 namespace CRM.Application.KnowledgeBase.Queries;
@@ -16,12 +17,16 @@ public class ListKbArticlesQueryHandler
 {
     private readonly IKbArticleRepository _articles;
     private readonly IKbCategoryRepository _categories;
+    private readonly IUserRepository _users;
 
     public ListKbArticlesQueryHandler(
-        IKbArticleRepository articles, IKbCategoryRepository categories)
+        IKbArticleRepository articles,
+        IKbCategoryRepository categories,
+        IUserRepository users)
     {
         _articles = articles;
         _categories = categories;
+        _users = users;
     }
 
     public async Task<PagedResult<KbArticleSummaryDto>> Handle(
@@ -37,12 +42,19 @@ public class ListKbArticlesQueryHandler
         var cats = await _categories.ListActiveAsync(ct);
         var catMap = cats.ToDictionary(c => c.Id, c => c.Name);
 
+        var authorIds = paged.Items.Select(a => a.CreatedByUserId).Distinct();
+        var users = await _users.FindByIdsAsync(authorIds, ct);
+        var userMap = users.ToDictionary(
+            u => u.Id,
+            u => $"{u.FirstName} {u.LastName}");
+
         var dtos = paged.Items
             .Select(a => new KbArticleSummaryDto(
-                a.Id, a.Title, a.TitleAr, a.CategoryId,
-                catMap.GetValueOrDefault(a.CategoryId),
+                a.Id, a.Title, a.TitleAr,
+                a.CategoryId, catMap.GetValueOrDefault(a.CategoryId),
                 a.Status.ToString(), a.Visibility.ToString(),
-                a.CreatedByUserId, a.CreatedAt))
+                a.CreatedByUserId, userMap.GetValueOrDefault(a.CreatedByUserId),
+                a.PublishedAt, a.CreatedAt))
             .ToList();
 
         return new PagedResult<KbArticleSummaryDto>(dtos, paged.TotalCount, paged.Page, paged.PageSize);
