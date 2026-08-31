@@ -39,7 +39,7 @@
           <dt>{{ 'common.priority' | translate }}</dt>
           <dd>{{ ticket()!.priority }}</dd>
           <dt>{{ 'ticket.sla' | translate }}</dt>
-          <dd>{{ ticket()!.sla?.breachTier ?? '—' }}</dd>
+          <dd><app-sla-indicator [ticketId]="ticket()!.id" mode="detail" /></dd>
           <dt>{{ 'common.department' | translate }}</dt>
           <dd>{{ ticket()!.departmentName ?? '—' }}</dd>
           <dt>{{ 'common.category' | translate }}</dt>

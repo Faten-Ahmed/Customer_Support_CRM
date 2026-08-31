@@ -24,6 +24,7 @@ import { ReplyComposerComponent } from '../components/reply-composer/reply-compo
 import { AttachmentPanelComponent } from '../attachment-panel/attachment-panel.component';
 import { TicketHistoryComponent } from '../ticket-history/ticket-history.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { SlaIndicatorComponent } from '../../shared/sla-indicator/sla-indicator.component';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -43,6 +44,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
     AttachmentPanelComponent,
     TicketHistoryComponent,
     TranslatePipe,
+    SlaIndicatorComponent,
   ],
   styles: [`
     :host { display: block; }
