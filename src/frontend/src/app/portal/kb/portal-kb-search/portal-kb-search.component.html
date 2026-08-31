@@ -1,0 +1,35 @@
+<div class="portal-page">
+  <h1 class="page-title" i18n="@@portalKb.search.title">Search Results</h1>
+
+  @if (query) {
+    <p class="search-query-label">
+      <span i18n="@@portalKb.search.resultsFor">Results for:</span>
+      <strong>"{{ query }}"</strong>
+    </p>
+  }
+
+  @if (loading()) {
+    <div class="spinner-wrap">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else if (results().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">search_off</mat-icon>
+      <p class="empty-title" i18n="@@portalKb.search.noResults">No articles found</p>
+      <p class="empty-sub">
+        <span i18n="@@portalKb.search.tryDifferent">Try different keywords or</span>
+        <a routerLink="/portal/tickets/new" class="inline-link" i18n="@@portalKb.search.submitTicket">submit a ticket</a>.
+      </p>
+    </div>
+  } @else {
+    <div class="result-list">
+      @for (article of results(); track article.id) {
+        <a [routerLink]="['/portal/kb', article.id]" class="result-card">
+          <p class="result-title">{{ label(article.title) }}</p>
+          <p class="result-excerpt">{{ label(article.excerpt) }}</p>
+          <p class="result-category">{{ label(article.categoryName) }}</p>
+        </a>
+      }
+    </div>
+  }
+</div>

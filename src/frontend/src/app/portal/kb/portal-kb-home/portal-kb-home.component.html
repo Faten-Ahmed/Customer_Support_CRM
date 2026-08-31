@@ -1,0 +1,52 @@
+<div class="portal-kb-home">
+  <div class="kb-hero">
+    <h1 class="kb-hero-title" i18n="@@portalKb.home.title">Knowledge Base</h1>
+    <p class="kb-hero-sub" i18n="@@portalKb.home.subtitle">Find answers to common questions</p>
+
+    <div class="kb-search-row">
+      <mat-form-field appearance="outline" class="kb-search-field">
+        <mat-label i18n="@@portalKb.home.searchLabel">Search articles…</mat-label>
+        <input matInput [formControl]="searchControl" (keyup.enter)="search()" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="search()" i18n="@@portalKb.home.searchBtn">
+        Search
+      </button>
+    </div>
+  </div>
+
+  @if (featured().length > 0) {
+    <section class="kb-section">
+      <h2 class="kb-section-title" i18n="@@portalKb.home.featured">Featured Articles</h2>
+      <div class="kb-grid">
+        @for (article of featured(); track article.id) {
+          <a [routerLink]="['/portal/kb', article.id]" class="kb-card">
+            <p class="kb-card-title">{{ label(article.title) }}</p>
+            <p class="kb-card-excerpt">{{ label(article.excerpt) }}</p>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="kb-section">
+    <h2 class="kb-section-title" i18n="@@portalKb.home.browse">Browse by Category</h2>
+    <div class="kb-grid">
+      @for (cat of categories(); track cat.id) {
+        <a [routerLink]="['/portal/kb']" [queryParams]="{ categoryId: cat.id }" class="kb-card kb-cat-card">
+          <mat-icon class="kb-cat-icon">folder</mat-icon>
+          <p class="kb-card-title">{{ label(cat.name) }}</p>
+          <p class="kb-card-count">{{ cat.articleCount }} <span i18n="@@portalKb.home.articles">articles</span></p>
+        </a>
+      }
+    </div>
+  </section>
+
+  <div class="kb-help-cta">
+    <p class="kb-cta-title" i18n="@@portalKb.home.ctaTitle">Can't find what you're looking for?</p>
+    <p class="kb-cta-sub" i18n="@@portalKb.home.ctaSub">Our support team is here to help.</p>
+    <a mat-raised-button color="primary" routerLink="/portal/tickets/new" i18n="@@portalKb.home.ctaBtn">
+      Submit a Ticket
+    </a>
+  </div>
+</div>

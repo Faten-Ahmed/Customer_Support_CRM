@@ -42,6 +42,21 @@ export const PORTAL_ROUTES: Routes = [
         loadComponent: () =>
           import('./profile/portal-profile.component').then(m => m.PortalProfileComponent),
       },
+      {
+        path: 'kb',
+        loadComponent: () =>
+          import('./kb/portal-kb-home/portal-kb-home.component').then(m => m.PortalKbHomeComponent),
+      },
+      {
+        path: 'kb/search',
+        loadComponent: () =>
+          import('./kb/portal-kb-search/portal-kb-search.component').then(m => m.PortalKbSearchComponent),
+      },
+      {
+        path: 'kb/:id',
+        loadComponent: () =>
+          import('./kb/portal-kb-article/portal-kb-article.component').then(m => m.PortalKbArticleComponent),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

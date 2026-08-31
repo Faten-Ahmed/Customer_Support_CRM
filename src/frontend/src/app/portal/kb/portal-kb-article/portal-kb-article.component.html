@@ -1,0 +1,49 @@
+@if (article()) {
+  <div class="portal-page">
+    <nav class="breadcrumb">
+      <a routerLink="/portal/kb" i18n="@@portalKb.article.breadcrumbHome">Knowledge Base</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>{{ label(article()!.categoryName) }}</span>
+    </nav>
+
+    <h1 class="page-title">{{ label(article()!.title) }}</h1>
+    <p class="article-updated">
+      <span i18n="@@portalKb.article.lastUpdated">Last updated:</span>
+      {{ article()!.updatedAt | date }}
+    </p>
+
+    <div class="article-content" [innerHTML]="safeContent()"></div>
+
+    <div class="article-feedback">
+      @if (!feedbackGiven()) {
+        <p class="feedback-prompt" i18n="@@portalKb.article.feedbackPrompt">Was this article helpful?</p>
+        <div class="feedback-actions">
+          <button mat-stroked-button (click)="submitFeedback(true)">
+            <mat-icon>thumb_up</mat-icon>
+            <span i18n="@@common.yes">Yes</span>
+          </button>
+          <button mat-stroked-button (click)="submitFeedback(false)">
+            <mat-icon>thumb_down</mat-icon>
+            <span i18n="@@common.no">No</span>
+          </button>
+        </div>
+      } @else {
+        <p class="feedback-thanks">
+          <mat-icon>check_circle</mat-icon>
+          <span i18n="@@portalKb.article.feedbackThanks">Thanks for your feedback!</span>
+        </p>
+      }
+    </div>
+
+    <div class="kb-help-cta">
+      <p class="kb-cta-title" i18n="@@portalKb.article.ctaTitle">Still need help?</p>
+      <a mat-raised-button color="primary" routerLink="/portal/tickets/new" i18n="@@portalKb.article.ctaBtn">
+        Submit a Support Ticket
+      </a>
+    </div>
+  </div>
+} @else {
+  <div class="spinner-wrap">
+    <span i18n="@@common.loading">Loading…</span>
+  </div>
+}
