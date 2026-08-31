@@ -25,6 +25,10 @@ public class BusinessHoursConfiguration : IEntityTypeConfiguration<BusinessHours
             .WithOne()
             .HasForeignKey(h => h.BusinessHoursId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(b => b.Holidays)
+            .HasField("_holidays")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
 
@@ -34,6 +38,7 @@ public class HolidayConfiguration : IEntityTypeConfiguration<Holiday>
     {
         builder.ToTable("BusinessHourHolidays");
         builder.HasKey(h => h.Id);
+        builder.Property(h => h.Id).ValueGeneratedNever();
         builder.Property(h => h.Name).HasMaxLength(200).IsRequired();
     }
 }
