@@ -53,7 +53,7 @@ public class KbArticlesControllerGetTests
                      Guid.NewGuid(), DateTime.UtcNow, null,
                      DateTime.UtcNow.AddDays(-1), DateTime.UtcNow));
 
-        var response = await BuildClient().GetAsync($"/api/kb/articles/{articleId}");
+        var response = await BuildClient().GetAsync($"/api/v1/kb/articles/{articleId}");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
@@ -64,7 +64,7 @@ public class KbArticlesControllerGetTests
                  .ReturnsAsync(new PagedResult<KbArticleSummaryDto>(
                      new List<KbArticleSummaryDto>(), 0, 1, 20));
 
-        var response = await BuildClient().GetAsync("/api/kb/articles?page=1&pageSize=20");
+        var response = await BuildClient().GetAsync("/api/v1/kb/articles?page=1&pageSize=20");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 }

@@ -51,7 +51,7 @@ public class KbArticlesControllerCreateTests
                      articleId, "How to reset password", null,
                      Guid.NewGuid(), "Draft", "Internal", Guid.NewGuid(), DateTime.UtcNow));
 
-        var response = await BuildClient().PostAsJsonAsync("/api/kb/articles", new
+        var response = await BuildClient().PostAsJsonAsync("/api/v1/kb/articles", new
         {
             title = "How to reset password",
             categoryId = Guid.NewGuid()
@@ -66,7 +66,7 @@ public class KbArticlesControllerCreateTests
         _mediator.Setup(m => m.Send(It.IsAny<CreateKbArticleCommand>(), It.IsAny<CancellationToken>()))
                  .ThrowsAsync(new KeyNotFoundException("Category not found."));
 
-        var response = await BuildClient().PostAsJsonAsync("/api/kb/articles", new
+        var response = await BuildClient().PostAsJsonAsync("/api/v1/kb/articles", new
         {
             title = "Title",
             categoryId = Guid.NewGuid()

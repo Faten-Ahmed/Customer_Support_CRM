@@ -52,7 +52,7 @@ public class KbSearchControllerTests
                          "Public", DateTime.UtcNow, "To reset your password...")
                  });
 
-        var response = await BuildClient().GetAsync("/api/kb/search?q=reset");
+        var response = await BuildClient().GetAsync("/api/v1/kb/search?q=reset");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var results = await response.Content.ReadFromJsonAsync<List<KbSearchResultDto>>();
@@ -65,7 +65,7 @@ public class KbSearchControllerTests
         _mediator.Setup(m => m.Send(It.IsAny<SearchKbQuery>(), It.IsAny<CancellationToken>()))
                  .ThrowsAsync(new FluentValidation.ValidationException("Query too short."));
 
-        var response = await BuildClient().GetAsync("/api/kb/search?q=a");
+        var response = await BuildClient().GetAsync("/api/v1/kb/search?q=a");
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }

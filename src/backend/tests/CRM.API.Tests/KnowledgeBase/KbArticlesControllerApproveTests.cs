@@ -47,7 +47,7 @@ public class KbArticlesControllerApproveTests
                  .Returns(Task.CompletedTask);
 
         var response = await BuildClient("Manager")
-            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/approve", null);
+            .PostAsync($"/api/v1/kb/articles/{Guid.NewGuid()}/approve", null);
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
@@ -56,7 +56,7 @@ public class KbArticlesControllerApproveTests
     public async Task Approve_AgentRole_Returns403()
     {
         var response = await BuildClient("Agent")
-            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/approve", null);
+            .PostAsync($"/api/v1/kb/articles/{Guid.NewGuid()}/approve", null);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -68,7 +68,7 @@ public class KbArticlesControllerApproveTests
                  .ThrowsAsync(new InvalidOperationException("Not in PendingReview status."));
 
         var response = await BuildClient("Manager")
-            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/approve", null);
+            .PostAsync($"/api/v1/kb/articles/{Guid.NewGuid()}/approve", null);
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }

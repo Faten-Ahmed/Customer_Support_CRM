@@ -47,7 +47,7 @@ public class KbArticlesControllerArchiveTests
                  .Returns(Task.CompletedTask);
 
         var response = await BuildClient()
-            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/archive", null);
+            .PostAsync($"/api/v1/kb/articles/{Guid.NewGuid()}/archive", null);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -56,7 +56,7 @@ public class KbArticlesControllerArchiveTests
     public async Task Archive_AgentRole_Returns403()
     {
         var response = await BuildClient("Agent")
-            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/archive", null);
+            .PostAsync($"/api/v1/kb/articles/{Guid.NewGuid()}/archive", null);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }

@@ -46,7 +46,7 @@ public class KbArticlesControllerDeleteTests
         _mediator.Setup(m => m.Send(It.IsAny<DeleteKbArticleCommand>(), It.IsAny<CancellationToken>()))
                  .Returns(Task.CompletedTask);
 
-        var response = await BuildClient().DeleteAsync($"/api/kb/articles/{Guid.NewGuid()}");
+        var response = await BuildClient().DeleteAsync($"/api/v1/kb/articles/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
@@ -57,7 +57,7 @@ public class KbArticlesControllerDeleteTests
         _mediator.Setup(m => m.Send(It.IsAny<DeleteKbArticleCommand>(), It.IsAny<CancellationToken>()))
                  .ThrowsAsync(new UnauthorizedAccessException("Not the author."));
 
-        var response = await BuildClient().DeleteAsync($"/api/kb/articles/{Guid.NewGuid()}");
+        var response = await BuildClient().DeleteAsync($"/api/v1/kb/articles/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -68,7 +68,7 @@ public class KbArticlesControllerDeleteTests
         _mediator.Setup(m => m.Send(It.IsAny<DeleteKbArticleCommand>(), It.IsAny<CancellationToken>()))
                  .ThrowsAsync(new InvalidOperationException("Must archive first."));
 
-        var response = await BuildClient().DeleteAsync($"/api/kb/articles/{Guid.NewGuid()}");
+        var response = await BuildClient().DeleteAsync($"/api/v1/kb/articles/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }

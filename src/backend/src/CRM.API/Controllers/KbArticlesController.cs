@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CRM.API.Controllers;
 
 [ApiController]
-[Route("api/kb/articles")]
+[Route("api/v1/kb/articles")]
 [Authorize(Roles = "Admin,Manager,Agent")]
 public class KbArticlesController : ControllerBase
 {
@@ -64,7 +64,7 @@ public class KbArticlesController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("/api/kb/search")]
+    [HttpGet("/api/v1/kb/search")]
     public async Task<IActionResult> Search(
         [FromQuery] string q, CancellationToken ct)
     {

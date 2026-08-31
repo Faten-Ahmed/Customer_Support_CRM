@@ -47,7 +47,7 @@ public class KbArticlesControllerSubmitTests
                  .Returns(Task.CompletedTask);
 
         var response = await BuildClient("Agent")
-            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/submit-review", null);
+            .PostAsync($"/api/v1/kb/articles/{Guid.NewGuid()}/submit-review", null);
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
@@ -59,7 +59,7 @@ public class KbArticlesControllerSubmitTests
                  .ThrowsAsync(new UnauthorizedAccessException("Not the author."));
 
         var response = await BuildClient("Agent")
-            .PostAsync($"/api/kb/articles/{Guid.NewGuid()}/submit-review", null);
+            .PostAsync($"/api/v1/kb/articles/{Guid.NewGuid()}/submit-review", null);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
