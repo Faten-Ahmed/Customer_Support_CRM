@@ -1,0 +1,41 @@
+@if (article()) {
+  <div class="page-container">
+    <div class="article-header">
+      <div class="article-meta">
+        <h1 class="page-title">{{ article()!.title }}</h1>
+        @if (article()!.titleAr) {
+          <p class="article-title-ar" dir="rtl">{{ article()!.titleAr }}</p>
+        }
+        <div class="meta-chips">
+          <span class="status-badge status-{{ article()!.status.toLowerCase() }}">{{ article()!.status }}</span>
+          <span class="visibility-badge">{{ article()!.visibility }}</span>
+        </div>
+      </div>
+
+      <div class="article-actions">
+        @if (canReview) {
+          <button mat-raised-button color="primary" (click)="approve()" i18n="@@kb.detail.approve">
+            <mat-icon>check_circle</mat-icon> Approve
+          </button>
+          <button mat-stroked-button color="warn" (click)="openRejectDialog()" i18n="@@kb.detail.reject">
+            <mat-icon>cancel</mat-icon> Reject
+          </button>
+        }
+        <button mat-button routerLink="/app/kb" i18n="@@kb.detail.back">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+      </div>
+    </div>
+
+    <div class="article-body">
+      <pre class="article-content">{{ article()!.content }}</pre>
+      @if (article()!.contentAr) {
+        <pre class="article-content" dir="rtl">{{ article()!.contentAr }}</pre>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="spinner-wrap">
+    <span i18n="@@common.loading">Loading…</span>
+  </div>
+}

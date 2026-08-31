@@ -45,4 +45,19 @@ describe('KbService', () => {
     expect(req.request.method).toBe('POST');
     req.flush({ id: 'art-1', status: 'PendingReview' });
   });
+
+  it('approve() POSTs /api/v1/kb/articles/{id}/approve', () => {
+    service.approve('art-1').subscribe();
+    const req = http.expectOne('/api/v1/kb/articles/art-1/approve');
+    expect(req.request.method).toBe('POST');
+    req.flush({ id: 'art-1', status: 'Published' });
+  });
+
+  it('reject() POSTs /api/v1/kb/articles/{id}/reject with rejectionNote', () => {
+    service.reject('art-1', 'Needs more detail here').subscribe();
+    const req = http.expectOne('/api/v1/kb/articles/art-1/reject');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ rejectionNote: 'Needs more detail here' });
+    req.flush({ id: 'art-1', status: 'Draft' });
+  });
 });

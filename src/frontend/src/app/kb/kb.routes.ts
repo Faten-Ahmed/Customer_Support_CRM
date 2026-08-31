@@ -16,4 +16,9 @@ export const KB_ROUTES: Routes = [
     loadComponent: () =>
       import('./article-editor/kb-article-editor.component').then(m => m.KbArticleEditorComponent),
   },
+  {
+    path: 'articles/:id',
+    loadComponent: () =>
+      import('./article-detail/kb-article-detail.component').then(m => m.KbArticleDetailComponent),
+  },
 ];

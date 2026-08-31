@@ -58,4 +58,12 @@ export class KbService {
   submitForReview(id: string): Observable<KbArticle> {
     return this.http.post<KbArticle>(`${this.base}/${id}/submit-review`, {});
   }
+
+  approve(id: string): Observable<KbArticle> {
+    return this.http.post<KbArticle>(`${this.base}/${id}/approve`, {});
+  }
+
+  reject(id: string, rejectionNote: string): Observable<KbArticle> {
+    return this.http.post<KbArticle>(`${this.base}/${id}/reject`, { rejectionNote });
+  }
 }
