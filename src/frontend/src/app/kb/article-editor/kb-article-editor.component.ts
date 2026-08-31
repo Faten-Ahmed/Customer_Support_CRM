@@ -75,7 +75,10 @@ export class KbArticleEditorComponent implements OnInit {
           this.snackBar.open('Draft saved', 'OK', { duration: 2000 });
           this.saving.set(false);
         },
-        error: () => this.saving.set(false),
+        error: (err) => {
+          this.showError(err, 'Failed to save draft');
+          this.saving.set(false);
+        },
       });
     } else {
       this.kbService.create(val).subscribe({
@@ -86,7 +89,10 @@ export class KbArticleEditorComponent implements OnInit {
           this.snackBar.open('Draft saved', 'OK', { duration: 2000 });
           this.router.navigate(['/app/kb/articles', art.id, 'edit']);
         },
-        error: () => this.saving.set(false),
+        error: (err) => {
+          this.showError(err, 'Failed to create article');
+          this.saving.set(false);
+        },
       });
     }
   }
@@ -107,10 +113,21 @@ export class KbArticleEditorComponent implements OnInit {
             this.snackBar.open('Submitted for review', 'OK', { duration: 3000 });
             this.router.navigate(['/app/kb']);
           },
-          error: () => this.saving.set(false),
+          error: (err) => {
+            this.showError(err, 'Submission failed');
+            this.saving.set(false);
+          },
         });
       },
-      error: () => this.saving.set(false),
+      error: (err) => {
+        this.showError(err, 'Failed to save article');
+        this.saving.set(false);
+      },
     });
+  }
+
+  private showError(err: any, fallback: string): void {
+    const msg = err?.error?.error ?? err?.error?.message ?? fallback;
+    this.snackBar.open(msg, 'Dismiss', { duration: 6000 });
   }
 }
