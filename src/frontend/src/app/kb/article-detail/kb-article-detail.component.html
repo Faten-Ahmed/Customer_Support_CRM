@@ -21,6 +21,11 @@
             <mat-icon>cancel</mat-icon> Reject
           </button>
         }
+        @if (canArchive) {
+          <button mat-stroked-button (click)="archive()" i18n="@@kb.detail.archive">
+            <mat-icon>archive</mat-icon> Archive
+          </button>
+        }
         <button mat-button routerLink="/app/kb" i18n="@@kb.detail.back">
           <mat-icon>arrow_back</mat-icon> Back
         </button>

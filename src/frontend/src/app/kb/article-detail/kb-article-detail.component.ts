@@ -39,6 +39,11 @@ export class KbArticleDetailComponent implements OnInit {
     return (role === 'Manager' || role === 'Admin') && this.article()?.status === 'PendingReview';
   }
 
+  get canArchive(): boolean {
+    const role = this.authStore.user()?.role;
+    return (role === 'Manager' || role === 'Admin') && this.article()?.status !== 'Archived';
+  }
+
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.kbService.getById(params['id']).subscribe(art => this.article.set(art));
@@ -63,6 +68,15 @@ export class KbArticleDetailComponent implements OnInit {
     });
     ref.afterClosed().subscribe(rejected => {
       if (rejected) this.router.navigate(['/app/kb']);
+    });
+  }
+
+  archive(): void {
+    const id = this.article()?.id;
+    if (!id) return;
+    this.kbService.archive(id).subscribe(() => {
+      this.snackBar.open('Article archived', 'OK', { duration: 3000 });
+      this.router.navigate(['/app/kb']);
     });
   }
 }

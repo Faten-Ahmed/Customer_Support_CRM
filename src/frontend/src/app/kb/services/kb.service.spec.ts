@@ -17,12 +17,20 @@ describe('KbService', () => {
 
   afterEach(() => http.verify());
 
-  it('list() GETs /api/v1/kb/articles with params', () => {
+  it('list() GETs /api/v1/kb/articles with status param', () => {
     service.list({ page: 1, pageSize: 20, status: 'Draft' }).subscribe();
     const req = http.expectOne(r => r.url === '/api/v1/kb/articles');
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('status')).toBe('Draft');
     req.flush({ data: [], total: 0 });
+  });
+
+  it('search() GETs /api/v1/kb/search with q param', () => {
+    service.search('reset password').subscribe();
+    const req = http.expectOne(r => r.url === '/api/v1/kb/search');
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('q')).toBe('reset password');
+    req.flush([]);
   });
 
   it('create() POSTs /api/v1/kb/articles', () => {
@@ -59,5 +67,19 @@ describe('KbService', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ rejectionNote: 'Needs more detail here' });
     req.flush({ id: 'art-1', status: 'Draft' });
+  });
+
+  it('archive() POSTs /api/v1/kb/articles/{id}/archive', () => {
+    service.archive('art-1').subscribe();
+    const req = http.expectOne('/api/v1/kb/articles/art-1/archive');
+    expect(req.request.method).toBe('POST');
+    req.flush(null);
+  });
+
+  it('delete() DELETEs /api/v1/kb/articles/{id}', () => {
+    service.delete('art-1').subscribe();
+    const req = http.expectOne('/api/v1/kb/articles/art-1');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
   });
 });

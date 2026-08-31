@@ -20,12 +20,21 @@ export interface KbArticle {
   createdAt: string;
 }
 
+export interface KbSearchResult {
+  id: string;
+  title: string;
+  titleAr?: string;
+  categoryId: string;
+  visibility: string;
+  publishedAt?: string;
+  excerpt: string;
+}
+
 export interface KbListQuery {
   page: number;
   pageSize: number;
   status?: KbStatus;
   categoryId?: string;
-  search?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -39,8 +48,12 @@ export class KbService {
       .set('pageSize', String(query.pageSize));
     if (query.status) params = params.set('status', query.status);
     if (query.categoryId) params = params.set('categoryId', query.categoryId);
-    if (query.search) params = params.set('search', query.search);
     return this.http.get<{ data: KbArticle[]; total: number }>(this.base, { params });
+  }
+
+  search(q: string): Observable<KbSearchResult[]> {
+    const params = new HttpParams().set('q', q);
+    return this.http.get<KbSearchResult[]>('/api/v1/kb/search', { params });
   }
 
   getById(id: string): Observable<KbArticle> {
@@ -65,5 +78,13 @@ export class KbService {
 
   reject(id: string, rejectionNote: string): Observable<KbArticle> {
     return this.http.post<KbArticle>(`${this.base}/${id}/reject`, { rejectionNote });
+  }
+
+  archive(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/archive`, {});
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }
