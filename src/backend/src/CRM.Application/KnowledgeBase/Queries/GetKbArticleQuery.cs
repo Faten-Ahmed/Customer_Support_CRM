@@ -10,8 +10,14 @@ public record GetKbArticleQuery(Guid ArticleId, bool IsPortalCaller)
 public class GetKbArticleQueryHandler : IRequestHandler<GetKbArticleQuery, KbArticleDetailDto>
 {
     private readonly IKbArticleRepository _articles;
+    private readonly IKbCategoryRepository _categories;
 
-    public GetKbArticleQueryHandler(IKbArticleRepository articles) => _articles = articles;
+    public GetKbArticleQueryHandler(
+        IKbArticleRepository articles, IKbCategoryRepository categories)
+    {
+        _articles = articles;
+        _categories = categories;
+    }
 
     public async Task<KbArticleDetailDto> Handle(GetKbArticleQuery query, CancellationToken ct)
     {
@@ -28,12 +34,14 @@ public class GetKbArticleQueryHandler : IRequestHandler<GetKbArticleQuery, KbArt
                     "This article is for internal use only.");
         }
 
-        return Map(article);
-    }
+        var category = await _categories.FindByIdAsync(article.CategoryId, ct);
 
-    private static KbArticleDetailDto Map(KbArticle a)
-        => new(a.Id, a.Title, a.TitleAr, a.Content, a.ContentAr,
-               a.CategoryId, a.Status.ToString(), a.Visibility.ToString(),
-               a.CreatedByUserId, a.PublishedAt, a.RejectionNote,
-               a.CreatedAt, a.UpdatedAt);
+        return new KbArticleDetailDto(
+            article.Id, article.Title, article.TitleAr,
+            article.Content, article.ContentAr,
+            article.CategoryId, category?.Name,
+            article.Status.ToString(), article.Visibility.ToString(),
+            article.CreatedByUserId, article.PublishedAt,
+            article.RejectionNote, article.CreatedAt, article.UpdatedAt);
+    }
 }

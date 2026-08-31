@@ -7,11 +7,21 @@
         @if (article()!.titleAr) {
           <p class="article-title-ar" dir="rtl">{{ article()!.titleAr }}</p>
         }
+
         <div class="meta-chips">
           <span [class]="'status-badge status-' + article()!.status.toLowerCase()">
             {{ article()!.status }}
           </span>
-          <span class="visibility-badge">{{ article()!.visibility }}</span>
+          <span class="visibility-badge">
+            <mat-icon class="chip-icon">visibility</mat-icon>
+            {{ article()!.visibility }}
+          </span>
+          @if (article()!.categoryName) {
+            <span class="category-badge">
+              <mat-icon class="chip-icon">folder</mat-icon>
+              {{ article()!.categoryName }}
+            </span>
+          }
         </div>
       </div>
 

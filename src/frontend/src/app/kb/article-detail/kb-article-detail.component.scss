@@ -57,14 +57,24 @@
   &.status-archived    { background: #f5f5f5; color: #616161; }
 }
 
-.visibility-badge {
-  display: inline-block;
+.visibility-badge,
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   padding: 3px 10px;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 500;
   background: var(--mat-sys-surface-variant);
   color: var(--mat-sys-on-surface-variant);
+}
+
+.chip-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
 }
 
 .article-actions {

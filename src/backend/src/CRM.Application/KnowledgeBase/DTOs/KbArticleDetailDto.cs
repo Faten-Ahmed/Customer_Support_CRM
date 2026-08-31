@@ -7,6 +7,7 @@ public record KbArticleDetailDto(
     string? Content,
     string? ContentAr,
     Guid CategoryId,
+    string? CategoryName,
     string Status,
     string Visibility,
     Guid CreatedByUserId,
