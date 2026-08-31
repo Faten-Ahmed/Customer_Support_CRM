@@ -1,5 +1,6 @@
 using CRM.Domain.Sla;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CRM.Infrastructure.Persistence.Configurations.Sla;
@@ -14,7 +15,11 @@ public class BusinessHoursConfiguration : IEntityTypeConfiguration<BusinessHours
         builder.Property(b => b.WorkDays)
             .HasConversion(
                 v => string.Join(',', v),
-                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries));
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries),
+                new ValueComparer<string[]>(
+                    (a, b) => a != null && b != null && a.SequenceEqual(b),
+                    v => v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
+                    v => v.ToArray()));
 
         builder.HasMany(b => b.Holidays)
             .WithOne()

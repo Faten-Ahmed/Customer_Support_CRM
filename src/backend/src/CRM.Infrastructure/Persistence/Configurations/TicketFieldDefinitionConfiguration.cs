@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CRM.Domain.Tickets;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CRM.Infrastructure.Persistence.Configurations;
@@ -24,10 +25,16 @@ public class TicketFieldDefinitionConfiguration : IEntityTypeConfiguration<Ticke
                .IsRequired()
                .HasConversion<int>();
 
+        var listComparer = new ValueComparer<List<string>?>(
+            (a, b) => (a == null && b == null) || (a != null && b != null && a.SequenceEqual(b)),
+            v => v == null ? 0 : v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
+            v => v == null ? null : v.ToList());
+
         builder.Property(f => f.Options)
                .HasConversion(
                    v => v == null ? null : JsonSerializer.Serialize(v, _json),
-                   v => v == null ? null : JsonSerializer.Deserialize<List<string>>(v, _json))
+                   v => v == null ? null : JsonSerializer.Deserialize<List<string>>(v, _json),
+                   listComparer)
                .HasColumnType("nvarchar(max)");
 
         builder.Property(f => f.IsRequired).IsRequired();

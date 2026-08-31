@@ -44,8 +44,8 @@ public class AdminTemplatesControllerTests
     {
         _mediator.Setup(m => m.Send(It.IsAny<CreateGlobalTemplateCommand>(), It.IsAny<CancellationToken>()))
                  .ReturnsAsync(new TemplateDto(
-                     Guid.NewGuid(), "Standard Greeting", "Hello!", "Greeting",
-                     "Global", Guid.NewGuid(), DateTime.UtcNow, DateTime.UtcNow));
+                     Guid.NewGuid(), "Standard Greeting", "", "Hello!", "", "Greeting",
+                     "Global", Guid.NewGuid(), true, DateTime.UtcNow, DateTime.UtcNow));
 
         var response = await BuildClient().PostAsJsonAsync(
             "/api/v1/admin/templates",
