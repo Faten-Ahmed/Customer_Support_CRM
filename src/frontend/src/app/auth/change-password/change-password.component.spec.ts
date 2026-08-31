@@ -61,6 +61,7 @@ describe('ChangePasswordComponent', () => {
   it('should call changePassword() on valid submit and navigate to /app', async () => {
     authServiceSpy.changePassword.mockReturnValue(of({ message: 'Password changed successfully.' }));
     component.form.setValue({
+      email: 'user@example.com',
       currentPassword: 'OldPass1!',
       newPassword: 'NewPass2@',
       confirmPassword: 'NewPass2@',
@@ -68,7 +69,7 @@ describe('ChangePasswordComponent', () => {
     component.onSubmit();
     await fixture.whenStable();
 
-    expect(authServiceSpy.changePassword).toHaveBeenCalledWith('OldPass1!', 'NewPass2@', 'NewPass2@');
+    expect(authServiceSpy.changePassword).toHaveBeenCalledWith('user@example.com', 'OldPass1!', 'NewPass2@', 'NewPass2@');
     expect(navigateSpy).toHaveBeenCalledWith(['/app']);
   });
 
@@ -77,6 +78,7 @@ describe('ChangePasswordComponent', () => {
       throwError(() => ({ error: { code: 'INVALID_CURRENT_PASSWORD' } }))
     );
     component.form.setValue({
+      email: 'user@example.com',
       currentPassword: 'wrongpass',
       newPassword: 'NewPass2@',
       confirmPassword: 'NewPass2@',

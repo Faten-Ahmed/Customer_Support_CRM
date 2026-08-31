@@ -255,7 +255,7 @@ describe('AuthService — changePassword', () => {
   });
 
   it('should POST to /api/v1/auth/change-password-first-login with correct body', () => {
-    service.changePassword('OldPass1!', 'NewPass2@', 'NewPass2@').subscribe(res => {
+    service.changePassword('user@example.com', 'OldPass1!', 'NewPass2@', 'NewPass2@').subscribe(res => {
       expect(res.message).toContain('changed');
     });
 
@@ -271,7 +271,7 @@ describe('AuthService — changePassword', () => {
 
   it('should propagate 422 INVALID_CURRENT_PASSWORD error', () => {
     let errorCode = '';
-    service.changePassword('wrong', 'NewPass2@', 'NewPass2@').subscribe({
+    service.changePassword('user@example.com', 'wrong', 'NewPass2@', 'NewPass2@').subscribe({
       error: (err: { error?: { code?: string } }) => (errorCode = err.error?.code ?? ''),
     });
 
