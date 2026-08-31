@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export type KbStatus = 'Draft' | 'PendingReview' | 'Published' | 'Archived';
-export type KbVisibility = 'Public' | 'Internal' | 'Private';
+export type KbVisibility = 'Internal' | 'Public' | 'Both';
 
 export interface KbArticle {
   id: string;
