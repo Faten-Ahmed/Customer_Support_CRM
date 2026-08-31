@@ -1,0 +1,66 @@
+<div class="page-container">
+  <h1 class="page-title">
+    @if (isEditMode) {
+      <span i18n="@@kb.editor.titleEdit">Edit Article</span>
+    } @else {
+      <span i18n="@@kb.editor.titleNew">New Article</span>
+    }
+  </h1>
+
+  <form [formGroup]="form" class="editor-form">
+    <div class="title-row">
+      <mat-form-field appearance="outline" class="flex-1">
+        <mat-label i18n="@@kb.editor.titleEn">Title (English)</mat-label>
+        <input matInput formControlName="title" />
+        <mat-error i18n="@@kb.editor.titleRequired">Title is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="flex-1">
+        <mat-label i18n="@@kb.editor.titleAr">Title (Arabic)</mat-label>
+        <input matInput formControlName="titleAr" dir="rtl" />
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@kb.editor.visibility">Visibility</mat-label>
+      <mat-select formControlName="visibility">
+        <mat-option value="Public" i18n="@@kb.visibility.public">Public</mat-option>
+        <mat-option value="Internal" i18n="@@kb.visibility.internal">Internal (Staff Only)</mat-option>
+        <mat-option value="Private" i18n="@@kb.visibility.private">Private</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-tab-group>
+      <mat-tab>
+        <ng-template mat-tab-label i18n="@@kb.editor.tabEn">English Content</ng-template>
+        <div class="tab-content">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label i18n="@@kb.editor.contentEn">Content (Markdown)</mat-label>
+            <textarea matInput formControlName="content" rows="18" class="mono-textarea"></textarea>
+            <mat-error i18n="@@kb.editor.contentRequired">Content is required</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label i18n="@@kb.editor.tabAr">Arabic Content (اللغة العربية)</ng-template>
+        <div class="tab-content">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label i18n="@@kb.editor.contentAr">Content AR (Markdown)</mat-label>
+            <textarea matInput formControlName="contentAr" rows="18" dir="rtl" class="mono-textarea"></textarea>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+    <div class="action-row">
+      <button mat-stroked-button type="button" (click)="saveDraft()" [disabled]="form.invalid || saving" i18n="@@kb.editor.saveDraft">
+        Save Draft
+      </button>
+      <button mat-raised-button color="primary" type="button" (click)="submitForReview()" [disabled]="form.invalid || saving" i18n="@@kb.editor.submitReview">
+        Submit for Review
+      </button>
+      <button mat-button type="button" routerLink="/app/kb" i18n="@@common.cancel">Cancel</button>
+    </div>
+  </form>
+</div>

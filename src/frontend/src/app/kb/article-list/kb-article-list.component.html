@@ -1,0 +1,79 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="page-title" i18n="@@kb.list.title">Knowledge Base</h1>
+    <button mat-raised-button color="primary" routerLink="/app/kb/articles/new">
+      <mat-icon>add</mat-icon>
+      <span i18n="@@kb.list.newArticle">New Article</span>
+    </button>
+  </div>
+
+  <div class="filter-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label i18n="@@kb.list.searchLabel">Search</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [formControl]="searchControl" i18n-placeholder="@@kb.list.searchPlaceholder" placeholder="Search articles…" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="status-field">
+      <mat-label i18n="@@kb.list.statusLabel">Status</mat-label>
+      <mat-select [formControl]="statusFilter">
+        <mat-option value="" i18n="@@kb.list.statusAll">All</mat-option>
+        <mat-option value="Draft" i18n="@@kb.status.draft">Draft</mat-option>
+        <mat-option value="PendingReview" i18n="@@kb.status.pendingReview">Pending Review</mat-option>
+        <mat-option value="Published" i18n="@@kb.status.published">Published</mat-option>
+        <mat-option value="Archived" i18n="@@kb.status.archived">Archived</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (loading()) {
+    <div class="spinner-wrap">
+      <mat-spinner diameter="40" />
+    </div>
+  }
+
+  <mat-table [dataSource]="articles()" class="full-width-table">
+    <ng-container matColumnDef="title">
+      <mat-header-cell *matHeaderCellDef i18n="@@kb.list.col.title">Title</mat-header-cell>
+      <mat-cell *matCellDef="let a">
+        <a [routerLink]="['/app/kb/articles', a.id, 'edit']" class="article-link">{{ a.title }}</a>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="category">
+      <mat-header-cell *matHeaderCellDef i18n="@@kb.list.col.category">Category</mat-header-cell>
+      <mat-cell *matCellDef="let a">{{ a.categoryName || '—' }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef i18n="@@kb.list.col.status">Status</mat-header-cell>
+      <mat-cell *matCellDef="let a">
+        <span [class]="badgeClass(a.status)">{{ a.status }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="visibility">
+      <mat-header-cell *matHeaderCellDef i18n="@@kb.list.col.visibility">Visibility</mat-header-cell>
+      <mat-cell *matCellDef="let a">{{ a.visibility }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="author">
+      <mat-header-cell *matHeaderCellDef i18n="@@kb.list.col.author">Author</mat-header-cell>
+      <mat-cell *matCellDef="let a">{{ a.authorName || '—' }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="publishedAt">
+      <mat-header-cell *matHeaderCellDef i18n="@@kb.list.col.published">Published</mat-header-cell>
+      <mat-cell *matCellDef="let a">{{ a.publishedAt ? (a.publishedAt | date:'mediumDate') : '—' }}</mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length" i18n="@@kb.list.noData">
+        No articles found.
+      </td>
+    </tr>
+  </mat-table>
+</div>

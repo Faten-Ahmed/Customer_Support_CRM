@@ -3,6 +3,7 @@ import { AUTH_ROUTES } from './auth/auth.routes';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { CUSTOMERS_ROUTES } from './customers/customers.routes';
 import { TICKETS_ROUTES } from './tickets/tickets.routes';
+import { KB_ROUTES } from './kb/kb.routes';
 import { PORTAL_ROUTES } from './portal/portal.routes';
 import { NotFoundComponent } from './shell/not-found.component';
 import { ForbiddenComponent } from './shell/forbidden.component';
@@ -41,6 +42,7 @@ export const routes: Routes = [
     children: [
       { path: 'customers', children: CUSTOMERS_ROUTES },
       { path: 'tickets', children: TICKETS_ROUTES },
+      { path: 'kb', children: KB_ROUTES },
       {
         path: 'admin',
         loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
