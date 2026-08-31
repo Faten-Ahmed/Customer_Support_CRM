@@ -19,14 +19,14 @@ describe('KbArticleListComponent', () => {
   let fixture: ComponentFixture<KbArticleListComponent>;
   let component: KbArticleListComponent;
   const mockKbService = {
-    list: vi.fn().mockReturnValue(of({ data: mockArticles, total: 2 })),
+    list: vi.fn().mockReturnValue(of({ items: mockArticles, totalCount: 2 })),
     search: vi.fn().mockReturnValue(of(mockSearchResults)),
     delete: vi.fn().mockReturnValue(of(undefined)),
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    mockKbService.list.mockReturnValue(of({ data: mockArticles, total: 2 }));
+    mockKbService.list.mockReturnValue(of({ items: mockArticles, totalCount: 2 }));
     mockKbService.search.mockReturnValue(of(mockSearchResults));
     mockKbService.delete.mockReturnValue(of(undefined));
 

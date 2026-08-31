@@ -22,7 +22,7 @@ describe('KbService', () => {
     const req = http.expectOne(r => r.url === '/api/v1/kb/articles');
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('status')).toBe('Draft');
-    req.flush({ data: [], total: 0 });
+    req.flush({ items: [], totalCount: 0 });
   });
 
   it('search() GETs /api/v1/kb/search with q param', () => {

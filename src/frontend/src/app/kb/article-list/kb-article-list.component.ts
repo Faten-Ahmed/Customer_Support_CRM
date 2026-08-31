@@ -106,7 +106,7 @@ export class KbArticleListComponent implements OnInit, OnDestroy {
         status: (this.statusFilter.value as KbStatus) || undefined,
       }).pipe(takeUntil(this.destroy$)).subscribe({
         next: res => {
-          this.rows.set(res.data.map(a => ({
+          this.rows.set(res.items.map(a => ({
             id: a.id,
             title: a.title,
             categoryName: a.categoryName,
@@ -115,7 +115,7 @@ export class KbArticleListComponent implements OnInit, OnDestroy {
             authorName: a.authorName,
             publishedAt: a.publishedAt,
           })));
-          this.total.set(res.total);
+          this.total.set(res.totalCount);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),

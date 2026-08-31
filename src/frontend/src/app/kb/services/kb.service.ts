@@ -42,13 +42,13 @@ export class KbService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/v1/kb/articles';
 
-  list(query: KbListQuery): Observable<{ data: KbArticle[]; total: number }> {
+  list(query: KbListQuery): Observable<{ items: KbArticle[]; totalCount: number }> {
     let params = new HttpParams()
       .set('page', String(query.page))
       .set('pageSize', String(query.pageSize));
     if (query.status) params = params.set('status', query.status);
     if (query.categoryId) params = params.set('categoryId', query.categoryId);
-    return this.http.get<{ data: KbArticle[]; total: number }>(this.base, { params });
+    return this.http.get<{ items: KbArticle[]; totalCount: number }>(this.base, { params });
   }
 
   search(q: string): Observable<KbSearchResult[]> {
