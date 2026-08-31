@@ -30,6 +30,11 @@ export interface KbSearchResult {
   excerpt: string;
 }
 
+export interface KbCategory {
+  id: string;
+  name: string;
+}
+
 export interface KbListQuery {
   page: number;
   pageSize: number;
@@ -41,6 +46,10 @@ export interface KbListQuery {
 export class KbService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/v1/kb/articles';
+
+  listCategories(): Observable<KbCategory[]> {
+    return this.http.get<KbCategory[]>('/api/v1/kb/categories');
+  }
 
   list(query: KbListQuery): Observable<{ items: KbArticle[]; totalCount: number }> {
     let params = new HttpParams()

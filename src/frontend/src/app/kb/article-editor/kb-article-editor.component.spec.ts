@@ -9,13 +9,17 @@ import { KbService, KbArticle } from '../services/kb.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 const draftArticle: KbArticle = {
-  id: 'art-new', title: 'T', content: 'C', visibility: 'Public', status: 'Draft', createdAt: '',
+  id: 'art-new', title: 'T', content: 'C', categoryId: 'cat-1',
+  visibility: 'Public', status: 'Draft', createdAt: '',
 };
+
+const mockCategories = [{ id: 'cat-1', name: 'General' }];
 
 describe('KbArticleEditorComponent', () => {
   let fixture: ComponentFixture<KbArticleEditorComponent>;
   let component: KbArticleEditorComponent;
   const mockKbService = {
+    listCategories: vi.fn().mockReturnValue(of(mockCategories)),
     create: vi.fn().mockReturnValue(of(draftArticle)),
     update: vi.fn().mockReturnValue(of({ ...draftArticle, id: 'art-1' })),
     submitForReview: vi.fn().mockReturnValue(of({ ...draftArticle, status: 'PendingReview' })),
@@ -26,6 +30,7 @@ describe('KbArticleEditorComponent', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockKbService.listCategories.mockReturnValue(of(mockCategories));
     mockKbService.create.mockReturnValue(of(draftArticle));
     mockKbService.update.mockReturnValue(of({ ...draftArticle, id: 'art-1' }));
     mockKbService.submitForReview.mockReturnValue(of({ ...draftArticle, status: 'PendingReview' }));
@@ -49,10 +54,13 @@ describe('KbArticleEditorComponent', () => {
   it('should create in new mode', () => {
     expect(component).toBeTruthy();
     expect(component.isEditMode).toBe(false);
+    expect(component.categories().length).toBe(1);
   });
 
   it('should call create() on saveDraft when no articleId', () => {
-    component.form.patchValue({ title: 'My Article', content: 'Content here', visibility: 'Public' });
+    component.form.patchValue({
+      title: 'My Article', categoryId: 'cat-1', content: 'Content here', visibility: 'Public',
+    });
     component.saveDraft();
     expect(mockKbService.create).toHaveBeenCalled();
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/kb/articles', 'art-new', 'edit']);
@@ -60,7 +68,9 @@ describe('KbArticleEditorComponent', () => {
 
   it('should call update() then submitForReview() when articleId exists', () => {
     component.articleId = 'art-1';
-    component.form.patchValue({ title: 'My Article', content: 'Content here', visibility: 'Public' });
+    component.form.patchValue({
+      title: 'My Article', categoryId: 'cat-1', content: 'Content here', visibility: 'Public',
+    });
     component.submitForReview();
     expect(mockKbService.update).toHaveBeenCalled();
     expect(mockKbService.submitForReview).toHaveBeenCalledWith('art-1');

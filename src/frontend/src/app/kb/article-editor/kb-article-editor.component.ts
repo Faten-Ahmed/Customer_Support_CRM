@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -9,7 +9,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
-import { KbService } from '../services/kb.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { KbService, KbCategory } from '../services/kb.service';
 
 @Component({
   selector: 'app-kb-article-editor',
@@ -25,6 +26,7 @@ import { KbService } from '../services/kb.service';
     MatButtonModule,
     MatSnackBarModule,
     MatIconModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './kb-article-editor.component.html',
 })
@@ -39,16 +41,20 @@ export class KbArticleEditorComponent implements OnInit {
   isEditMode = false;
   saving = false;
 
+  readonly categories = signal<KbCategory[]>([]);
+
   readonly form = this.fb.group({
     title: ['', Validators.required],
     titleAr: [''],
-    content: ['', Validators.required],
+    categoryId: ['', Validators.required],
+    visibility: ['Internal', Validators.required],
+    content: [''],
     contentAr: [''],
-    categoryId: [''],
-    visibility: ['Public', Validators.required],
   });
 
   ngOnInit(): void {
+    this.kbService.listCategories().subscribe(cats => this.categories.set(cats));
+
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.articleId = params['id'];
@@ -59,33 +65,51 @@ export class KbArticleEditorComponent implements OnInit {
   }
 
   saveDraft(): void {
+    if (this.form.invalid) return;
     const val = this.form.value as any;
+    this.saving = true;
     if (this.articleId) {
-      this.kbService.update(this.articleId, val).subscribe(() => {
-        this.snackBar.open('Draft saved', 'OK', { duration: 2000 });
+      this.kbService.update(this.articleId, val).subscribe({
+        next: () => {
+          this.snackBar.open('Draft saved', 'OK', { duration: 2000 });
+          this.saving = false;
+        },
+        error: () => this.saving = false,
       });
     } else {
-      this.kbService.create(val).subscribe(art => {
-        this.articleId = art.id;
-        this.isEditMode = true;
-        this.snackBar.open('Draft saved', 'OK', { duration: 2000 });
-        this.router.navigate(['/app/kb/articles', art.id, 'edit']);
+      this.kbService.create(val).subscribe({
+        next: art => {
+          this.articleId = art.id;
+          this.isEditMode = true;
+          this.saving = false;
+          this.snackBar.open('Draft saved', 'OK', { duration: 2000 });
+          this.router.navigate(['/app/kb/articles', art.id, 'edit']);
+        },
+        error: () => this.saving = false,
       });
     }
   }
 
   submitForReview(): void {
+    if (this.form.invalid) return;
     const val = this.form.value as any;
+    this.saving = true;
     const save$ = this.articleId
       ? this.kbService.update(this.articleId, val)
       : this.kbService.create(val);
 
-    save$.subscribe(art => {
-      this.articleId = art.id;
-      this.kbService.submitForReview(this.articleId!).subscribe(() => {
-        this.snackBar.open('Submitted for review', 'OK', { duration: 3000 });
-        this.router.navigate(['/app/kb']);
-      });
+    save$.subscribe({
+      next: art => {
+        this.articleId = art.id;
+        this.kbService.submitForReview(this.articleId!).subscribe({
+          next: () => {
+            this.snackBar.open('Submitted for review', 'OK', { duration: 3000 });
+            this.router.navigate(['/app/kb']);
+          },
+          error: () => this.saving = false,
+        });
+      },
+      error: () => this.saving = false,
     });
   }
 }
