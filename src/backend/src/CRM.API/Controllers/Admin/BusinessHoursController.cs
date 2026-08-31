@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CRM.API.Controllers.Admin;
 
 [ApiController]
-[Route("api/admin/business-hours")]
+[Route("api/v1/admin/business-hours")]
 [Authorize(Roles = "Admin")]
 public class BusinessHoursController : ControllerBase
 {

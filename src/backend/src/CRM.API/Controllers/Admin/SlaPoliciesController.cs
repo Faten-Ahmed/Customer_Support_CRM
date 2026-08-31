@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CRM.API.Controllers.Admin;
 
 [ApiController]
-[Route("api/admin/sla/policies")]
+[Route("api/v1/admin/sla/policies")]
 [Authorize(Roles = "Admin,Manager")]
 public class SlaPoliciesController : ControllerBase
 {
