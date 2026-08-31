@@ -2,6 +2,7 @@ using CRM.Application.KnowledgeBase.Commands;
 using CRM.Application.KnowledgeBase.Queries;
 using CRM.Domain.KnowledgeBase;
 using CRM.Domain.Users;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -67,8 +68,15 @@ public class KbArticlesController : ControllerBase
     public async Task<IActionResult> Search(
         [FromQuery] string q, CancellationToken ct)
     {
-        var results = await _mediator.Send(new SearchKbQuery(q ?? string.Empty, false), ct);
-        return Ok(results);
+        try
+        {
+            var results = await _mediator.Send(new SearchKbQuery(q ?? string.Empty, false), ct);
+            return Ok(results);
+        }
+        catch (ValidationException ex)
+        {
+            return UnprocessableEntity(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
+        }
     }
 
     [HttpPost("{id:guid}/submit-review")]
