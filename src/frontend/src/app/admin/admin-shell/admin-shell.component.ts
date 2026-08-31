@@ -21,6 +21,8 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { label: 'Branches', icon: 'location_on', route: 'branches', roles: ['Admin', 'Manager'] },
   { label: 'Categories', icon: 'category', route: 'categories', roles: ['Admin', 'Manager'] },
   { label: 'Templates', icon: 'article', route: 'templates', roles: ['Admin'] },
+  { label: 'SLA Policies', icon: 'schedule', route: 'sla-policies', roles: ['Admin'] },
+  { label: 'Business Hours', icon: 'access_time', route: 'business-hours', roles: ['Admin'] },
 ];
 
 @Component({

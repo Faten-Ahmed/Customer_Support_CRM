@@ -41,6 +41,16 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./channels/channel-status.component').then(m => m.ChannelStatusComponent),
       },
+      {
+        path: 'sla-policies',
+        loadComponent: () =>
+          import('./sla/sla-policy-table.component').then(m => m.SlaPolicyTableComponent),
+      },
+      {
+        path: 'business-hours',
+        loadComponent: () =>
+          import('./business-hours/business-hours-editor.component').then(m => m.BusinessHoursEditorComponent),
+      },
     ],
   },
 ];
