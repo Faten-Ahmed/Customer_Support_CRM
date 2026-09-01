@@ -37,15 +37,30 @@
             <mat-spinner diameter="24" />
           </div>
         } @else if (templates().length === 0) {
-          <button mat-menu-item disabled>No templates available</button>
+          <button mat-menu-item disabled>{{ 'templates.noTemplates' | translate }}</button>
         } @else {
-          @for (t of templates(); track t.id) {
-            <button mat-menu-item (click)="applyTemplate(t)" style="max-width:320px">
-              <span style="font-weight:500">{{ t.title }}</span>
-              @if (t.category) {
-                <span style="font-size:11px;color:#888;margin-left:6px">{{ t.category }}</span>
-              }
+          @if (personalTemplates().length > 0) {
+            <button mat-menu-item disabled style="font-size:11px;font-weight:600;color:#888;height:32px;min-height:32px">
+              {{ 'templates.myTemplates' | translate }}
             </button>
+            @for (t of personalTemplates(); track t.id) {
+              <button mat-menu-item (click)="applyTemplate(t)" style="max-width:320px">
+                <span style="font-weight:500">{{ t.title }}</span>
+              </button>
+            }
+          }
+          @if (personalTemplates().length > 0 && globalTemplates().length > 0) {
+            <mat-divider />
+          }
+          @if (globalTemplates().length > 0) {
+            <button mat-menu-item disabled style="font-size:11px;font-weight:600;color:#888;height:32px;min-height:32px">
+              {{ 'templates.globalTemplates' | translate }}
+            </button>
+            @for (t of globalTemplates(); track t.id) {
+              <button mat-menu-item (click)="applyTemplate(t)" style="max-width:320px">
+                <span style="font-weight:500">{{ t.title }}</span>
+              </button>
+            }
           }
         }
       </mat-menu>

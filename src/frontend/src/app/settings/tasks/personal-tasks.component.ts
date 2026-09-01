@@ -121,10 +121,10 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
                           @if (task.description) {
                             <span class="task-desc">{{ task.description }}</span>
                           }
-                          @if (task.dueDate) {
-                            <span class="task-due" [class.overdue]="isOverdue(task.dueDate)">
+                          @if (task.dueAt) {
+                            <span class="task-due" [class.overdue]="task.isOverdue">
                               <mat-icon style="font-size: 14px; height: 14px; width: 14px; vertical-align: middle;">schedule</mat-icon>
-                              {{ task.dueDate | date:'mediumDate' }}
+                              {{ task.dueAt | date:'mediumDate' }}
                             </span>
                           }
                         </div>
@@ -317,8 +317,8 @@ export class PersonalTasksComponent implements OnInit {
   newDescription = '';
   newDueDate: Date | null = null;
 
-  readonly activeTasks = computed(() => this.allTasks().filter(t => !t.isCompleted));
-  readonly completedTasks = computed(() => this.allTasks().filter(t => t.isCompleted));
+  readonly activeTasks = computed(() => this.allTasks().filter(t => t.status !== 'Completed'));
+  readonly completedTasks = computed(() => this.allTasks().filter(t => t.status === 'Completed'));
 
   ngOnInit(): void {
     this.loadTasks();
@@ -346,7 +346,7 @@ export class PersonalTasksComponent implements OnInit {
     const payload = {
       title: this.newTitle.trim(),
       description: this.newDescription.trim() || undefined,
-      dueDate: this.newDueDate ? this.newDueDate.toISOString() : undefined,
+      dueAt: this.newDueDate ? this.newDueDate.toISOString() : undefined,
     };
 
     this.taskService.createTask(payload).subscribe({
@@ -354,11 +354,12 @@ export class PersonalTasksComponent implements OnInit {
         this.adding.set(false);
         const newTask: AgentTaskDto = {
           id: resp.id,
-          agentUserId: '',
           title: payload.title,
           description: payload.description,
-          dueDate: payload.dueDate,
-          isCompleted: false,
+          priority: 'Medium',
+          status: 'Pending',
+          dueAt: payload.dueAt,
+          isOverdue: false,
           createdAt: new Date().toISOString(),
         };
         this.allTasks.update(list => [newTask, ...list]);
@@ -382,12 +383,9 @@ export class PersonalTasksComponent implements OnInit {
 
   completeTask(task: AgentTaskDto): void {
     this.taskService.completeTask(task.id).subscribe({
-      next: () => {
+      next: updated => {
         this.allTasks.update(list =>
-          list.map(t => t.id === task.id
-            ? { ...t, isCompleted: true, completedAt: new Date().toISOString() }
-            : t
-          )
+          list.map(t => t.id === task.id ? updated : t)
         );
       },
       error: () => {
@@ -407,7 +405,4 @@ export class PersonalTasksComponent implements OnInit {
     });
   }
 
-  isOverdue(dueDate: string): boolean {
-    return new Date(dueDate) < new Date();
-  }
 }

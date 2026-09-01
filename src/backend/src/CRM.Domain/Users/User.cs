@@ -94,7 +94,7 @@ public class User
             Email = email,
             Role = role,
             IsActive = true,
-            AvailabilityStatus = AvailabilityStatus.Offline,
+            AvailabilityStatus = AvailabilityStatus.Available,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -119,7 +119,7 @@ public class User
             Role = role,
             IsActive = true,
             RequiresPasswordChange = requiresPasswordChange,
-            AvailabilityStatus = AvailabilityStatus.Offline,
+            AvailabilityStatus = AvailabilityStatus.Available,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -147,7 +147,7 @@ public class User
             Role = role,
             IsActive = isActive,
             RequiresPasswordChange = requiresPasswordChange,
-            AvailabilityStatus = AvailabilityStatus.Offline,
+            AvailabilityStatus = AvailabilityStatus.Available,
             CreatedAt = DateTime.UtcNow
         };
 }

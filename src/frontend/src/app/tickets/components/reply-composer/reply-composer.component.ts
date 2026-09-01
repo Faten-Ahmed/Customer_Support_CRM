@@ -3,15 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { catchError, of } from 'rxjs';
 import { TicketMessage, TicketService } from '../../ticket.service';
-import { Template, TemplateService } from '../../template.service';
+import { AgentTemplateService, TemplateDto } from '../../../settings/agent-template.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
@@ -26,6 +26,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     MatFormFieldModule,
     MatTooltipModule,
     MatMenuModule,
+    MatDividerModule,
     MatProgressSpinnerModule,
     TranslatePipe,
   ],
@@ -104,14 +105,16 @@ export class ReplyComposerComponent {
   @Output() messageSent = new EventEmitter<TicketMessage>();
 
   private readonly ticketService = inject(TicketService);
-  private readonly templateService = inject(TemplateService);
-  private readonly dialog = inject(MatDialog);
+  private readonly agentTemplateService = inject(AgentTemplateService);
 
   readonly replyControl = new FormControl('', Validators.required);
   readonly isInternal = signal(false);
   readonly sending = signal(false);
-  readonly templates = signal<Template[]>([]);
+  readonly templates = signal<TemplateDto[]>([]);
   readonly templatesLoading = signal(false);
+
+  readonly personalTemplates = () => this.templates().filter(t => t.scope === 'Personal');
+  readonly globalTemplates = () => this.templates().filter(t => t.scope === 'Global');
 
   get charCount(): number {
     return (this.replyControl.value ?? '').length;
@@ -142,15 +145,15 @@ export class ReplyComposerComponent {
   loadTemplates(): void {
     if (this.templates().length > 0) return;
     this.templatesLoading.set(true);
-    this.templateService.list().pipe(
-      catchError(() => of({ data: [], meta: { totalCount: 0 } }))
+    this.agentTemplateService.listMyTemplates(undefined, 1, 100).pipe(
+      catchError(() => of({ items: [], totalCount: 0, page: 1, pageSize: 100, totalPages: 0 }))
     ).subscribe(page => {
-      this.templates.set((page.data ?? []).filter(t => t.isActive));
+      this.templates.set(page.items.filter(t => t.isActive));
       this.templatesLoading.set(false);
     });
   }
 
-  applyTemplate(template: Template): void {
+  applyTemplate(template: TemplateDto): void {
     this.replyControl.setValue(template.content);
   }
 }

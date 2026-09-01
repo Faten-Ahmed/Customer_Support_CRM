@@ -21,7 +21,6 @@ interface TemplateForm {
   titleAr: string;
   content: string;
   contentAr: string;
-  category: string;
 }
 
 @Component({
@@ -81,11 +80,6 @@ interface TemplateForm {
                 <mat-form-field appearance="outline">
                   <mat-label>{{ 'templates.titleAr' | translate }}</mat-label>
                   <input matInput [(ngModel)]="form.titleAr" name="titleAr" dir="rtl" />
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>{{ 'common.category' | translate }}</mat-label>
-                  <input matInput [(ngModel)]="form.category" name="category" />
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">
@@ -327,7 +321,6 @@ export class TemplateManagementComponent implements OnInit {
       titleAr: tpl.titleAr,
       content: tpl.content,
       contentAr: tpl.contentAr,
-      category: tpl.category ?? '',
     };
     this.showNewForm.set(true);
   }
@@ -347,7 +340,6 @@ export class TemplateManagementComponent implements OnInit {
       titleAr: this.form.titleAr,
       content: this.form.content,
       contentAr: this.form.contentAr,
-      category: this.form.category || undefined,
     };
 
     const id = this.editingId();
@@ -388,6 +380,6 @@ export class TemplateManagementComponent implements OnInit {
   }
 
   private emptyForm(): TemplateForm {
-    return { title: '', titleAr: '', content: '', contentAr: '', category: '' };
+    return { title: '', titleAr: '', content: '', contentAr: '' };
   }
 }

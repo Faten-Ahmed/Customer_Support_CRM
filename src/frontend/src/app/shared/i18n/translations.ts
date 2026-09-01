@@ -215,6 +215,7 @@ export const TRANSLATIONS: TranslationMap = {
   'templates.myTemplates':    { en: 'My Templates',         ar: 'قوالبي' },
   'templates.globalTemplates':{ en: 'Global Templates',     ar: 'القوالب العامة' },
   'templates.noPersonal':     { en: 'No personal templates yet.', ar: 'لا توجد قوالب شخصية بعد.' },
+  'templates.noTemplates':    { en: 'No templates available.', ar: 'لا توجد قوالب متاحة.' },
   'templates.noGlobal':       { en: 'No global templates available.', ar: 'لا توجد قوالب عامة متاحة.' },
   'templates.titleEn':        { en: 'Title (English)',      ar: 'العنوان (إنجليزي)' },
   'templates.titleAr':        { en: 'Title (Arabic)',       ar: 'العنوان (عربي)' },

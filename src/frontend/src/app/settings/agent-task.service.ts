@@ -4,13 +4,16 @@ import { Observable } from 'rxjs';
 
 export interface AgentTaskDto {
   id: string;
-  agentUserId: string;
   title: string;
   description?: string;
-  dueDate?: string;
-  isCompleted: boolean;
-  completedAt?: string;
+  priority: string;
+  status: string;
+  dueAt?: string;
+  isOverdue: boolean;
+  ticketId?: string;
+  customerId?: string;
   createdAt: string;
+  completedAt?: string;
 }
 
 export interface AgentTaskPage {
@@ -24,7 +27,7 @@ export interface AgentTaskPage {
 export interface CreateTaskPayload {
   title: string;
   description?: string;
-  dueDate?: string;
+  dueAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -44,8 +47,8 @@ export class AgentTaskService {
     return this.http.post<{ id: string }>(this.baseUrl, payload);
   }
 
-  completeTask(id: string): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${id}/complete`, {});
+  completeTask(id: string): Observable<AgentTaskDto> {
+    return this.http.put<AgentTaskDto>(`${this.baseUrl}/${id}`, { status: 'Completed' });
   }
 
   deleteTask(id: string): Observable<void> {
