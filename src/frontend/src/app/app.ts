@@ -1,10 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { I18nService } from './shared/services/i18n.service';
+import { NotificationToastComponent } from './notifications/notification-toast/notification-toast.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NotificationToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
   host: {

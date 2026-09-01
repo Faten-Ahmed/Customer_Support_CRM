@@ -1,5 +1,6 @@
 using CRM.Application.Admin.Users.Commands;
 using CRM.Application.Common;
+using CRM.Domain.Notifications;
 using CRM.Application.Sla.Jobs;
 using CRM.Domain.Auth;
 using CRM.Domain.Branches;
@@ -100,6 +101,8 @@ public static class DependencyInjection
 
         // Notification service (stub until Feature 05)
         services.AddScoped<INotificationService, StubNotificationService>();
+        // Notification repository (Feature 05)
+        services.AddScoped<INotificationRepository, NotificationRepository>();
 
         services.Configure<MinIOSettings>(configuration.GetSection("MinIO"));
         services.AddScoped<IStorageService, StorageService>();

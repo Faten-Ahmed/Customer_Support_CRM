@@ -1,12 +1,15 @@
 using CRM.API.Hubs;
 using CRM.API.Middleware;
+using CRM.API.Services;
 using CRM.Application;
+using CRM.Application.Notifications;
 using CRM.Application.Sla.Jobs;
 using CRM.Infrastructure;
 using CRM.Infrastructure.Persistence.Seed;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -71,6 +74,11 @@ try
 
     // SignalR (hubs mapped after feature implementation)
     builder.Services.AddSignalR();
+
+    // INotificationPushService — registered here (API project) so NotificationHub type is accessible
+    builder.Services.AddScoped<INotificationPushService>(sp =>
+        new NotificationPushService(
+            sp.GetRequiredService<IHubContext<NotificationHub>>()));
 
     // Swagger — dev only (Bearer security definition added once Swashbuckle OpenAPI 2.x API is confirmed)
     builder.Services.AddEndpointsApiExplorer();

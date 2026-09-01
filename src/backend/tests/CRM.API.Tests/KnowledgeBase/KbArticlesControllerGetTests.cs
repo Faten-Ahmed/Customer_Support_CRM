@@ -49,8 +49,8 @@ public class KbArticlesControllerGetTests
         _mediator.Setup(m => m.Send(It.IsAny<GetKbArticleQuery>(), It.IsAny<CancellationToken>()))
                  .ReturnsAsync(new KbArticleDetailDto(
                      articleId, "Title", null, "Content...", null,
-                     Guid.NewGuid(), "Published", "Internal",
-                     Guid.NewGuid(), DateTime.UtcNow, null,
+                     Guid.NewGuid(), null, "Published", "Internal",
+                     Guid.NewGuid(), null, null,
                      DateTime.UtcNow.AddDays(-1), DateTime.UtcNow));
 
         var response = await BuildClient().GetAsync($"/api/v1/kb/articles/{articleId}");

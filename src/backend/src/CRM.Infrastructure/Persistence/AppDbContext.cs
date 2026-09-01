@@ -1,5 +1,6 @@
 using CRM.Domain.Auth;
 using CRM.Domain.Branches;
+using CRM.Domain.Notifications;
 using CRM.Domain.Categories;
 using CRM.Domain.Customers;
 using CRM.Domain.Departments;
@@ -38,6 +39,7 @@ public class AppDbContext : DbContext
     public DbSet<TicketSla> TicketSlas => Set<TicketSla>();
     public DbSet<KbCategory> KbCategories => Set<KbCategory>();
     public DbSet<KbArticle> KbArticles => Set<KbArticle>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

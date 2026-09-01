@@ -19,9 +19,7 @@
     <mat-icon>auto_awesome</mat-icon>
   </button>
 
-  <button mat-icon-button [matTooltip]="'shell.notifications' | translate">
-    <mat-icon matBadge="3" matBadgeColor="warn">notifications</mat-icon>
-  </button>
+  <app-notification-bell />
 
   <button mat-button [matMenuTriggerFor]="userMenu">
     <mat-icon>account_circle</mat-icon>

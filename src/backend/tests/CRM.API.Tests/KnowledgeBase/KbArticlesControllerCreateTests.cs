@@ -49,7 +49,7 @@ public class KbArticlesControllerCreateTests
         _mediator.Setup(m => m.Send(It.IsAny<CreateKbArticleCommand>(), It.IsAny<CancellationToken>()))
                  .ReturnsAsync(new KbArticleSummaryDto(
                      articleId, "How to reset password", null,
-                     Guid.NewGuid(), "Draft", "Internal", Guid.NewGuid(), DateTime.UtcNow));
+                     Guid.NewGuid(), null, "Draft", "Internal", Guid.NewGuid(), "Test Author", null, DateTime.UtcNow));
 
         var response = await BuildClient().PostAsJsonAsync("/api/v1/kb/articles", new
         {

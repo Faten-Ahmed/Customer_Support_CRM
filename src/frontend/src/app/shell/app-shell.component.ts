@@ -18,6 +18,7 @@ import { AuthStore } from '../auth/auth.store';
 import { AgentAiAssistantComponent } from '../shared/agent-ai-assistant/agent-ai-assistant.component';
 import { I18nService } from '../shared/services/i18n.service';
 import { TranslatePipe } from '../shared/pipes/translate.pipe';
+import { NotificationBellComponent } from '../notifications/notification-bell/notification-bell.component';
 
 interface NavItem {
   labelKey: string;
@@ -42,7 +43,7 @@ const NAV_ITEMS: NavItem[] = [
     CommonModule, RouterModule,
     MatSidenavModule, MatToolbarModule, MatButtonModule, MatIconModule,
     MatMenuModule, MatTooltipModule, MatProgressBarModule, MatBadgeModule, MatDividerModule,
-    AgentAiAssistantComponent, TranslatePipe,
+    AgentAiAssistantComponent, TranslatePipe, NotificationBellComponent,
   ],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
