@@ -19,6 +19,8 @@ import { AgentAiAssistantComponent } from '../shared/agent-ai-assistant/agent-ai
 import { I18nService } from '../shared/services/i18n.service';
 import { TranslatePipe } from '../shared/pipes/translate.pipe';
 import { NotificationBellComponent } from '../notifications/notification-bell/notification-bell.component';
+import { SignalRService } from '../core/signalr.service';
+import { NotificationService } from '../notifications/notification.service';
 
 interface NavItem {
   labelKey: string;
@@ -52,6 +54,8 @@ export class AppShellComponent implements OnInit, OnDestroy {
   readonly authStore = inject(AuthStore);
   readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly signalR = inject(SignalRService);
+  private readonly notifService = inject(NotificationService);
 
   readonly collapsed = signal(localStorage.getItem('sidenav_collapsed') === 'true');
   readonly aiOpen = signal(false);
@@ -60,6 +64,7 @@ export class AppShellComponent implements OnInit, OnDestroy {
   readonly navItems = NAV_ITEMS;
 
   private routerSub!: Subscription;
+  private signalRSubs = new Subscription();
 
   get user() { return this.authStore.user(); }
 
@@ -79,10 +84,20 @@ export class AppShellComponent implements OnInit, OnDestroy {
         this.loading.set(false);
       }
     });
+
+    this.signalR.connectAll();
+    this.signalRSubs.add(
+      this.signalR.notification$.subscribe(n => this.notifService.pushNotification(n))
+    );
+    this.signalRSubs.add(
+      this.signalR.unreadCountUpdated$.subscribe(count => this.notifService.setUnreadCount(count))
+    );
   }
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
+    this.signalRSubs.unsubscribe();
+    this.signalR.disconnectAll();
   }
 
   toggleSidenav(): void {

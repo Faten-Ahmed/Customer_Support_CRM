@@ -39,7 +39,7 @@ describe('NotificationService', () => {
   it('list() should GET /api/notifications with params', () => {
     service.list({ page: 1, pageSize: 20, unreadOnly: true }).subscribe();
     const req = httpMock.expectOne(r =>
-      r.url === '/api/notifications' &&
+      r.url === '/api/v1/notifications' &&
       r.params.get('page') === '1' &&
       r.params.get('pageSize') === '20' &&
       r.params.get('unreadOnly') === 'true'
@@ -50,14 +50,14 @@ describe('NotificationService', () => {
 
   it('list() should populate notifications signal', () => {
     service.list({ page: 1, pageSize: 20 }).subscribe();
-    const req = httpMock.expectOne(r => r.url === '/api/notifications');
+    const req = httpMock.expectOne(r => r.url === '/api/v1/notifications');
     req.flush({ items: [MOCK_NOTIFICATION], totalCount: 1, page: 1, pageSize: 20 });
     expect(service.notifications()).toEqual([MOCK_NOTIFICATION]);
   });
 
   it('markRead() should PUT /api/notifications/{id}/read', () => {
     service.markRead('n1').subscribe();
-    const req = httpMock.expectOne('/api/notifications/n1/read');
+    const req = httpMock.expectOne('/api/v1/notifications/n1/read');
     expect(req.request.method).toBe('PUT');
     req.flush({});
   });
@@ -65,15 +65,15 @@ describe('NotificationService', () => {
   it('markRead() should update notification isRead signal locally', () => {
     service['_notifications'].set([MOCK_NOTIFICATION]);
     service.markRead('n1').subscribe();
-    const req = httpMock.expectOne('/api/notifications/n1/read');
+    const req = httpMock.expectOne('/api/v1/notifications/n1/read');
     req.flush({});
     const updated = service.notifications().find(n => n.id === 'n1');
     expect(updated?.isRead).toBe(true);
   });
 
-  it('markAllRead() should PUT /api/notifications/mark-all-read', () => {
+  it('markAllRead() should PUT /api/v1/notifications/read-all', () => {
     service.markAllRead().subscribe();
-    const req = httpMock.expectOne('/api/notifications/mark-all-read');
+    const req = httpMock.expectOne('/api/v1/notifications/read-all');
     expect(req.request.method).toBe('PUT');
     req.flush({});
   });
@@ -81,15 +81,15 @@ describe('NotificationService', () => {
   it('markAllRead() should set all notifications isRead to true', () => {
     service['_notifications'].set([MOCK_NOTIFICATION, { ...MOCK_NOTIFICATION, id: 'n2' }]);
     service.markAllRead().subscribe();
-    const req = httpMock.expectOne('/api/notifications/mark-all-read');
+    const req = httpMock.expectOne('/api/v1/notifications/read-all');
     req.flush({});
     expect(service.notifications().every(n => n.isRead)).toBe(true);
     expect(service.unreadCount()).toBe(0);
   });
 
-  it('getUnreadCount() should GET /api/notifications/unread-count and update signal', () => {
+  it('getUnreadCount() should GET /api/v1/notifications/unread-count and update signal', () => {
     service.getUnreadCount().subscribe();
-    const req = httpMock.expectOne('/api/notifications/unread-count');
+    const req = httpMock.expectOne('/api/v1/notifications/unread-count');
     expect(req.request.method).toBe('GET');
     req.flush({ count: 7 });
     expect(service.unreadCount()).toBe(7);

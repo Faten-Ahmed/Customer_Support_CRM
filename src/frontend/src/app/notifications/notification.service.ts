@@ -46,7 +46,7 @@ export class NotificationService {
 
     this._loading.set(true);
     return this.http
-      .get<NotificationListResponse>('/api/notifications', { params: httpParams })
+      .get<NotificationListResponse>('/api/v1/notifications', { params: httpParams })
       .pipe(
         tap(res => {
           this._notifications.set(res.items);
@@ -56,7 +56,7 @@ export class NotificationService {
   }
 
   markRead(id: string): Observable<void> {
-    return this.http.put<void>(`/api/notifications/${id}/read`, {}).pipe(
+    return this.http.put<void>(`/api/v1/notifications/${id}/read`, {}).pipe(
       tap(() => {
         this._notifications.update(list =>
           list.map(n => (n.id === id ? { ...n, isRead: true } : n))
@@ -67,7 +67,7 @@ export class NotificationService {
   }
 
   markAllRead(): Observable<void> {
-    return this.http.put<void>('/api/notifications/mark-all-read', {}).pipe(
+    return this.http.put<void>('/api/v1/notifications/read-all', {}).pipe(
       tap(() => {
         this._notifications.update(list => list.map(n => ({ ...n, isRead: true })));
         this._unreadCount.set(0);
@@ -76,7 +76,7 @@ export class NotificationService {
   }
 
   getUnreadCount(): Observable<{ count: number }> {
-    return this.http.get<{ count: number }>('/api/notifications/unread-count').pipe(
+    return this.http.get<{ count: number }>('/api/v1/notifications/unread-count').pipe(
       tap(res => this._unreadCount.set(res.count))
     );
   }
