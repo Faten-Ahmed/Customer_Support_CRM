@@ -1,3 +1,4 @@
+using CRM.Application.Common;
 using CRM.Application.Sla.Commands;
 using CRM.Application.Tickets.Commands;
 using CRM.Domain.Customers;
@@ -14,6 +15,7 @@ public class CreateTicketInternalCommandHandlerTests
     private readonly Mock<ICustomerRepository> _customerRepo = new();
     private readonly Mock<ITicketRepository> _ticketRepo = new();
     private readonly Mock<IMediator> _mediator = new();
+    private readonly Mock<ITicketJobScheduler> _jobScheduler = new();
     private readonly CreateTicketInternalCommandHandler _handler;
 
     public CreateTicketInternalCommandHandlerTests()
@@ -21,7 +23,7 @@ public class CreateTicketInternalCommandHandlerTests
         _mediator.Setup(m => m.Send(It.IsAny<StartSlaClockCommand>(), It.IsAny<CancellationToken>()))
                  .Returns(Task.FromResult(Unit.Value));
         _handler = new CreateTicketInternalCommandHandler(
-            _customerRepo.Object, _ticketRepo.Object, _mediator.Object);
+            _customerRepo.Object, _ticketRepo.Object, _mediator.Object, _jobScheduler.Object);
     }
 
     [Fact]

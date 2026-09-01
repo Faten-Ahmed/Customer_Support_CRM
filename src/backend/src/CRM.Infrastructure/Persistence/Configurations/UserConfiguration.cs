@@ -31,6 +31,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.IsActive).IsRequired().HasDefaultValue(true);
         builder.Property(u => u.RequiresPasswordChange).IsRequired().HasDefaultValue(false);
+        builder.Property(u => u.LastAvailabilityChange);
+        builder.Property(u => u.LastAssignedAt);
         builder.Property(u => u.CreatedAt).IsRequired();
 
         builder.HasIndex(u => u.Email).IsUnique();

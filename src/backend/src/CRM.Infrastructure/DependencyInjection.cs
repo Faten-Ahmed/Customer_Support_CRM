@@ -1,5 +1,7 @@
 using CRM.Application.Admin.Users.Commands;
 using CRM.Application.Common;
+using CRM.Application.Tickets.Jobs;
+using CRM.Domain.Agents;
 using CRM.Domain.Notifications;
 using CRM.Application.Sla.Jobs;
 using CRM.Domain.Auth;
@@ -13,6 +15,7 @@ using CRM.Domain.Sla;
 using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
 using CRM.Domain.Users;
+using CRM.Infrastructure.Agents;
 using CRM.Infrastructure.Channels;
 using CRM.Infrastructure.Email;
 using CRM.Infrastructure.Identity;
@@ -98,6 +101,14 @@ public static class DependencyInjection
 
         // SLA jobs
         services.AddScoped<SlaMonitorJob>();
+
+        // Agent Dashboard jobs
+        services.AddScoped<AutoAssignTicketJob>();
+        services.AddScoped<AutoCloseResolvedTicketsJob>();
+        services.AddScoped<CRM.Application.Agents.Jobs.PurgeCompletedTasksJob>();
+
+        // Agent task repository
+        services.AddScoped<IAgentTaskRepository, AgentTaskRepository>();
 
         services.AddScoped<INotificationService, SlaNotificationService>();
         // Notification repository (Feature 05)

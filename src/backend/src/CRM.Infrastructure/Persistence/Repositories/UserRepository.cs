@@ -175,4 +175,40 @@ public class UserRepository : IUserRepository
                 $"INSERT INTO UserSkills (UserId, CategoryId) VALUES ({userId}, {cId})", ct);
         }
     }
+
+    public async Task<IReadOnlyList<AgentCapacityDto>> FindActiveAgentsInDepartmentAsync(
+        Guid departmentId, CancellationToken ct = default)
+    {
+        var agents = await _db.Users
+            .Where(u => u.IsActive
+                        && u.Role == UserRole.Agent
+                        && u.AvailabilityStatus == AvailabilityStatus.Available
+                        && u.Departments.Any(d => d.DepartmentId == departmentId))
+            .Select(u => new
+            {
+                u.Id,
+                u.LastAssignedAt,
+                SkillCategoryIds = u.Skills.Select(s => s.CategoryId).ToList(),
+                OpenTicketCount = _db.Tickets.Count(t =>
+                    t.AssignedToUserId == u.Id &&
+                    t.Status != Domain.Tickets.Enums.TicketStatus.Resolved &&
+                    t.Status != Domain.Tickets.Enums.TicketStatus.Closed)
+            })
+            .ToListAsync(ct);
+
+        return agents.Select(a => new AgentCapacityDto(
+            a.Id,
+            a.OpenTicketCount,
+            a.LastAssignedAt,
+            a.SkillCategoryIds.AsReadOnly()))
+            .ToList();
+    }
+
+    public async Task UpdateLastAssignedAtAsync(Guid agentId, CancellationToken ct = default)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == agentId, ct);
+        if (user is null) return;
+        user.RecordAssignment();
+        await _db.SaveChangesAsync(ct);
+    }
 }

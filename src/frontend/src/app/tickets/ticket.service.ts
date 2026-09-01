@@ -96,6 +96,28 @@ export interface SlaInfo {
   breachTier: string;
 }
 
+export interface UnassignedTicketDto {
+  id: string;
+  ticketNumber: string;
+  customerId: string;
+  subject: string;
+  priority: TicketPriority;
+  channel: TicketChannel;
+  departmentId?: string;
+  categoryId?: string;
+  createdAt: string;
+  resolutionDue?: string;
+  breachTier: string;
+}
+
+export interface UnassignedTicketPage {
+  items: UnassignedTicketDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface TicketDetail extends TicketSummary {
   subjectAr?: string;
   description: string;
@@ -231,5 +253,12 @@ export class TicketService {
 
   getSla(ticketId: string): Observable<SlaStatus> {
     return this.http.get<SlaStatus>(`${this.baseUrl}/${ticketId}/sla`);
+  }
+
+  listUnassigned(page = 1, pageSize = 20): Observable<UnassignedTicketPage> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+    return this.http.get<UnassignedTicketPage>(`${this.baseUrl}/unassigned`, { params });
   }
 }

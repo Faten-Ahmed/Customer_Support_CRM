@@ -141,6 +141,129 @@ public class TicketRepository : ITicketRepository
             .Select(c => c.Name)
             .FirstOrDefaultAsync(ct);
 
+    public async Task<PagedResult<Ticket>> ListUnassignedAsync(
+        IReadOnlyList<Guid>? departmentIds,
+        int page,
+        int pageSize,
+        CancellationToken ct = default)
+    {
+        var query = _db.Tickets
+            .Where(t => t.Status == TicketStatus.New && t.AssignedToUserId == null)
+            .AsQueryable();
+
+        if (departmentIds is { Count: > 0 })
+            query = query.Where(t => t.DepartmentId.HasValue &&
+                                     departmentIds.Contains(t.DepartmentId.Value));
+
+        var total = await query.CountAsync(ct);
+        var items = await query
+            .OrderBy(t => t.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PagedResult<Ticket>(items, total, page, pageSize);
+    }
+
+    public async Task<IReadOnlyList<Ticket>> FindResolvedWithNoCustomerReplyAsync(
+        DateTime resolvedBefore,
+        CancellationToken ct = default)
+    {
+        var resolvedStatus = TicketStatus.Resolved;
+
+        var tickets = await _db.Tickets
+            .Where(t => t.Status == resolvedStatus
+                        && t.ResolvedAt.HasValue
+                        && t.ResolvedAt.Value < resolvedBefore
+                        && !_db.TicketMessages.Any(m =>
+                            m.TicketId == t.Id
+                            && m.AuthorCustomerId.HasValue
+                            && m.CreatedAt > t.ResolvedAt.Value))
+            .ToListAsync(ct);
+
+        return tickets;
+    }
+
+    public async Task<PagedResult<MyTicketProjection>> ListAssignedToAgentAsync(
+        Guid agentId,
+        AgentTicketFilter filter,
+        int page,
+        int pageSize,
+        CancellationToken ct = default)
+    {
+        var query = _db.Tickets
+            .Include(t => t.Customer)
+            .Where(t => t.AssignedToUserId == agentId)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Status) &&
+            Enum.TryParse<TicketStatus>(filter.Status, out var parsedStatus))
+            query = query.Where(t => t.Status == parsedStatus);
+
+        if (!string.IsNullOrWhiteSpace(filter.Priority) &&
+            Enum.TryParse<TicketPriority>(filter.Priority, out var parsedPriority))
+            query = query.Where(t => t.Priority == parsedPriority);
+
+        if (filter.DepartmentId.HasValue)
+            query = query.Where(t => t.DepartmentId == filter.DepartmentId.Value);
+
+        var total = await query.CountAsync(ct);
+
+        var sortBy = filter.SortBy ?? "Priority";
+        var sortDesc = (filter.SortDir ?? "desc").Equals("desc", StringComparison.OrdinalIgnoreCase);
+
+        query = sortBy.ToLower() switch
+        {
+            "priority" => sortDesc
+                ? query.OrderByDescending(t => t.Priority)
+                : query.OrderBy(t => t.Priority),
+            "createdat" => sortDesc
+                ? query.OrderByDescending(t => t.CreatedAt)
+                : query.OrderBy(t => t.CreatedAt),
+            _ => sortDesc
+                ? query.OrderByDescending(t => t.Priority)
+                : query.OrderBy(t => t.Priority),
+        };
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(t => new MyTicketProjection(
+                t.Id, t.TicketNumber, t.CustomerId,
+                t.Customer!.FullName,
+                t.Subject, t.Status.ToString(), t.Priority.ToString(),
+                t.Channel.ToString(),
+                t.DepartmentId, t.CategoryId, t.CreatedAt,
+                null, "None", null))
+            .ToListAsync(ct);
+
+        return new PagedResult<MyTicketProjection>(items, total, page, pageSize);
+    }
+
+    public async Task<TicketRenderContext?> GetRenderContextAsync(
+        Guid ticketId,
+        CancellationToken ct = default)
+    {
+        var ticket = await _db.Tickets
+            .Include(t => t.Customer)
+            .Include(t => t.AssignedTo)
+            .FirstOrDefaultAsync(t => t.Id == ticketId, ct);
+
+        if (ticket is null) return null;
+
+        var deptName = ticket.DepartmentId.HasValue
+            ? await GetDepartmentNameAsync(ticket.DepartmentId.Value, ct) ?? "Unknown"
+            : "Unknown";
+
+        var agentName = ticket.AssignedTo is not null
+            ? $"{ticket.AssignedTo.FirstName} {ticket.AssignedTo.LastName}"
+            : "Unassigned";
+
+        var customerName = ticket.Customer?.FullName ?? "Unknown";
+
+        return new TicketRenderContext(ticket.TicketNumber, customerName, agentName, deptName);
+    }
+
     public Task SaveChangesAsync(CancellationToken ct = default)
         => _db.SaveChangesAsync(ct);
 }

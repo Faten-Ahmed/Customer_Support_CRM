@@ -2,8 +2,10 @@ using CRM.API.Hubs;
 using CRM.API.Middleware;
 using CRM.API.Services;
 using CRM.Application;
+using CRM.Application.Agents.Jobs;
 using CRM.Application.Notifications;
 using CRM.Application.Sla.Jobs;
+using CRM.Application.Tickets.Jobs;
 using CRM.Infrastructure;
 using CRM.Infrastructure.Persistence.Seed;
 using FluentValidation.AspNetCore;
@@ -129,6 +131,14 @@ try
             "sla-monitor",
             job => job.Execute(CancellationToken.None),
             "*/5 * * * *");
+        recurringJobs.AddOrUpdate<AutoCloseResolvedTicketsJob>(
+            "auto-close-resolved-tickets",
+            job => job.Execute(CancellationToken.None),
+            "*/30 * * * *");
+        recurringJobs.AddOrUpdate<PurgeCompletedTasksJob>(
+            "purge-completed-tasks",
+            job => job.Execute(CancellationToken.None),
+            "0 2 * * *");
     }
 
     app.Run();

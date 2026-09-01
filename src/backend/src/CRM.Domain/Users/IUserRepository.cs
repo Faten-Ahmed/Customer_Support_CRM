@@ -41,4 +41,9 @@ public interface IUserRepository
         Guid userId, IReadOnlyList<UserDepartment> departments, CancellationToken ct = default);
     Task ReplaceUserSkillsAsync(
         Guid userId, IReadOnlyList<Guid> categoryIds, CancellationToken ct = default);
+
+    Task<IReadOnlyList<AgentCapacityDto>> FindActiveAgentsInDepartmentAsync(
+        Guid departmentId, CancellationToken ct = default);
+
+    Task UpdateLastAssignedAtAsync(Guid agentId, CancellationToken ct = default);
 }

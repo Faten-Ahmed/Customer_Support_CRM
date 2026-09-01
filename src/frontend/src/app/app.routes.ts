@@ -40,9 +40,29 @@ export const routes: Routes = [
       import('./shell/app-shell.component').then(m => m.AppShellComponent),
     canActivate: [AuthGuard],
     children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./dashboard/agent-dashboard/agent-dashboard.component').then(m => m.AgentDashboardComponent),
+      },
       { path: 'customers', children: CUSTOMERS_ROUTES },
       { path: 'tickets', children: TICKETS_ROUTES },
       { path: 'kb', children: KB_ROUTES },
+      {
+        path: 'settings',
+        children: [
+          {
+            path: 'templates',
+            loadComponent: () =>
+              import('./settings/templates/template-management.component').then(m => m.TemplateManagementComponent),
+          },
+          {
+            path: 'tasks',
+            loadComponent: () =>
+              import('./settings/tasks/personal-tasks.component').then(m => m.PersonalTasksComponent),
+          },
+        ],
+      },
       {
         path: 'admin',
         loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),

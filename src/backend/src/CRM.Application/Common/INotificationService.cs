@@ -10,4 +10,9 @@ public interface INotificationService
         Guid? assignedAgentId,
         Guid? departmentId,
         CancellationToken ct = default);
+
+    Task SendUnassignedTicketAlertAsync(
+        Guid departmentId,
+        Guid ticketId,
+        CancellationToken ct = default);
 }

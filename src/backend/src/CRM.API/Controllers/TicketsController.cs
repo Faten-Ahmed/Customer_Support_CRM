@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using CRM.Domain.Tickets;
 
 namespace CRM.API.Controllers;
 
@@ -48,6 +49,20 @@ public class TicketsController : ControllerBase
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+    }
+
+    [HttpGet("unassigned")]
+    public async Task<IActionResult> GetUnassigned(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
+        Enum.TryParse<UserRole>(roleClaim, out var role);
+
+        var result = await _mediator.Send(
+            new ListUnassignedTicketsQuery(CurrentUserId, role, page, pageSize), ct);
+        return Ok(result);
     }
 
     [HttpGet]

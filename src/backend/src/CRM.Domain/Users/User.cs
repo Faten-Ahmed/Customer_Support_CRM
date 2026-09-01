@@ -15,6 +15,8 @@ public class User
     public bool IsActive { get; private set; }
     public bool RequiresPasswordChange { get; private set; }
     public AvailabilityStatus AvailabilityStatus { get; private set; }
+    public DateTime? LastAvailabilityChange { get; private set; }
+    public DateTime? LastAssignedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     private readonly List<UserDepartment> _departments = new();
@@ -24,6 +26,17 @@ public class User
     public IReadOnlyList<UserSkill> Skills => _skills.AsReadOnly();
 
     private User() { }
+
+    public void SetAvailability(AvailabilityStatus status)
+    {
+        AvailabilityStatus = status;
+        LastAvailabilityChange = DateTime.UtcNow;
+    }
+
+    public void RecordAssignment()
+    {
+        LastAssignedAt = DateTime.UtcNow;
+    }
 
     public void SetPassword(string newPasswordHash)
     {

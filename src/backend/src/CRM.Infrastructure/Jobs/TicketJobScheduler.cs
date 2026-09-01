@@ -1,9 +1,17 @@
 using CRM.Application.Common;
+using CRM.Application.Tickets.Jobs;
+using Hangfire;
 
 namespace CRM.Infrastructure.Jobs;
 
-// Stub — real Hangfire implementation follows in BE infrastructure tasks.
 public class TicketJobScheduler : ITicketJobScheduler
 {
-    public void ScheduleAutoAssign(Guid ticketId) { }
+    private readonly IBackgroundJobClient _jobs;
+
+    public TicketJobScheduler(IBackgroundJobClient jobs) => _jobs = jobs;
+
+    public void ScheduleAutoAssign(Guid ticketId)
+    {
+        _jobs.Enqueue<AutoAssignTicketJob>(j => j.Execute(ticketId, CancellationToken.None));
+    }
 }

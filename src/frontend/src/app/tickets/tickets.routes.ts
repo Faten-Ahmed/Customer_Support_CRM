@@ -12,6 +12,11 @@ export const TICKETS_ROUTES: Routes = [
       import('./create-ticket/create-ticket-form.component').then(m => m.CreateTicketFormComponent),
   },
   {
+    path: 'unassigned',
+    loadComponent: () =>
+      import('./unassigned-queue/unassigned-queue.component').then(m => m.UnassignedQueueComponent),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./ticket-detail/ticket-detail.component').then(m => m.TicketDetailComponent),

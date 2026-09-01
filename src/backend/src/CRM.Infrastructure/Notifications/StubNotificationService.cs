@@ -72,4 +72,22 @@ public class SlaNotificationService : INotificationService
             }
         }
     }
+
+    public async Task SendUnassignedTicketAlertAsync(
+        Guid departmentId,
+        Guid ticketId,
+        CancellationToken ct = default)
+    {
+        var title = "Unassigned Ticket Alert";
+        var body = $"Ticket {ticketId} could not be auto-assigned in department {departmentId}. Manual assignment required.";
+
+        var managers = await _users.ListAsync(UserRole.Manager, null, true, null, 1, 200, ct);
+        var admins = await _users.ListAsync(UserRole.Admin, null, true, null, 1, 200, ct);
+
+        foreach (var userId in managers.Items.Concat(admins.Items).Select(u => u.Id).Distinct())
+        {
+            await _mediator.Send(new CreateNotificationCommand(
+                userId, NotificationType.UnassignedTicketAlert, title, body, "ticket", ticketId), ct);
+        }
+    }
 }

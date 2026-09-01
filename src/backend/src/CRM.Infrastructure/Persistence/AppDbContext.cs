@@ -1,3 +1,4 @@
+using CRM.Domain.Agents;
 using CRM.Domain.Auth;
 using CRM.Domain.Branches;
 using CRM.Domain.Notifications;
@@ -40,6 +41,7 @@ public class AppDbContext : DbContext
     public DbSet<KbCategory> KbCategories => Set<KbCategory>();
     public DbSet<KbArticle> KbArticles => Set<KbArticle>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<AgentTask> AgentTasks => Set<AgentTask>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

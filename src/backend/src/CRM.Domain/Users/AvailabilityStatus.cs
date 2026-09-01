@@ -1,3 +1,3 @@
 namespace CRM.Domain.Users;
 
-public enum AvailabilityStatus { Online, Busy, Away, Offline }
+public enum AvailabilityStatus { Available, Busy, Away, Offline }

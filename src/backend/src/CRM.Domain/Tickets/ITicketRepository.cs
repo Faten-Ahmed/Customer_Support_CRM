@@ -39,6 +39,35 @@ public record TicketFilter(
     string SortBy,
     bool SortDesc);
 
+public record AgentTicketFilter(
+    string? Status,
+    string? Priority,
+    Guid? DepartmentId,
+    string? SortBy,
+    string? SortDir);
+
+public record MyTicketProjection(
+    Guid Id,
+    string TicketNumber,
+    Guid CustomerId,
+    string CustomerFullName,
+    string Subject,
+    string Status,
+    string Priority,
+    string Channel,
+    Guid? DepartmentId,
+    Guid? CategoryId,
+    DateTime CreatedAt,
+    DateTime? ResolutionDue,
+    string SlaStatus,
+    int? ResolutionRemainingMinutes);
+
+public record TicketRenderContext(
+    string TicketNumber,
+    string CustomerFullName,
+    string AgentFullName,
+    string DepartmentName);
+
 public interface ITicketRepository
 {
     Task<Ticket?> FindByIdAsync(Guid id, CancellationToken ct = default);
@@ -58,5 +87,26 @@ public interface ITicketRepository
     Task<string?> GetDepartmentNameAsync(Guid departmentId, CancellationToken ct = default);
     Task<string?> GetCategoryNameAsync(Guid categoryId, CancellationToken ct = default);
     Task<bool> IsDepartmentActiveAsync(Guid departmentId, CancellationToken ct = default);
+    Task<PagedResult<Ticket>> ListUnassignedAsync(
+        IReadOnlyList<Guid>? departmentIds,
+        int page,
+        int pageSize,
+        CancellationToken ct = default);
+
+    Task<IReadOnlyList<Ticket>> FindResolvedWithNoCustomerReplyAsync(
+        DateTime resolvedBefore,
+        CancellationToken ct = default);
+
+    Task<PagedResult<MyTicketProjection>> ListAssignedToAgentAsync(
+        Guid agentId,
+        AgentTicketFilter filter,
+        int page,
+        int pageSize,
+        CancellationToken ct = default);
+
+    Task<TicketRenderContext?> GetRenderContextAsync(
+        Guid ticketId,
+        CancellationToken ct = default);
+
     Task SaveChangesAsync(CancellationToken ct = default);
 }

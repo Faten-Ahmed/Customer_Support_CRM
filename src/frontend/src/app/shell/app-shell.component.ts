@@ -35,6 +35,8 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: 'nav.customers', icon: 'people', route: '/app/customers', roles: ['Admin', 'Manager', 'Agent'] },
   { labelKey: 'nav.knowledgeBase', icon: 'menu_book', route: '/app/kb' },
   { labelKey: 'nav.reports', icon: 'bar_chart', route: '/app/reports', roles: ['Admin', 'Manager'] },
+  { labelKey: 'nav.templates', icon: 'quick_reply', route: '/app/settings/templates', roles: ['Admin', 'Manager', 'Agent'] },
+  { labelKey: 'nav.tasks', icon: 'checklist', route: '/app/settings/tasks', roles: ['Agent', 'Manager'] },
   { labelKey: 'nav.admin', icon: 'admin_panel_settings', route: '/app/admin', roles: ['Admin'] },
 ];
 

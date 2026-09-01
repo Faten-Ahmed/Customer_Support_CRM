@@ -1,3 +1,4 @@
+using CRM.Application.Common;
 using CRM.Application.Sla.Commands;
 using CRM.Application.Tickets.DTOs;
 using CRM.Domain.Customers;
@@ -26,13 +27,16 @@ public class CreateTicketInternalCommandHandler
     private readonly ICustomerRepository _customers;
     private readonly ITicketRepository _tickets;
     private readonly IMediator _mediator;
+    private readonly ITicketJobScheduler _jobScheduler;
 
     public CreateTicketInternalCommandHandler(
-        ICustomerRepository customers, ITicketRepository tickets, IMediator mediator)
+        ICustomerRepository customers, ITicketRepository tickets, IMediator mediator,
+        ITicketJobScheduler jobScheduler)
     {
         _customers = customers;
         _tickets = tickets;
         _mediator = mediator;
+        _jobScheduler = jobScheduler;
     }
 
     public async Task<TicketSummaryDto> Handle(
@@ -59,6 +63,7 @@ public class CreateTicketInternalCommandHandler
         await _tickets.AddAsync(ticket, ct);
         await _tickets.SaveChangesAsync(ct);
 
+        _jobScheduler.ScheduleAutoAssign(ticket.Id);
         await _mediator.Send(new StartSlaClockCommand(ticket.Id), ct);
 
         return new TicketSummaryDto(

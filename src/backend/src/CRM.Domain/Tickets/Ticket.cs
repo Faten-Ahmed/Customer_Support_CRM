@@ -172,6 +172,15 @@ public class Ticket
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void AutoClose()
+    {
+        var oldStatus = Status.ToString();
+        Status = TicketStatus.Closed;
+        ClosedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+        _history.Add(TicketHistory.Create(Id, "AutoClosed", oldStatus, TicketStatus.Closed.ToString(), Guid.Empty));
+    }
+
     private static string GenerateNumber()
         => $"TKT-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
 }

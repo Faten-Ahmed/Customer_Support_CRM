@@ -59,6 +59,8 @@ export const TRANSLATIONS: TranslationMap = {
   'nav.customers':      { en: 'Customers',      ar: 'العملاء' },
   'nav.knowledgeBase':  { en: 'Knowledge Base', ar: 'قاعدة المعرفة' },
   'nav.reports':        { en: 'Reports',        ar: 'التقارير' },
+  'nav.templates':      { en: 'Templates',      ar: 'القوالب' },
+  'nav.tasks':          { en: 'My Tasks',       ar: 'مهامي' },
   'nav.admin':          { en: 'Admin',          ar: 'الإدارة' },
 
   // ── App Shell ──────────────────────────────────────────────────────────
@@ -188,6 +190,47 @@ export const TRANSLATIONS: TranslationMap = {
   'ticket.fileTooLarge':    { en: 'File exceeds 5 MB limit.', ar: 'الملف يتجاوز حد 5 ميغابايت.' },
   'ticket.attachmentLimitExceeded': { en: 'Attachment limit exceeded for this ticket.', ar: 'تم تجاوز حد المرفقات لهذه التذكرة.' },
   'ticket.uploadFailed':    { en: 'Upload failed. Please try again.', ar: 'فشل الرفع. حاول مرة أخرى.' },
+
+  // ── Dashboard ──────────────────────────────────────────────────────────
+  'dashboard.availability':       { en: 'Availability',               ar: 'الحالة' },
+  'dashboard.refresh':            { en: 'Refresh',                    ar: 'تحديث' },
+  'dashboard.openTickets':        { en: 'Open Tickets',               ar: 'التذاكر المفتوحة' },
+  'dashboard.slaWarningBreached': { en: 'SLA Warning / Breached',     ar: 'تحذير SLA / منتهك' },
+  'dashboard.onHold':             { en: 'On Hold',                    ar: 'قيد الانتظار' },
+  'dashboard.resolvedToday':      { en: 'Resolved Today',             ar: 'محلولة اليوم' },
+  'dashboard.myTickets':          { en: 'My Tickets',                 ar: 'تذاكري' },
+  'dashboard.noTickets':          { en: 'No tickets assigned to you.', ar: 'لا توجد تذاكر معينة لك.' },
+  'dashboard.resolutionDue':      { en: 'Resolution Due',             ar: 'موعد الحل' },
+
+  // ── Unassigned Queue ───────────────────────────────────────────────────
+  'unassigned.title':      { en: 'Unassigned Queue',       ar: 'قائمة التذاكر غير المعينة' },
+  'unassigned.subtitle':   { en: 'Unclaimed Tickets',      ar: 'التذاكر غير المطالب بها' },
+  'unassigned.noTickets':  { en: 'No unassigned tickets.', ar: 'لا توجد تذاكر غير معينة.' },
+  'unassigned.breachTier': { en: 'Breach Tier',            ar: 'مستوى الخرق' },
+  'unassigned.claim':      { en: 'Claim',                  ar: 'استلام' },
+
+  // ── Templates ──────────────────────────────────────────────────────────
+  'templates.newTemplate':    { en: 'New Template',         ar: 'قالب جديد' },
+  'templates.editTemplate':   { en: 'Edit Template',        ar: 'تعديل القالب' },
+  'templates.myTemplates':    { en: 'My Templates',         ar: 'قوالبي' },
+  'templates.globalTemplates':{ en: 'Global Templates',     ar: 'القوالب العامة' },
+  'templates.noPersonal':     { en: 'No personal templates yet.', ar: 'لا توجد قوالب شخصية بعد.' },
+  'templates.noGlobal':       { en: 'No global templates available.', ar: 'لا توجد قوالب عامة متاحة.' },
+  'templates.titleEn':        { en: 'Title (English)',      ar: 'العنوان (إنجليزي)' },
+  'templates.titleAr':        { en: 'Title (Arabic)',       ar: 'العنوان (عربي)' },
+  'templates.contentEn':      { en: 'Content (English)',    ar: 'المحتوى (إنجليزي)' },
+  'templates.contentAr':      { en: 'Content (Arabic)',     ar: 'المحتوى (عربي)' },
+
+  // ── Tasks ──────────────────────────────────────────────────────────────
+  'tasks.addTask':        { en: 'Add Task',             ar: 'إضافة مهمة' },
+  'tasks.taskTitle':      { en: 'Task Title',           ar: 'عنوان المهمة' },
+  'tasks.dueDate':        { en: 'Due Date',             ar: 'تاريخ الاستحقاق' },
+  'tasks.showCompleted':  { en: 'Show Completed',       ar: 'إظهار المكتملة' },
+  'tasks.activeTasks':    { en: 'Active Tasks',         ar: 'المهام النشطة' },
+  'tasks.completedTasks': { en: 'Completed Tasks',      ar: 'المهام المكتملة' },
+  'tasks.noActive':       { en: 'No active tasks.',     ar: 'لا توجد مهام نشطة.' },
+  'tasks.noCompleted':    { en: 'No completed tasks.',  ar: 'لا توجد مهام مكتملة.' },
+  'tasks.complete':       { en: 'Mark Complete',        ar: 'تحديد كمكتملة' },
 
   // ── Portal ─────────────────────────────────────────────────────────────
   'portal.emailNotVerified':    { en: 'Please verify your email before logging in.',  ar: 'يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول.' },
