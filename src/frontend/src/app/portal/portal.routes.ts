@@ -57,6 +57,11 @@ export const PORTAL_ROUTES: Routes = [
         loadComponent: () =>
           import('./kb/portal-kb-article/portal-kb-article.component').then(m => m.PortalKbArticleComponent),
       },
+      {
+        path: 'live-chat',
+        loadComponent: () =>
+          import('./live-chat/live-chat.component').then(m => m.LiveChatComponent),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

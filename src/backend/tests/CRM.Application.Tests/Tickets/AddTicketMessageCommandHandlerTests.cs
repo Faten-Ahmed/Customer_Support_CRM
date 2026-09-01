@@ -1,3 +1,4 @@
+using CRM.Application.Common;
 using CRM.Application.Notifications.Commands;
 using CRM.Application.Tickets.Commands;
 using CRM.Domain.Customers;
@@ -17,6 +18,7 @@ public class AddTicketMessageCommandHandlerTests
     private readonly Mock<IUserRepository> _users = new();
     private readonly Mock<ICustomerRepository> _customers = new();
     private readonly Mock<IMediator> _mediator = new();
+    private readonly Mock<IBackgroundJobService> _jobs = new();
     private readonly AddTicketMessageCommandHandler _handler;
 
     public AddTicketMessageCommandHandlerTests()
@@ -25,7 +27,7 @@ public class AddTicketMessageCommandHandlerTests
                  .ReturnsAsync(Guid.NewGuid());
         _handler = new AddTicketMessageCommandHandler(
             _ticketRepo.Object, _messageRepo.Object,
-            _users.Object, _customers.Object, _mediator.Object);
+            _users.Object, _customers.Object, _mediator.Object, _jobs.Object);
     }
 
     [Fact]

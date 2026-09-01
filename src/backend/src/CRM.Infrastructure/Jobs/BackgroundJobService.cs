@@ -13,4 +13,8 @@ public class BackgroundJobService : IBackgroundJobService
     public void EnqueueWelcomeEmail(Guid userId, string email, string tempPassword)
         => _jobClient.Enqueue<SendWelcomeEmailJob>(
             job => job.Execute(userId, email, tempPassword, CancellationToken.None));
+
+    public void EnqueueOutboundEmail(Guid ticketId, Guid messageId)
+        => _jobClient.Enqueue<SendOutboundEmailJob>(
+            job => job.Execute(ticketId, messageId, CancellationToken.None));
 }

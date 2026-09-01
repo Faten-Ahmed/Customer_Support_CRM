@@ -68,6 +68,26 @@ public class EmailService : IEmailService
         await SendAsync(toEmail, toName, subject, body, ct);
     }
 
+    public async Task SendTicketReplyAsync(
+        string toEmail, string toName, string ticketNumber, string subject, string body,
+        CancellationToken ct = default)
+    {
+        var emailSubject = $"Re: {subject} [#{ticketNumber}]";
+        var htmlBody = $"""
+            <div style="font-family:sans-serif;max-width:640px;margin:0 auto;padding:24px;">
+              <p style="color:#666;font-size:0.875rem;">Ticket #{ticketNumber}</p>
+              <div style="border-left:4px solid #1976d2;padding-left:16px;margin:16px 0;white-space:pre-wrap;">
+                {System.Net.WebUtility.HtmlEncode(body)}
+              </div>
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="color:#999;font-size:0.75rem;">
+                This is a reply to your support ticket. Please use the customer portal to respond.
+              </p>
+            </div>
+            """;
+        await SendAsync(toEmail, toName, emailSubject, htmlBody, ct);
+    }
+
     private async Task SendAsync(string toEmail, string toName, string subject, string htmlBody, CancellationToken ct)
     {
         var message = new MimeMessage();

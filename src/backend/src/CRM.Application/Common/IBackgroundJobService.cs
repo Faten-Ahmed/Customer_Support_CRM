@@ -6,4 +6,5 @@ namespace CRM.Application.Common;
 public interface IBackgroundJobService
 {
     void EnqueueWelcomeEmail(Guid userId, string email, string tempPassword);
+    void EnqueueOutboundEmail(Guid ticketId, Guid messageId);
 }

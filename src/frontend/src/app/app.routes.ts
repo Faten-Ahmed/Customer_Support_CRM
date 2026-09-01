@@ -66,6 +66,11 @@ export const routes: Routes = [
         ],
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('./profile/profile.component').then(m => m.ProfileComponent),
+      },
+      {
         path: 'admin',
         loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
       },

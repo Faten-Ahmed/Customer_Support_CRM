@@ -14,6 +14,7 @@ public record TicketMessageProjection(
 
 public interface ITicketMessageRepository
 {
+    Task<TicketMessage?> FindByIdAsync(Guid id, CancellationToken ct = default);
     Task AddAsync(TicketMessage message, CancellationToken ct = default);
     Task<PagedResult<TicketMessageProjection>> ListByTicketAsync(
         Guid ticketId,

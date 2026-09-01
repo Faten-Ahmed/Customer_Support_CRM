@@ -1,5 +1,6 @@
 using CRM.Domain.Agents;
 using CRM.Domain.Auth;
+using CRM.Domain.Chat;
 using CRM.Domain.Branches;
 using CRM.Domain.Notifications;
 using CRM.Domain.Categories;
@@ -42,6 +43,8 @@ public class AppDbContext : DbContext
     public DbSet<KbArticle> KbArticles => Set<KbArticle>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<AgentTask> AgentTasks => Set<AgentTask>();
+    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
+    public DbSet<ChatSessionMessage> ChatSessionMessages => Set<ChatSessionMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

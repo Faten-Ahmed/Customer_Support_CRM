@@ -129,7 +129,7 @@ try
     app.MapControllers();
 
     app.MapHub<NotificationHub>("/hubs/notifications");
-    // app.MapHub<ChatHub>("/hubs/chat");
+    app.MapHub<CRM.Infrastructure.Hubs.ChatHub>("/hubs/chat");
     app.MapHub<DashboardHub>("/hubs/dashboard");
 
     if (!app.Environment.IsEnvironment("Testing"))

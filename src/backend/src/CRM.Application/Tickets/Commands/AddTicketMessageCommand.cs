@@ -1,3 +1,4 @@
+using CRM.Application.Common;
 using CRM.Application.Notifications.Commands;
 using CRM.Application.Tickets.DTOs;
 using CRM.Domain.Customers;
@@ -24,19 +25,22 @@ public class AddTicketMessageCommandHandler
     private readonly IUserRepository _users;
     private readonly ICustomerRepository _customers;
     private readonly IMediator _mediator;
+    private readonly IBackgroundJobService _jobs;
 
     public AddTicketMessageCommandHandler(
         ITicketRepository tickets,
         ITicketMessageRepository messages,
         IUserRepository users,
         ICustomerRepository customers,
-        IMediator mediator)
+        IMediator mediator,
+        IBackgroundJobService jobs)
     {
         _tickets = tickets;
         _messages = messages;
         _users = users;
         _customers = customers;
         _mediator = mediator;
+        _jobs = jobs;
     }
 
     public async Task<TicketMessageDto> Handle(
@@ -69,6 +73,9 @@ public class AddTicketMessageCommandHandler
         }
 
         await DispatchNotificationAsync(cmd, ticket, authorName, ct);
+
+        if (!cmd.IsInternal && cmd.AuthorUserId.HasValue && ticket.Channel == TicketChannel.Email)
+            _jobs.EnqueueOutboundEmail(ticket.Id, message.Id);
 
         return new TicketMessageDto(
             message.Id, message.TicketId, message.Body, message.IsInternal,

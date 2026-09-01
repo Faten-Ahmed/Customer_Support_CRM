@@ -9,6 +9,9 @@ public class TicketMessageRepository : ITicketMessageRepository
     private readonly AppDbContext _db;
     public TicketMessageRepository(AppDbContext db) => _db = db;
 
+    public async Task<TicketMessage?> FindByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.TicketMessages.FindAsync([id], ct);
+
     public async Task AddAsync(TicketMessage message, CancellationToken ct = default)
         => await _db.TicketMessages.AddAsync(message, ct);
 

@@ -1,5 +1,6 @@
 using CRM.Application.Admin.Users.Commands;
 using CRM.Application.Common;
+using CRM.Domain.Chat;
 using CRM.Application.Reports.Services;
 using CRM.Application.Tickets.Jobs;
 using CRM.Domain.Agents;
@@ -93,6 +94,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailHealthChecker, EmailHealthChecker>();
         services.AddScoped<ITwilioHealthChecker, TwilioHealthChecker>();
         services.AddScoped<ILiveChatSessionRepository, LiveChatSessionRepository>();
+        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
         services.AddScoped<ICategoryExistenceChecker, CategoryExistenceChecker>();
 
         // KB repositories
