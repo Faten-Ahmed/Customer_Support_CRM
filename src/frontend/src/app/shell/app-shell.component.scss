@@ -47,8 +47,12 @@ mat-sidenav {
   flex-direction: column;
   padding: 12px 0 0;
   gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100% - 12px);
 }
 
+// Base nav link — shared by leaf links and group button
 .nav-link {
   display: flex;
   align-items: center;
@@ -63,6 +67,8 @@ mat-sidenav {
   transition: background 0.15s ease;
   white-space: nowrap;
   overflow: hidden;
+  width: calc(100% - 16px);
+  box-sizing: border-box;
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -77,6 +83,48 @@ mat-sidenav {
   mat-icon {
     flex-shrink: 0;
   }
+}
+
+// Group toggle button — same look as nav-link but no routerLinkActive
+.nav-group-btn {
+  background: none;
+  border: none;
+  text-align: start;
+
+  .nav-label {
+    flex: 1;
+  }
+
+  .chevron {
+    flex-shrink: 0;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &.group-active {
+    color: white;
+  }
+}
+
+// Children container
+.nav-children {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-bottom: 4px;
+}
+
+// Indented child links
+.nav-child-link {
+  padding-inline-start: 36px;
+  font-size: 0.82rem;
+  margin-inline-start: 8px;
 }
 
 :host ::ng-deep .mat-drawer-content {

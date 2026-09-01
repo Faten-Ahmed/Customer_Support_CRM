@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { AgentWorkload, DashboardService, KpiData } from '../dashboard.service';
+import { Department, DepartmentService } from '../../admin/departments/department.service';
 import { SignalRService } from '../../shared/services/signalr.service';
 import { AuthStore } from '../../auth/auth.store';
 import * as signalR from '@microsoft/signalr';
@@ -17,12 +18,12 @@ interface KpiCard { label: string; key: keyof KpiData; suffix?: string; }
 const KPI_CARDS: KpiCard[] = [
   { label: 'Open Tickets', key: 'openTickets' },
   { label: 'SLA Breach Rate', key: 'slaBreachRate', suffix: '%' },
-  { label: 'Avg First Response (min)', key: 'avgFirstResponse' },
-  { label: 'CSAT Score', key: 'csatScore', suffix: '%' },
+  { label: 'Avg First Response (min)', key: 'avgFirstResponseMinutes7Day' },
+  { label: 'CSAT Score', key: 'csatScore30Day', suffix: '%' },
   { label: 'Agent Utilization', key: 'agentUtilization', suffix: '%' },
   { label: 'Unassigned', key: 'unassignedTickets' },
   { label: 'Escalation Rate', key: 'escalationRate', suffix: '%' },
-  { label: 'Resolved Today', key: 'resolvedToday' },
+  { label: 'Resolved Today', key: 'ticketsTodayResolved' },
 ];
 
 @Component({
@@ -42,11 +43,13 @@ const KPI_CARDS: KpiCard[] = [
 })
 export class ManagementDashboardComponent implements OnInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
+  private readonly departmentService = inject(DepartmentService);
   private readonly signalRService = inject(SignalRService);
   readonly authStore = inject(AuthStore);
 
   readonly kpis = signal<KpiData | null>(null);
   readonly agentWorkload = signal<AgentWorkload[]>([]);
+  readonly departments = signal<Department[]>([]);
   readonly departmentFilter = new FormControl('');
 
   readonly kpiCards = KPI_CARDS;
@@ -57,6 +60,9 @@ export class ManagementDashboardComponent implements OnInit, OnDestroy {
   get isAdmin(): boolean { return this.authStore.user()?.role === 'Admin'; }
 
   ngOnInit(): void {
+    if (this.isAdmin) {
+      this.departmentService.list().subscribe(r => this.departments.set(r.data));
+    }
     this.loadKpis();
     this.connectSignalR();
     this.departmentFilter.valueChanges.subscribe(() => this.loadKpis());
@@ -68,8 +74,10 @@ export class ManagementDashboardComponent implements OnInit, OnDestroy {
 
   loadKpis(): void {
     const deptId = this.departmentFilter.value || undefined;
-    this.dashboardService.getKpis(deptId).subscribe(k => this.kpis.set(k));
-    this.dashboardService.getAgentWorkload(deptId).subscribe(w => this.agentWorkload.set(w));
+    this.dashboardService.getKpis(deptId).subscribe(k => {
+      this.kpis.set(k);
+      this.agentWorkload.set(k.agentWorkload ?? []);
+    });
   }
 
   refresh(): void { this.loadKpis(); }
@@ -77,8 +85,10 @@ export class ManagementDashboardComponent implements OnInit, OnDestroy {
   private connectSignalR(): void {
     this.connection = this.signalRService.getConnection('/hubs/dashboard');
     this.connection.start().then(() => {
-      this.connection.on('KpiUpdated', (data: KpiData) => this.kpis.set(data));
-      this.connection.on('AgentWorkloadUpdated', (data: AgentWorkload[]) => this.agentWorkload.set(data));
+      this.connection.on('KpiUpdated', (data: KpiData) => {
+        this.kpis.set(data);
+        this.agentWorkload.set(data.agentWorkload ?? []);
+      });
     });
   }
 }

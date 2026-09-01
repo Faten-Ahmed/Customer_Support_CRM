@@ -5,8 +5,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { CsatReport, ReportFilter, ReportService } from '../report.service';
 
 @Component({
@@ -19,8 +20,9 @@ import { CsatReport, ReportFilter, ReportService } from '../report.service';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTableModule,
     MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   templateUrl: './csat-report.component.html',
 })
@@ -34,34 +36,38 @@ export class CsatReportComponent implements OnInit {
 
   filterForm = this.fb.group({
     dateFrom: [this.defaultFrom()],
-    dateTo: [this.defaultTo()],
-    departmentId: [''],
+    dateTo:   [this.defaultTo()],
   });
-
-  distributionColumns = ['rating', 'count'];
-  commentColumns = ['content', 'rating', 'agentName', 'date'];
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading.set(true);
     this.error.set(false);
-    const filter = this.filterForm.value as ReportFilter;
+    const v = this.filterForm.value;
+    const filter: ReportFilter = {
+      dateFrom: this.toIso(v.dateFrom),
+      dateTo:   this.toIso(v.dateTo),
+    };
     this.reportService.getCsatReport(filter).subscribe({
-      next: r => { this.report.set(r); this.loading.set(false); },
+      next: r  => { this.report.set(r); this.loading.set(false); },
       error: () => { this.error.set(true); this.loading.set(false); },
     });
   }
 
   applyFilter(): void { this.load(); }
 
-  private defaultFrom(): string {
-    const d = new Date();
-    d.setDate(1);
-    return d.toISOString().split('T')[0];
+  private toIso(d: Date | string | null | undefined): string {
+    if (!d) return new Date().toISOString().split('T')[0];
+    if (d instanceof Date) return d.toISOString().split('T')[0];
+    return d;
   }
 
-  private defaultTo(): string {
-    return new Date().toISOString().split('T')[0];
+  private defaultFrom(): Date {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d;
   }
+
+  private defaultTo(): Date { return new Date(); }
 }

@@ -39,14 +39,61 @@
   <mat-sidenav mode="side" opened [style.width]="collapsed() ? '56px' : '220px'">
     <nav class="sidenav-nav">
       @for (item of visibleNavItems(); track item.route) {
-        <a [routerLink]="item.route" routerLinkActive="active-link"
-           class="nav-link"
-           [matTooltip]="collapsed() ? (item.labelKey | translate) : ''" matTooltipPosition="right">
-          <mat-icon>{{ item.icon }}</mat-icon>
-          @if (!collapsed()) {
-            <span>{{ item.labelKey | translate }}</span>
+
+        @if (item.children) {
+          <!-- Group toggle button -->
+          <button class="nav-link nav-group-btn"
+                  [class.group-active]="hasActiveChild(item.children)"
+                  [matTooltip]="collapsed() ? (item.labelKey | translate) : ''"
+                  matTooltipPosition="right"
+                  (click)="collapsed() ? null : toggleGroup(item.route)">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            @if (!collapsed()) {
+              <span class="nav-label">{{ item.labelKey | translate }}</span>
+              <mat-icon class="chevron" [class.open]="isExpanded(item.route)">
+                expand_more
+              </mat-icon>
+            }
+          </button>
+
+          <!-- Children -->
+          @if (!collapsed() && isExpanded(item.route)) {
+            <div class="nav-children">
+              @for (child of item.children; track child.route) {
+                <a [routerLink]="child.route"
+                   routerLinkActive="active-link"
+                   class="nav-link nav-child-link">
+                  <mat-icon>{{ child.icon }}</mat-icon>
+                  <span>{{ child.labelKey | translate }}</span>
+                </a>
+              }
+            </div>
           }
-        </a>
+
+          <!-- Collapsed: show each child as icon-only -->
+          @if (collapsed()) {
+            @for (child of item.children; track child.route) {
+              <a [routerLink]="child.route"
+                 routerLinkActive="active-link"
+                 class="nav-link"
+                 [matTooltip]="child.labelKey | translate"
+                 matTooltipPosition="right">
+                <mat-icon>{{ child.icon }}</mat-icon>
+              </a>
+            }
+          }
+
+        } @else {
+          <a [routerLink]="item.route" routerLinkActive="active-link"
+             class="nav-link"
+             [matTooltip]="collapsed() ? (item.labelKey | translate) : ''" matTooltipPosition="right">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            @if (!collapsed()) {
+              <span>{{ item.labelKey | translate }}</span>
+            }
+          </a>
+        }
+
       }
     </nav>
   </mat-sidenav>

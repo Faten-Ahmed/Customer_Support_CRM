@@ -27,6 +27,7 @@ interface NavItem {
   icon: string;
   route: string;
   roles?: string[];
+  children?: NavItem[];
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -34,7 +35,16 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: 'nav.tickets', icon: 'confirmation_number', route: '/app/tickets' },
   { labelKey: 'nav.customers', icon: 'people', route: '/app/customers', roles: ['Admin', 'Manager', 'Agent'] },
   { labelKey: 'nav.knowledgeBase', icon: 'menu_book', route: '/app/kb' },
-  { labelKey: 'nav.reports', icon: 'bar_chart', route: '/app/reports', roles: ['Admin', 'Manager'] },
+  {
+    labelKey: 'nav.reports', icon: 'bar_chart', route: '/app/reports', roles: ['Admin', 'Manager'],
+    children: [
+      { labelKey: 'nav.reports.dashboard', icon: 'space_dashboard',     route: '/app/reports/dashboard', roles: ['Admin', 'Manager'] },
+      { labelKey: 'nav.reports.tickets',   icon: 'confirmation_number', route: '/app/reports/tickets',   roles: ['Admin', 'Manager'] },
+      { labelKey: 'nav.reports.sla',       icon: 'verified_user',       route: '/app/reports/sla',       roles: ['Admin', 'Manager'] },
+      { labelKey: 'nav.reports.agents',    icon: 'support_agent',       route: '/app/reports/agents',    roles: ['Admin', 'Manager'] },
+      { labelKey: 'nav.reports.csat',      icon: 'star_rate',           route: '/app/reports/csat',      roles: ['Admin', 'Manager'] },
+    ],
+  },
   { labelKey: 'nav.templates', icon: 'library_books', route: '/app/settings/templates', roles: ['Admin', 'Manager', 'Agent'] },
   { labelKey: 'nav.tasks', icon: 'checklist', route: '/app/settings/tasks', roles: ['Agent', 'Manager'] },
   { labelKey: 'nav.admin', icon: 'admin_panel_settings', route: '/app/admin', roles: ['Admin'] },
@@ -62,6 +72,7 @@ export class AppShellComponent implements OnInit, OnDestroy {
   readonly collapsed = signal(localStorage.getItem('sidenav_collapsed') === 'true');
   readonly aiOpen = signal(false);
   readonly loading = signal(false);
+  readonly expandedGroups = signal<Set<string>>(new Set());
 
   readonly navItems = NAV_ITEMS;
 
@@ -75,7 +86,34 @@ export class AppShellComponent implements OnInit, OnDestroy {
     return this.navItems.filter(item => !item.roles || !role || item.roles.includes(role));
   }
 
+  isExpanded(route: string): boolean {
+    return this.expandedGroups().has(route);
+  }
+
+  hasActiveChild(children: NavItem[]): boolean {
+    return children.some(c => this.router.url.startsWith(c.route));
+  }
+
+  toggleGroup(route: string): void {
+    this.expandedGroups.update(set => {
+      const next = new Set(set);
+      next.has(route) ? next.delete(route) : next.add(route);
+      return next;
+    });
+  }
+
   ngOnInit(): void {
+    // Auto-expand any group whose child matches the current URL
+    this.expandedGroups.update(set => {
+      const next = new Set(set);
+      for (const item of NAV_ITEMS) {
+        if (item.children?.some(c => this.router.url.startsWith(c.route))) {
+          next.add(item.route);
+        }
+      }
+      return next;
+    });
+
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) this.loading.set(true);
       if (
@@ -84,6 +122,16 @@ export class AppShellComponent implements OnInit, OnDestroy {
         event instanceof NavigationError
       ) {
         this.loading.set(false);
+        // Auto-expand the group containing the newly active child
+        this.expandedGroups.update(set => {
+          const next = new Set(set);
+          for (const item of NAV_ITEMS) {
+            if (item.children?.some(c => this.router.url.startsWith(c.route))) {
+              next.add(item.route);
+            }
+          }
+          return next;
+        });
       }
     });
 
@@ -110,9 +158,7 @@ export class AppShellComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleAi(): void {
-    this.aiOpen.update(v => !v);
-  }
+  toggleAi(): void { this.aiOpen.update(v => !v); }
 
   logout(): void {
     this.authStore.clearToken();

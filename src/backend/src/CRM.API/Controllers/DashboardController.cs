@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace CRM.API.Controllers;
 
 [ApiController]
-[Route("api/dashboard")]
+[Route("api/v1/dashboard")]
 [Authorize]
 public class DashboardController : ControllerBase
 {

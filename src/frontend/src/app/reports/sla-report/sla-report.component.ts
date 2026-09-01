@@ -7,7 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { ReportFilter, ReportService, SlaReport } from '../report.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { ReportFilter, ReportService, SlaComplianceReport } from '../report.service';
 
 @Component({
   selector: 'app-sla-report',
@@ -21,6 +23,8 @@ import { ReportFilter, ReportService, SlaReport } from '../report.service';
     MatInputModule,
     MatTableModule,
     MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   templateUrl: './sla-report.component.html',
 })
@@ -28,39 +32,55 @@ export class SlaReportComponent implements OnInit {
   private readonly reportService = inject(ReportService);
   private readonly fb = inject(FormBuilder);
 
-  readonly report = signal<SlaReport | null>(null);
+  readonly report = signal<SlaComplianceReport | null>(null);
   readonly loading = signal(false);
   readonly error = signal(false);
 
   filterForm = this.fb.group({
     dateFrom: [this.defaultFrom()],
-    dateTo: [this.defaultTo()],
-    departmentId: [''],
+    dateTo:   [this.defaultTo()],
   });
 
-  byPriorityColumns = ['priority', 'compliant', 'breached'];
+  byPriorityColumns = ['priority', 'frRate', 'resRate', 'total'];
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading.set(true);
     this.error.set(false);
-    const filter = this.filterForm.value as ReportFilter;
+    const v = this.filterForm.value;
+    const filter: ReportFilter = {
+      dateFrom: this.toIso(v.dateFrom),
+      dateTo:   this.toIso(v.dateTo),
+    };
     this.reportService.getSlaReport(filter).subscribe({
-      next: r => { this.report.set(r); this.loading.set(false); },
+      next: r  => { this.report.set(r); this.loading.set(false); },
       error: () => { this.error.set(true); this.loading.set(false); },
     });
   }
 
   applyFilter(): void { this.load(); }
 
-  private defaultFrom(): string {
-    const d = new Date();
-    d.setDate(1);
-    return d.toISOString().split('T')[0];
+  byPriorityRows(r: SlaComplianceReport) {
+    return Object.entries(r.byPriority).map(([priority, data]) => ({
+      priority,
+      frRate: data.firstResponseComplianceRate,
+      resRate: data.resolutionComplianceRate,
+      total: data.totalTickets,
+    }));
   }
 
-  private defaultTo(): string {
-    return new Date().toISOString().split('T')[0];
+  private toIso(d: Date | string | null | undefined): string {
+    if (!d) return new Date().toISOString().split('T')[0];
+    if (d instanceof Date) return d.toISOString().split('T')[0];
+    return d;
   }
+
+  private defaultFrom(): Date {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d;
+  }
+
+  private defaultTo(): Date { return new Date(); }
 }

@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace CRM.API.Controllers;
 
 [ApiController]
-[Route("api/reports")]
+[Route("api/v1/reports")]
 [Authorize]
 public class ReportsController : ControllerBase
 {
