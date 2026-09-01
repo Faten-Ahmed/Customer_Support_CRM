@@ -1,7 +1,9 @@
 using CRM.Application.Admin.Users.Commands;
 using CRM.Application.Common;
+using CRM.Application.Reports.Services;
 using CRM.Application.Tickets.Jobs;
 using CRM.Domain.Agents;
+using CRM.Domain.Dashboard;
 using CRM.Domain.Notifications;
 using CRM.Application.Sla.Jobs;
 using CRM.Domain.Auth;
@@ -11,6 +13,7 @@ using CRM.Domain.Channels;
 using CRM.Domain.Customers;
 using CRM.Domain.Departments;
 using CRM.Domain.KnowledgeBase;
+using CRM.Domain.Reports;
 using CRM.Domain.Sla;
 using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
@@ -24,6 +27,8 @@ using CRM.Infrastructure.Notifications;
 using CRM.Infrastructure.Persistence;
 using CRM.Infrastructure.Persistence.Repositories;
 using CRM.Infrastructure.Persistence.Repositories.Sla;
+using CRM.Infrastructure.Reports;
+using CRM.Infrastructure.Reports.Jobs;
 using CRM.Infrastructure.Storage;
 using Minio;
 using Hangfire;
@@ -113,6 +118,12 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, SlaNotificationService>();
         // Notification repository (Feature 05)
         services.AddScoped<INotificationRepository, NotificationRepository>();
+
+        // Report + Dashboard repositories
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
+        services.AddScoped<IReportExportService, ReportExportService>();
+        services.AddScoped<IReportExportJobRunner, GenerateReportExportJob>();
 
         services.Configure<MinIOSettings>(configuration.GetSection("MinIO"));
         services.AddScoped<IStorageService, StorageService>();

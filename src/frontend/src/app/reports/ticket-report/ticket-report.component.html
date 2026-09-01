@@ -1,0 +1,58 @@
+<div class="p-6">
+  <h1 class="text-2xl font-semibold mb-4" i18n="@@reports.tickets.title">Ticket Report</h1>
+
+  <!-- Filter Bar -->
+  <form [formGroup]="filterForm" class="flex gap-3 mb-6 items-end flex-wrap">
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@reports.filter.from">From</mat-label>
+      <input matInput type="date" formControlName="dateFrom" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@reports.filter.to">To</mat-label>
+      <input matInput type="date" formControlName="dateTo" />
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="button" (click)="applyFilter()" i18n="@@reports.filter.apply">Apply</button>
+    <button mat-stroked-button type="button">
+      <mat-icon>download</mat-icon>
+      <span i18n="@@reports.filter.export">Export</span>
+    </button>
+  </form>
+
+  @if (loading()) {
+    <div class="grid grid-cols-3 gap-4">
+      @for (i of [1,2,3]; track i) {
+        <div class="h-24 bg-gray-200 rounded animate-pulse"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="text-center py-12">
+      <p class="mb-4" i18n="@@reports.error.message">Failed to load report. Please try again.</p>
+      <button mat-raised-button color="primary" (click)="load()" i18n="@@reports.error.retry">Retry</button>
+    </div>
+  } @else if (report()) {
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      @for (entry of (report()!.summary | keyvalue); track entry.key) {
+        <mat-card class="p-4 text-center">
+          <p class="text-2xl font-bold">{{ entry.value }}</p>
+          <p class="text-sm capitalize">{{ entry.key }}</p>
+        </mat-card>
+      }
+    </div>
+
+    <!-- By Status Table -->
+    <h2 class="text-lg font-semibold mb-3" i18n="@@reports.tickets.byStatus">By Status</h2>
+    <mat-table [dataSource]="report()!.byStatus" class="w-full mb-6">
+      <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef i18n="@@reports.tickets.status">Status</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ r.status }}</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="count">
+        <mat-header-cell *matHeaderCellDef i18n="@@reports.tickets.count">Count</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ r.count }}</mat-cell>
+      </ng-container>
+      <mat-header-row *matHeaderRowDef="byStatusColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: byStatusColumns;"></mat-row>
+    </mat-table>
+  }
+</div>

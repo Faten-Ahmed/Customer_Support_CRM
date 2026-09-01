@@ -1,0 +1,53 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-semibold" i18n="@@reports.dashboard.title">Operations Dashboard</h1>
+    <div class="flex gap-3 items-center">
+      @if (isAdmin) {
+        <mat-form-field appearance="outline" class="w-40">
+          <mat-label i18n="@@reports.dashboard.dept">Department</mat-label>
+          <mat-select [formControl]="departmentFilter">
+            <mat-option value="" i18n="@@reports.dashboard.allDepts">All</mat-option>
+            <mat-option value="d1" i18n="@@reports.dashboard.support">Support</mat-option>
+          </mat-select>
+        </mat-form-field>
+      }
+      <button mat-stroked-button (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+        <span i18n="@@reports.dashboard.refresh">Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  @if (kpis()) {
+    <div class="grid grid-cols-4 gap-4 mb-8">
+      @for (card of kpiCards; track card.key) {
+        <mat-card class="p-4 text-center">
+          <p class="text-3xl font-bold">
+            {{ kpis()![card.key] ?? '—' }}{{ card.suffix ?? '' }}
+          </p>
+          <p class="text-sm mt-1">{{ card.label }}</p>
+        </mat-card>
+      }
+    </div>
+  }
+
+  <!-- Agent Workload -->
+  <h2 class="text-lg font-semibold mb-3" i18n="@@reports.dashboard.workload">Agent Workload</h2>
+  <mat-table [dataSource]="agentWorkload()" class="w-full">
+    <ng-container matColumnDef="agentName">
+      <mat-header-cell *matHeaderCellDef i18n="@@reports.dashboard.agent">Agent</mat-header-cell>
+      <mat-cell *matCellDef="let a">{{ a.agentName }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="openTickets">
+      <mat-header-cell *matHeaderCellDef i18n="@@reports.dashboard.openTickets">Open Tickets</mat-header-cell>
+      <mat-cell *matCellDef="let a">{{ a.openTickets }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="availabilityStatus">
+      <mat-header-cell *matHeaderCellDef i18n="@@reports.dashboard.status">Status</mat-header-cell>
+      <mat-cell *matCellDef="let a">{{ a.availabilityStatus }}</mat-cell>
+    </ng-container>
+    <mat-header-row *matHeaderRowDef="workloadColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: workloadColumns;"></mat-row>
+  </mat-table>
+</div>

@@ -1,0 +1,53 @@
+<div class="p-6">
+  <h1 class="text-2xl font-semibold mb-4" i18n="@@reports.agents.title">Agent Performance Report</h1>
+
+  <form [formGroup]="filterForm" class="flex gap-3 mb-6 items-end flex-wrap">
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@reports.filter.from">From</mat-label>
+      <input matInput type="date" formControlName="dateFrom" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@reports.filter.to">To</mat-label>
+      <input matInput type="date" formControlName="dateTo" />
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="button" (click)="applyFilter()" i18n="@@reports.filter.apply">Apply</button>
+    <button mat-stroked-button type="button">
+      <mat-icon>download</mat-icon>
+      <span i18n="@@reports.filter.export">Export</span>
+    </button>
+  </form>
+
+  @if (loading()) {
+    <div class="h-24 bg-gray-200 rounded animate-pulse mb-4"></div>
+  } @else if (error()) {
+    <div class="text-center py-12">
+      <p class="mb-4" i18n="@@reports.error.message">Failed to load report. Please try again.</p>
+      <button mat-raised-button color="primary" (click)="load()" i18n="@@reports.error.retry">Retry</button>
+    </div>
+  } @else if (report()) {
+    <mat-table [dataSource]="report()!" class="w-full">
+      <ng-container matColumnDef="agentName">
+        <mat-header-cell *matHeaderCellDef i18n="@@reports.agents.name">Agent</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ r.agentName }}</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="ticketsHandled">
+        <mat-header-cell *matHeaderCellDef i18n="@@reports.agents.handled">Handled</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ r.ticketsHandled }}</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="avgResponseTime">
+        <mat-header-cell *matHeaderCellDef i18n="@@reports.agents.avgResponse">Avg Response (min)</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ r.avgResponseTime }}</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="slaComplianceRate">
+        <mat-header-cell *matHeaderCellDef i18n="@@reports.agents.sla">SLA %</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ r.slaComplianceRate }}%</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="csatAvg">
+        <mat-header-cell *matHeaderCellDef i18n="@@reports.agents.csat">CSAT</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ r.csatAvg ?? '—' }}</mat-cell>
+      </ng-container>
+      <mat-header-row *matHeaderRowDef="agentColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: agentColumns;"></mat-row>
+    </mat-table>
+  }
+</div>

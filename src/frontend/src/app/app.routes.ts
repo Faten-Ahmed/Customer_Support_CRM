@@ -5,6 +5,7 @@ import { CUSTOMERS_ROUTES } from './customers/customers.routes';
 import { TICKETS_ROUTES } from './tickets/tickets.routes';
 import { KB_ROUTES } from './kb/kb.routes';
 import { PORTAL_ROUTES } from './portal/portal.routes';
+import { REPORTS_ROUTES } from './reports/reports.routes';
 import { NotFoundComponent } from './shell/not-found.component';
 import { ForbiddenComponent } from './shell/forbidden.component';
 
@@ -48,6 +49,7 @@ export const routes: Routes = [
       { path: 'customers', children: CUSTOMERS_ROUTES },
       { path: 'tickets', children: TICKETS_ROUTES },
       { path: 'kb', children: KB_ROUTES },
+      { path: 'reports', children: REPORTS_ROUTES },
       {
         path: 'settings',
         children: [

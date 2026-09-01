@@ -3,10 +3,13 @@ using CRM.API.Middleware;
 using CRM.API.Services;
 using CRM.Application;
 using CRM.Application.Agents.Jobs;
+using CRM.Application.Dashboard.Services;
 using CRM.Application.Notifications;
 using CRM.Application.Sla.Jobs;
 using CRM.Application.Tickets.Jobs;
 using CRM.Infrastructure;
+using CRM.Infrastructure.Dashboard;
+using CRM.Infrastructure.Hubs;
 using CRM.Infrastructure.Persistence.Seed;
 using FluentValidation.AspNetCore;
 using Hangfire;
@@ -82,6 +85,12 @@ try
         new NotificationPushService(
             sp.GetRequiredService<IHubContext<NotificationHub>>()));
 
+    // IDashboardPusher — registered here (API project) so DashboardHub type is accessible
+    builder.Services.AddSingleton<IDashboardPusher>(sp =>
+        new DashboardPushService(
+            sp.GetRequiredService<IHubContext<DashboardHub>>(),
+            sp.GetRequiredService<CRM.Domain.Dashboard.IDashboardRepository>()));
+
     // Swagger — dev only (Bearer security definition added once Swashbuckle OpenAPI 2.x API is confirmed)
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
@@ -121,7 +130,7 @@ try
 
     app.MapHub<NotificationHub>("/hubs/notifications");
     // app.MapHub<ChatHub>("/hubs/chat");
-    // app.MapHub<DashboardHub>("/hubs/dashboard");
+    app.MapHub<DashboardHub>("/hubs/dashboard");
 
     if (!app.Environment.IsEnvironment("Testing"))
     {
