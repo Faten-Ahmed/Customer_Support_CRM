@@ -1,8 +1,10 @@
+using CRM.Application.Notifications.Commands;
 using CRM.Application.Tickets.Commands;
 using CRM.Domain.Customers;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
 using CRM.Domain.Users;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -14,13 +16,16 @@ public class AddTicketMessageCommandHandlerTests
     private readonly Mock<ITicketMessageRepository> _messageRepo = new();
     private readonly Mock<IUserRepository> _users = new();
     private readonly Mock<ICustomerRepository> _customers = new();
+    private readonly Mock<IMediator> _mediator = new();
     private readonly AddTicketMessageCommandHandler _handler;
 
     public AddTicketMessageCommandHandlerTests()
     {
+        _mediator.Setup(m => m.Send(It.IsAny<CreateNotificationCommand>(), It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(Guid.NewGuid());
         _handler = new AddTicketMessageCommandHandler(
             _ticketRepo.Object, _messageRepo.Object,
-            _users.Object, _customers.Object);
+            _users.Object, _customers.Object, _mediator.Object);
     }
 
     [Fact]

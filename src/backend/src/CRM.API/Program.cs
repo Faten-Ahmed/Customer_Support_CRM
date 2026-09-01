@@ -105,7 +105,13 @@ try
     }
 
     app.UseMiddleware<ExceptionMiddleware>();
-    app.UseSerilogRequestLogging();
+    app.UseSerilogRequestLogging(opts =>
+    {
+        opts.GetLevel = (_, _, ex) =>
+            ex is OperationCanceledException
+                ? Serilog.Events.LogEventLevel.Verbose
+                : Serilog.Events.LogEventLevel.Information;
+    });
     app.UseCors("AllowAngular");
     app.UseAuthentication();
     app.UseAuthorization();

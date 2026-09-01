@@ -55,7 +55,7 @@ public class NotificationsController : ControllerBase
     public async Task<IActionResult> UnreadCount(CancellationToken ct)
     {
         var count = await _mediator.Send(new GetUnreadCountQuery(CurrentUserId), ct);
-        return Ok(new { data = new { count } });
+        return Ok(new { count });
     }
 
     [HttpPut("{id:guid}/read")]

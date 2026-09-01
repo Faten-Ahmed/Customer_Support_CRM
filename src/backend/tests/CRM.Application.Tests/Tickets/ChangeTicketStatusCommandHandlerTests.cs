@@ -1,7 +1,9 @@
+using CRM.Application.Notifications.Commands;
 using CRM.Application.Tickets.Commands;
 using CRM.Domain.Sla;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -12,6 +14,7 @@ public class ChangeTicketStatusCommandHandlerTests
     private readonly Mock<ITicketRepository> _repo = new();
     private readonly Mock<ITicketSlaRepository> _slaRepo = new();
     private readonly Mock<IBusinessHoursRepository> _hoursRepo = new();
+    private readonly Mock<IMediator> _mediator = new();
     private readonly ChangeTicketStatusCommandHandler _handler;
 
     public ChangeTicketStatusCommandHandlerTests()
@@ -19,7 +22,10 @@ public class ChangeTicketStatusCommandHandlerTests
         _slaRepo.Setup(r => r.FindByTicketIdAsync(It.IsAny<Guid>(), default))
                 .ReturnsAsync((TicketSla?)null);
         _hoursRepo.Setup(r => r.FindGlobalAsync(default)).ReturnsAsync((BusinessHours?)null);
-        _handler = new ChangeTicketStatusCommandHandler(_repo.Object, _slaRepo.Object, _hoursRepo.Object);
+        _mediator.Setup(m => m.Send(It.IsAny<CreateNotificationCommand>(), It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(Guid.NewGuid());
+        _handler = new ChangeTicketStatusCommandHandler(
+            _repo.Object, _slaRepo.Object, _hoursRepo.Object, _mediator.Object);
     }
 
     [Fact]

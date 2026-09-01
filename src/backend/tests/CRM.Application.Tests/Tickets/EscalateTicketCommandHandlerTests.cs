@@ -1,6 +1,10 @@
+using CRM.Application.Notifications.Commands;
 using CRM.Application.Tickets.Commands;
+using CRM.Domain.Common;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
+using CRM.Domain.Users;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -9,11 +13,17 @@ namespace CRM.Application.Tests.Tickets;
 public class EscalateTicketCommandHandlerTests
 {
     private readonly Mock<ITicketRepository> _repo = new();
+    private readonly Mock<IUserRepository> _userRepo = new();
+    private readonly Mock<IMediator> _mediator = new();
     private readonly EscalateTicketCommandHandler _handler;
 
     public EscalateTicketCommandHandlerTests()
     {
-        _handler = new EscalateTicketCommandHandler(_repo.Object);
+        _userRepo.Setup(r => r.ListAsync(It.IsAny<UserRole?>(), null, true, null, 1, 200, default))
+                 .ReturnsAsync(new PagedResult<UserSummaryProjection>([], 0, 1, 200));
+        _mediator.Setup(m => m.Send(It.IsAny<CreateNotificationCommand>(), It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(Guid.NewGuid());
+        _handler = new EscalateTicketCommandHandler(_repo.Object, _userRepo.Object, _mediator.Object);
     }
 
     private static Ticket MakeInProgressTicket()

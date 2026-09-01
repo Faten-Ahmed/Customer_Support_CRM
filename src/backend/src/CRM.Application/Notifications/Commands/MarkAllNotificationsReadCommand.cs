@@ -27,6 +27,7 @@ public class MarkAllNotificationsReadCommandHandler
     public async Task<int> Handle(MarkAllNotificationsReadCommand cmd, CancellationToken ct)
     {
         int count = await _notifications.MarkAllReadAsync(cmd.RequestingUserId, ct);
+        await _notifications.SaveChangesAsync(ct);
 
         await GetUnreadCountQueryHandler.InvalidateAsync(_cache, cmd.RequestingUserId, ct);
 

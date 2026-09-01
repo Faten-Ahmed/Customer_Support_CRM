@@ -1,5 +1,7 @@
+using CRM.Application.Notifications.Commands;
 using CRM.Application.Sla;
 using CRM.Application.Tickets.Services;
+using CRM.Domain.Notifications;
 using CRM.Domain.Sla;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
@@ -17,15 +19,18 @@ public class ChangeTicketStatusCommandHandler : IRequestHandler<ChangeTicketStat
     private readonly ITicketRepository _tickets;
     private readonly ITicketSlaRepository _slaRepo;
     private readonly IBusinessHoursRepository _businessHours;
+    private readonly IMediator _mediator;
 
     public ChangeTicketStatusCommandHandler(
         ITicketRepository tickets,
         ITicketSlaRepository slaRepo,
-        IBusinessHoursRepository businessHours)
+        IBusinessHoursRepository businessHours,
+        IMediator mediator)
     {
         _tickets = tickets;
         _slaRepo = slaRepo;
         _businessHours = businessHours;
+        _mediator = mediator;
     }
 
     public async Task Handle(ChangeTicketStatusCommand cmd, CancellationToken ct)
@@ -65,5 +70,16 @@ public class ChangeTicketStatusCommandHandler : IRequestHandler<ChangeTicketStat
         await _tickets.SaveChangesAsync(ct);
         if (sla is not null)
             await _slaRepo.SaveChangesAsync(ct);
+
+        var (type, title, body) = cmd.NewStatus == TicketStatus.Closed
+            ? (NotificationType.TicketClosed,
+               $"Ticket Closed: #{ticket.TicketNumber}",
+               $"Your ticket #{ticket.TicketNumber} \"{ticket.Subject}\" has been closed.")
+            : (NotificationType.TicketStatusChanged,
+               $"Ticket #{ticket.TicketNumber} Status Updated",
+               $"Your ticket \"{ticket.Subject}\" status changed to {cmd.NewStatus}.");
+
+        await _mediator.Send(new CreateNotificationCommand(
+            ticket.CustomerId, type, title, body, "ticket", ticket.Id), ct);
     }
 }

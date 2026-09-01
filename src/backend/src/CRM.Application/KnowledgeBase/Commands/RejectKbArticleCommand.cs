@@ -1,4 +1,6 @@
+using CRM.Application.Notifications.Commands;
 using CRM.Domain.KnowledgeBase;
+using CRM.Domain.Notifications;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
@@ -10,9 +12,13 @@ public record RejectKbArticleCommand(Guid ArticleId, string RejectionNote) : IRe
 public class RejectKbArticleCommandHandler : IRequestHandler<RejectKbArticleCommand>
 {
     private readonly IKbArticleRepository _articles;
+    private readonly IMediator _mediator;
 
-    public RejectKbArticleCommandHandler(IKbArticleRepository articles)
-        => _articles = articles;
+    public RejectKbArticleCommandHandler(IKbArticleRepository articles, IMediator mediator)
+    {
+        _articles = articles;
+        _mediator = mediator;
+    }
 
     public async Task Handle(RejectKbArticleCommand cmd, CancellationToken ct)
     {
@@ -29,5 +35,12 @@ public class RejectKbArticleCommandHandler : IRequestHandler<RejectKbArticleComm
         article.Reject(cmd.RejectionNote);
 
         await _articles.SaveChangesAsync(ct);
+
+        await _mediator.Send(new CreateNotificationCommand(
+            article.CreatedByUserId,
+            NotificationType.KbArticleRejected,
+            $"Article Rejected: \"{article.Title}\"",
+            $"Your KB article \"{article.Title}\" was rejected. Note: {cmd.RejectionNote}",
+            "article", article.Id), ct);
     }
 }

@@ -19,5 +19,5 @@ public class NotificationPushService : INotificationPushService
     public Task PushUnreadCountAsync(Guid userId, int count,
         CancellationToken ct = default)
         => _hub.Clients.Group($"user-{userId}")
-               .SendAsync("UnreadCountUpdated", new { count }, ct);
+               .SendAsync("UnreadCountUpdated", count, ct);
 }

@@ -1,5 +1,7 @@
 using CRM.Application.Common;
+using CRM.Application.Notifications.Commands;
 using CRM.Application.Tickets.Services;
+using CRM.Domain.Notifications;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
 using CRM.Domain.Users;
@@ -14,15 +16,18 @@ public class ReopenTicketCommandHandler : IRequestHandler<ReopenTicketCommand>
     private readonly ITicketRepository _tickets;
     private readonly IUserRepository _users;
     private readonly ITicketJobScheduler _jobs;
+    private readonly IMediator _mediator;
 
     public ReopenTicketCommandHandler(
         ITicketRepository tickets,
         IUserRepository users,
-        ITicketJobScheduler jobs)
+        ITicketJobScheduler jobs,
+        IMediator mediator)
     {
         _tickets = tickets;
         _users = users;
         _jobs = jobs;
+        _mediator = mediator;
     }
 
     public async Task Handle(ReopenTicketCommand cmd, CancellationToken ct)
@@ -46,5 +51,15 @@ public class ReopenTicketCommandHandler : IRequestHandler<ReopenTicketCommand>
         }
 
         await _tickets.SaveChangesAsync(ct);
+
+        if (ticket.AssignedToUserId.HasValue)
+        {
+            await _mediator.Send(new CreateNotificationCommand(
+                ticket.AssignedToUserId.Value,
+                NotificationType.TicketReopened,
+                $"Ticket Reopened: #{ticket.TicketNumber}",
+                $"Ticket #{ticket.TicketNumber} \"{ticket.Subject}\" has been reopened.",
+                "ticket", ticket.Id), ct);
+        }
     }
 }

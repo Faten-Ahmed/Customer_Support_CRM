@@ -1,6 +1,8 @@
 using CRM.Application.KnowledgeBase.Commands;
+using CRM.Application.Notifications.Commands;
 using CRM.Domain.KnowledgeBase;
 using FluentValidation;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -9,11 +11,14 @@ namespace CRM.Application.Tests.KnowledgeBase;
 public class RejectKbArticleCommandHandlerTests
 {
     private readonly Mock<IKbArticleRepository> _repo = new();
+    private readonly Mock<IMediator> _mediator = new();
     private readonly RejectKbArticleCommandHandler _handler;
 
     public RejectKbArticleCommandHandlerTests()
     {
-        _handler = new RejectKbArticleCommandHandler(_repo.Object);
+        _mediator.Setup(m => m.Send(It.IsAny<CreateNotificationCommand>(), It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(Guid.NewGuid());
+        _handler = new RejectKbArticleCommandHandler(_repo.Object, _mediator.Object);
     }
 
     private static KbArticle MakePendingReviewArticle()

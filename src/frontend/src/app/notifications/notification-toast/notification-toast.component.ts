@@ -20,13 +20,19 @@ export interface ToastItem {
 }
 
 const PERSISTENT_TYPES = new Set(['SlaBreached', 'Critical']);
-const AUTO_DISMISS_MS = 3000;
+const AUTO_DISMISS_MS = 7000;
 const MAX_TOASTS = 3;
 
-const ENTITY_ROUTES: Record<string, string> = {
-  ticket: '/tickets',
-  article: '/kb/articles',
-  chat: '/chats',
+const APP_ROUTES: Record<string, string> = {
+  ticket: '/app/tickets',
+  article: '/app/kb/articles',
+  chat: '/app/chats',
+};
+
+const PORTAL_ROUTES: Record<string, string> = {
+  ticket: '/portal/tickets',
+  article: '/portal/kb',
+  chat: '/portal/chats',
 };
 
 @Component({
@@ -129,8 +135,11 @@ export class NotificationToastComponent implements OnInit, OnDestroy {
   }
 
   viewEntity(toast: ToastItem): void {
-    const base = ENTITY_ROUTES[toast.notification.entityType] ?? '/notifications';
-    this.router.navigate([base, toast.notification.entityId]);
+    const routes = this.router.url.startsWith('/portal') ? PORTAL_ROUTES : APP_ROUTES;
+    const base = routes[toast.notification.entityType];
+    if (base) {
+      this.router.navigate([base, toast.notification.entityId]);
+    }
     this.dismiss(toast.id);
   }
 }

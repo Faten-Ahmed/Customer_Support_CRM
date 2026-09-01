@@ -1,3 +1,5 @@
+using CRM.Application.Notifications.Commands;
+using CRM.Domain.Notifications;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
 using CRM.Domain.Users;
@@ -14,11 +16,13 @@ public class AssignTicketCommandHandler : IRequestHandler<AssignTicketCommand>
 {
     private readonly ITicketRepository _tickets;
     private readonly IUserRepository _users;
+    private readonly IMediator _mediator;
 
-    public AssignTicketCommandHandler(ITicketRepository tickets, IUserRepository users)
+    public AssignTicketCommandHandler(ITicketRepository tickets, IUserRepository users, IMediator mediator)
     {
         _tickets = tickets;
         _users = users;
+        _mediator = mediator;
     }
 
     public async Task Handle(AssignTicketCommand cmd, CancellationToken ct)
@@ -38,5 +42,12 @@ public class AssignTicketCommandHandler : IRequestHandler<AssignTicketCommand>
 
         ticket.Assign(cmd.AgentId, cmd.AssignedByUserId);
         await _tickets.SaveChangesAsync(ct);
+
+        await _mediator.Send(new CreateNotificationCommand(
+            cmd.AgentId,
+            NotificationType.TicketAssigned,
+            $"Ticket Assigned: #{ticket.TicketNumber}",
+            $"You have been assigned ticket #{ticket.TicketNumber}: \"{ticket.Subject}\".",
+            "ticket", ticket.Id), ct);
     }
 }

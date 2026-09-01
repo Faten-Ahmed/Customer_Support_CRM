@@ -1,4 +1,6 @@
+using CRM.Application.Notifications.Commands;
 using CRM.Domain.KnowledgeBase;
+using CRM.Domain.Notifications;
 using MediatR;
 
 namespace CRM.Application.KnowledgeBase.Commands;
@@ -8,9 +10,13 @@ public record ApproveKbArticleCommand(Guid ArticleId) : IRequest;
 public class ApproveKbArticleCommandHandler : IRequestHandler<ApproveKbArticleCommand>
 {
     private readonly IKbArticleRepository _articles;
+    private readonly IMediator _mediator;
 
-    public ApproveKbArticleCommandHandler(IKbArticleRepository articles)
-        => _articles = articles;
+    public ApproveKbArticleCommandHandler(IKbArticleRepository articles, IMediator mediator)
+    {
+        _articles = articles;
+        _mediator = mediator;
+    }
 
     public async Task Handle(ApproveKbArticleCommand cmd, CancellationToken ct)
     {
@@ -20,5 +26,12 @@ public class ApproveKbArticleCommandHandler : IRequestHandler<ApproveKbArticleCo
         article.Approve();
 
         await _articles.SaveChangesAsync(ct);
+
+        await _mediator.Send(new CreateNotificationCommand(
+            article.CreatedByUserId,
+            NotificationType.KbArticlePublished,
+            $"Article Published: \"{article.Title}\"",
+            $"Your KB article \"{article.Title}\" has been approved and published.",
+            "article", article.Id), ct);
     }
 }

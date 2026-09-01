@@ -27,10 +27,13 @@ public class GetTicketSlaQueryHandler : IRequestHandler<GetTicketSlaQuery, Ticke
         _businessHours = businessHours;
     }
 
+    private static readonly SlaClock _noClock = new(null, 0, false, "—");
+
     public async Task<TicketSlaDto> Handle(GetTicketSlaQuery query, CancellationToken ct)
     {
-        var sla = await _slaRepo.FindByTicketIdAsync(query.TicketId, ct)
-            ?? throw new KeyNotFoundException($"No SLA record found for ticket {query.TicketId}.");
+        var sla = await _slaRepo.FindByTicketIdAsync(query.TicketId, ct);
+        if (sla is null)
+            return new TicketSlaDto(IsPaused: false, FirstResponse: _noClock, Resolution: _noClock);
 
         var ticket = await _tickets.FindByIdAsync(query.TicketId, ct);
 

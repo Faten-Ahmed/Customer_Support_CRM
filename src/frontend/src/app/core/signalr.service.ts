@@ -73,7 +73,14 @@ export class SignalRService {
       conn.on('UnreadCountUpdated', (count: number) => this._unreadCountUpdated$.next(count));
     }
 
-    conn.start().then(() => stateSignal.set(ConnectionState.Connected));
+    conn.start()
+      .then(() => stateSignal.set(ConnectionState.Connected))
+      .catch(() => {
+        stateSignal.set(ConnectionState.Disconnected);
+        // Remove so the caller can retry connect() after a token refresh
+        this.connections.delete(hub);
+        this._states.delete(hub);
+      });
   }
 
   connectAll(): void {

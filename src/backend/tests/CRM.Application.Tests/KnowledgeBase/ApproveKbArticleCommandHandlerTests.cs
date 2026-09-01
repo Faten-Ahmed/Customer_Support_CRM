@@ -1,5 +1,7 @@
 using CRM.Application.KnowledgeBase.Commands;
+using CRM.Application.Notifications.Commands;
 using CRM.Domain.KnowledgeBase;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -8,11 +10,14 @@ namespace CRM.Application.Tests.KnowledgeBase;
 public class ApproveKbArticleCommandHandlerTests
 {
     private readonly Mock<IKbArticleRepository> _repo = new();
+    private readonly Mock<IMediator> _mediator = new();
     private readonly ApproveKbArticleCommandHandler _handler;
 
     public ApproveKbArticleCommandHandlerTests()
     {
-        _handler = new ApproveKbArticleCommandHandler(_repo.Object);
+        _mediator.Setup(m => m.Send(It.IsAny<CreateNotificationCommand>(), It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(Guid.NewGuid());
+        _handler = new ApproveKbArticleCommandHandler(_repo.Object, _mediator.Object);
     }
 
     private static KbArticle MakePendingReviewArticle()

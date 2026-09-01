@@ -1,13 +1,17 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
+import { Subscription } from 'rxjs';
 import { AuthStore } from '../../auth/auth.store';
 import { I18nService } from '../../shared/services/i18n.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { NotificationBellComponent } from '../../notifications/notification-bell/notification-bell.component';
+import { SignalRService, HubName } from '../../core/signalr.service';
+import { NotificationService } from '../../notifications/notification.service';
 
 @Component({
   selector: 'app-portal-shell',
@@ -15,7 +19,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
   imports: [
     RouterOutlet, RouterLink, RouterLinkActive,
     MatToolbarModule, MatButtonModule, MatIconModule, MatTooltipModule, MatListModule,
-    TranslatePipe,
+    TranslatePipe, NotificationBellComponent,
   ],
   template: `
     <mat-toolbar color="primary" class="portal-toolbar">
@@ -24,6 +28,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
       <button mat-button (click)="i18n.toggleLang()" [matTooltip]="'shell.switchLang' | translate" class="lang-toggle">
         {{ i18n.lang() === 'en' ? 'ع' : 'EN' }}
       </button>
+      <app-notification-bell />
       <span class="user-name">{{ user()?.fullName }}</span>
       <button mat-icon-button (click)="logout()" [matTooltip]="'shell.signOut' | translate">
         <mat-icon>logout</mat-icon>
@@ -91,12 +96,31 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
     }
   `],
 })
-export class PortalShellComponent {
+export class PortalShellComponent implements OnInit, OnDestroy {
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
+  private readonly signalR = inject(SignalRService);
+  private readonly notifService = inject(NotificationService);
   readonly i18n = inject(I18nService);
 
   readonly user = this.authStore.user;
+
+  private signalRSubs = new Subscription();
+
+  ngOnInit(): void {
+    this.signalR.connect(HubName.Notification);
+    this.signalRSubs.add(
+      this.signalR.notification$.subscribe(n => this.notifService.pushNotification(n))
+    );
+    this.signalRSubs.add(
+      this.signalR.unreadCountUpdated$.subscribe(count => this.notifService.setUnreadCount(count))
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.signalRSubs.unsubscribe();
+    this.signalR.disconnect(HubName.Notification);
+  }
 
   logout(): void {
     this.authStore.clearToken();

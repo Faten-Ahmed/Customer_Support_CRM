@@ -11,8 +11,8 @@ import { CommonModule } from '@angular/common';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { timer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { timer, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { TicketService, SlaStatus } from '../../tickets/ticket.service';
 
 export function slaColour(elapsedPercent: number): 'green' | 'yellow' | 'orange' | 'red' {
@@ -121,13 +121,19 @@ export class SlaIndicatorComponent implements OnInit {
   readonly slaColour = slaColour;
 
   ngOnInit(): void {
+    const fetch$ = this.ticketSvc.getSla(this.ticketId).pipe(
+      catchError(() => of(null))
+    );
+
     const poll$ = this.mode === 'detail'
-      ? timer(0, 60_000).pipe(switchMap(() => this.ticketSvc.getSla(this.ticketId)))
-      : this.ticketSvc.getSla(this.ticketId);
+      ? timer(0, 60_000).pipe(switchMap(() => fetch$))
+      : fetch$;
 
     poll$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.sla.set(data);
-      this.colour.set(slaColour(data.firstResponse.elapsedPercent));
+      if (data) {
+        this.sla.set(data);
+        this.colour.set(slaColour(data.firstResponse.elapsedPercent));
+      }
     });
   }
 

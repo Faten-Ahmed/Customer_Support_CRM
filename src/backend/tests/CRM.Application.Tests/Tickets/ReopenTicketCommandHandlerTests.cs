@@ -1,8 +1,10 @@
 using CRM.Application.Common;
+using CRM.Application.Notifications.Commands;
 using CRM.Application.Tickets.Commands;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
 using CRM.Domain.Users;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -13,12 +15,15 @@ public class ReopenTicketCommandHandlerTests
     private readonly Mock<ITicketRepository> _ticketRepo = new();
     private readonly Mock<IUserRepository> _userRepo = new();
     private readonly Mock<ITicketJobScheduler> _jobs = new();
+    private readonly Mock<IMediator> _mediator = new();
     private readonly ReopenTicketCommandHandler _handler;
 
     public ReopenTicketCommandHandlerTests()
     {
+        _mediator.Setup(m => m.Send(It.IsAny<CreateNotificationCommand>(), It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(Guid.NewGuid());
         _handler = new ReopenTicketCommandHandler(
-            _ticketRepo.Object, _userRepo.Object, _jobs.Object);
+            _ticketRepo.Object, _userRepo.Object, _jobs.Object, _mediator.Object);
     }
 
     private static Ticket MakeResolvedTicket(Guid? assignedTo = null)

@@ -99,8 +99,7 @@ public static class DependencyInjection
         // SLA jobs
         services.AddScoped<SlaMonitorJob>();
 
-        // Notification service (stub until Feature 05)
-        services.AddScoped<INotificationService, StubNotificationService>();
+        services.AddScoped<INotificationService, SlaNotificationService>();
         // Notification repository (Feature 05)
         services.AddScoped<INotificationRepository, NotificationRepository>();
 
