@@ -1,73 +1,73 @@
 <div style="padding: 24px;">
 
-  <h1 style="margin: 0 0 20px; font-size: 22px; font-weight: 600;">Agent Performance Report</h1>
+  <h1 style="margin: 0 0 20px; font-size: 22px; font-weight: 600;">{{ 'report.agentPerformance' | translate }}</h1>
 
   <!-- Filter bar -->
   <mat-card appearance="outlined" style="margin-bottom: 24px;">
     <mat-card-content style="padding: 16px;">
       <form [formGroup]="filterForm" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
         <mat-form-field appearance="outline">
-          <mat-label>From</mat-label>
+          <mat-label>{{ 'report.dateFrom' | translate }}</mat-label>
           <input matInput [matDatepicker]="pickerFrom" formControlName="dateFrom" readonly />
           <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
           <mat-datepicker #pickerFrom></mat-datepicker>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>To</mat-label>
+          <mat-label>{{ 'report.dateTo' | translate }}</mat-label>
           <input matInput [matDatepicker]="pickerTo" formControlName="dateTo" readonly />
           <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
           <mat-datepicker #pickerTo></mat-datepicker>
         </mat-form-field>
         <button mat-raised-button color="primary" type="button" (click)="applyFilter()">
-          <mat-icon>search</mat-icon> Apply
+          <mat-icon>search</mat-icon> {{ 'report.apply' | translate }}
         </button>
       </form>
     </mat-card-content>
   </mat-card>
 
   @if (loading()) {
-    <p style="text-align: center; padding: 40px; color: var(--mat-sys-on-surface-variant);">Loading…</p>
+    <p style="text-align: center; padding: 40px; color: var(--mat-sys-on-surface-variant);">{{ 'common.loading' | translate }}</p>
   } @else if (error()) {
     <div style="text-align: center; padding: 40px;">
-      <p style="margin-bottom: 12px;">Failed to load report. Please try again.</p>
-      <button mat-raised-button color="primary" (click)="load()">Retry</button>
+      <p style="margin-bottom: 12px;">{{ 'report.loadError' | translate }}</p>
+      <button mat-raised-button color="primary" (click)="load()">{{ 'report.retry' | translate }}</button>
     </div>
   } @else if (report()) {
     <mat-card appearance="outlined">
       <mat-table [dataSource]="report()!">
         <ng-container matColumnDef="agentName">
-          <mat-header-cell *matHeaderCellDef>Agent</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'common.agent' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.agentName }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="ticketsHandled">
-          <mat-header-cell *matHeaderCellDef>Handled</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.handled' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.ticketsHandled }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="ticketsResolved">
-          <mat-header-cell *matHeaderCellDef>Resolved</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.trendResolved' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.ticketsResolved }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="avgFirstResponseMinutes">
-          <mat-header-cell *matHeaderCellDef>Avg Response (min)</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.avgResponseMin' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.avgFirstResponseMinutes }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="slaComplianceRate">
-          <mat-header-cell *matHeaderCellDef>SLA %</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.slaPct' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.slaComplianceRate }}%</mat-cell>
         </ng-container>
         <ng-container matColumnDef="escalationRate">
-          <mat-header-cell *matHeaderCellDef>Escalation %</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.escalationPct' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.escalationRate }}%</mat-cell>
         </ng-container>
         <ng-container matColumnDef="csatScore">
-          <mat-header-cell *matHeaderCellDef>CSAT</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'nav.reports.csat' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.csatScore ?? '—' }}</mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="agentColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: agentColumns;"></mat-row>
       </mat-table>
       @if (report()!.length === 0) {
-        <div style="padding: 24px; text-align: center; color: var(--mat-sys-on-surface-variant);">No data for this period.</div>
+        <div style="padding: 24px; text-align: center; color: var(--mat-sys-on-surface-variant);">{{ 'report.noData' | translate }}</div>
       }
     </mat-card>
   }

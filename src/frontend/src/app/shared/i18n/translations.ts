@@ -251,4 +251,60 @@ export const TRANSLATIONS: TranslationMap = {
   'portal.createAccount':       { en: 'Create Account',             ar: 'إنشاء حساب' },
   'portal.errEmailExists':      { en: 'An account with this email already exists.', ar: 'يوجد حساب بهذا البريد الإلكتروني مسبقًا.' },
   'portal.errRegistrationFailed': { en: 'Registration failed. Please try again.', ar: 'فشل التسجيل. حاول مرة أخرى.' },
+
+  // ── Portal Registration (missing keys) ─────────────────────────────────
+  'common.fullNameAr':       { en: 'Full Name (Arabic)',                      ar: 'الاسم الكامل (عربي)' },
+  'err.fullNameArRequired':  { en: 'Full name (Arabic) is required.',         ar: 'الاسم الكامل بالعربية مطلوب.' },
+
+  // ── Reports — shared filter bar ────────────────────────────────────────
+  'report.dateFrom':         { en: 'From',                                    ar: 'من' },
+  'report.dateTo':           { en: 'To',                                      ar: 'إلى' },
+  'report.apply':            { en: 'Apply',                                   ar: 'تطبيق' },
+  'report.loadError':        { en: 'Failed to load report. Please try again.', ar: 'فشل تحميل التقرير. حاول مرة أخرى.' },
+  'report.retry':            { en: 'Retry',                                   ar: 'إعادة المحاولة' },
+
+  // ── Reports — Ticket Volume ────────────────────────────────────────────
+  'report.ticketVolume':     { en: 'Ticket Volume Report',                    ar: 'تقرير حجم التذاكر' },
+  'report.totalCreated':     { en: 'Total Created',                           ar: 'إجمالي المنشأة' },
+  'report.totalResolved':    { en: 'Resolved',                                ar: 'محلولة' },
+  'report.totalClosed':      { en: 'Closed',                                  ar: 'مغلقة' },
+  'report.openAtEnd':        { en: 'Open at End',                             ar: 'مفتوحة في النهاية' },
+  'report.byStatus':         { en: 'By Status',                               ar: 'حسب الحالة' },
+  'report.byPriority':       { en: 'By Priority',                             ar: 'حسب الأولوية' },
+  'report.byChannel':        { en: 'By Channel',                              ar: 'حسب القناة' },
+  'report.trend':            { en: 'Trend',                                   ar: 'الاتجاه' },
+  'report.count':            { en: 'Count',                                   ar: 'العدد' },
+  'report.channel':          { en: 'Channel',                                 ar: 'القناة' },
+  'report.trendCreated':     { en: 'Created',                                 ar: 'منشأة' },
+  'report.trendResolved':    { en: 'Resolved',                                ar: 'محلولة' },
+
+  // ── Reports — SLA Compliance ───────────────────────────────────────────
+  'report.slaCompliance':    { en: 'SLA Compliance Report',                   ar: 'تقرير الالتزام بـ SLA' },
+  'report.firstResponseRate':{ en: 'First Response Rate',                     ar: 'معدل الاستجابة الأولى' },
+  'report.resolutionRate':   { en: 'Resolution Rate',                         ar: 'معدل الحل' },
+  'report.avgFirstResponse': { en: 'Avg First Response (min)',                 ar: 'متوسط الاستجابة الأولى (دقيقة)' },
+  'report.avgResolution':    { en: 'Avg Resolution (min)',                     ar: 'متوسط الحل (دقيقة)' },
+  'report.firstResponsePct': { en: 'First Response %',                        ar: 'نسبة الاستجابة الأولى %' },
+  'report.resolutionPct':    { en: 'Resolution %',                            ar: 'نسبة الحل %' },
+  'report.totalTickets':     { en: 'Total Tickets',                           ar: 'إجمالي التذاكر' },
+  'report.breachSeverity':   { en: 'Breach Severity',                         ar: 'شدة الخرق' },
+  'report.warning':          { en: 'Warning',                                 ar: 'تحذير' },
+  'report.breach':           { en: 'Breach',                                  ar: 'خرق' },
+  'report.criticalBreach':   { en: 'Critical Breach',                         ar: 'خرق حرج' },
+
+  // ── Reports — Agent Performance ───────────────────────────────────────
+  'report.agentPerformance': { en: 'Agent Performance Report',                ar: 'تقرير أداء الوكلاء' },
+  'report.handled':          { en: 'Handled',                                 ar: 'المعالجة' },
+  'report.avgResponseMin':   { en: 'Avg Response (min)',                       ar: 'متوسط الاستجابة (دقيقة)' },
+  'report.slaPct':           { en: 'SLA %',                                   ar: 'SLA %' },
+  'report.escalationPct':    { en: 'Escalation %',                            ar: 'نسبة التصعيد' },
+  'report.noData':           { en: 'No data for this period.',                 ar: 'لا توجد بيانات لهذه الفترة.' },
+
+  // ── Reports — CSAT ────────────────────────────────────────────────────
+  'report.csatTitle':        { en: 'CSAT Report',                             ar: 'تقرير رضا العملاء' },
+  'report.avgScore':         { en: 'Avg Score',                               ar: 'متوسط التقييم' },
+  'report.responseRate':     { en: 'Response Rate',                           ar: 'معدل الاستجابة' },
+  'report.responses':        { en: 'Responses',                               ar: 'الردود' },
+  'report.recentComments':   { en: 'Recent Comments',                         ar: 'التعليقات الأخيرة' },
+  'report.csatInactive':     { en: 'No CSAT survey responses in this period.', ar: 'لا توجد استجابات لاستطلاعات رضا العملاء في هذه الفترة.' },
 };

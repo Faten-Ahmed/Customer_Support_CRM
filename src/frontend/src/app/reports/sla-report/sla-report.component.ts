@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReportFilter, ReportService, SlaComplianceReport } from '../report.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sla-report',
@@ -25,6 +26,7 @@ import { ReportFilter, ReportService, SlaComplianceReport } from '../report.serv
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    TranslatePipe,
   ],
   templateUrl: './sla-report.component.html',
 })

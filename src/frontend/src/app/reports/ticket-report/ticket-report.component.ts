@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReportFilter, ReportService, TicketVolumeReport } from '../report.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-ticket-report',
@@ -25,6 +26,7 @@ import { ReportFilter, ReportService, TicketVolumeReport } from '../report.servi
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    TranslatePipe,
   ],
   templateUrl: './ticket-report.component.html',
 })
@@ -65,10 +67,10 @@ export class TicketReportComponent implements OnInit {
 
   summaryCards(r: TicketVolumeReport) {
     return [
-      { label: 'Total Created',    value: r.summary.totalCreated },
-      { label: 'Resolved',         value: r.summary.totalResolved },
-      { label: 'Closed',           value: r.summary.totalClosed },
-      { label: 'Open at End',      value: r.summary.openAtEndOfPeriod },
+      { labelKey: 'report.totalCreated',  value: r.summary.totalCreated },
+      { labelKey: 'report.totalResolved', value: r.summary.totalResolved },
+      { labelKey: 'report.totalClosed',   value: r.summary.totalClosed },
+      { labelKey: 'report.openAtEnd',     value: r.summary.openAtEndOfPeriod },
     ];
   }
 

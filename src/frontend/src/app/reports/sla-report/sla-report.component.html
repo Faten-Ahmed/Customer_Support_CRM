@@ -1,36 +1,36 @@
 <div style="padding: 24px;">
 
-  <h1 style="margin: 0 0 20px; font-size: 22px; font-weight: 600;">SLA Compliance Report</h1>
+  <h1 style="margin: 0 0 20px; font-size: 22px; font-weight: 600;">{{ 'report.slaCompliance' | translate }}</h1>
 
   <!-- Filter bar -->
   <mat-card appearance="outlined" style="margin-bottom: 24px;">
     <mat-card-content style="padding: 16px;">
       <form [formGroup]="filterForm" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
         <mat-form-field appearance="outline">
-          <mat-label>From</mat-label>
+          <mat-label>{{ 'report.dateFrom' | translate }}</mat-label>
           <input matInput [matDatepicker]="pickerFrom" formControlName="dateFrom" readonly />
           <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
           <mat-datepicker #pickerFrom></mat-datepicker>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>To</mat-label>
+          <mat-label>{{ 'report.dateTo' | translate }}</mat-label>
           <input matInput [matDatepicker]="pickerTo" formControlName="dateTo" readonly />
           <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
           <mat-datepicker #pickerTo></mat-datepicker>
         </mat-form-field>
         <button mat-raised-button color="primary" type="button" (click)="applyFilter()">
-          <mat-icon>search</mat-icon> Apply
+          <mat-icon>search</mat-icon> {{ 'report.apply' | translate }}
         </button>
       </form>
     </mat-card-content>
   </mat-card>
 
   @if (loading()) {
-    <p style="text-align: center; padding: 40px; color: var(--mat-sys-on-surface-variant);">Loading…</p>
+    <p style="text-align: center; padding: 40px; color: var(--mat-sys-on-surface-variant);">{{ 'common.loading' | translate }}</p>
   } @else if (error()) {
     <div style="text-align: center; padding: 40px;">
-      <p style="margin-bottom: 12px;">Failed to load report. Please try again.</p>
-      <button mat-raised-button color="primary" (click)="load()">Retry</button>
+      <p style="margin-bottom: 12px;">{{ 'report.loadError' | translate }}</p>
+      <button mat-raised-button color="primary" (click)="load()">{{ 'report.retry' | translate }}</button>
     </div>
   } @else if (report()) {
 
@@ -39,47 +39,47 @@
       <mat-card appearance="outlined">
         <mat-card-content style="padding: 20px; text-align: center;">
           <div style="font-size: 32px; font-weight: 700; color: var(--mat-sys-primary);">{{ report()!.firstResponseComplianceRate }}%</div>
-          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">First Response Rate</div>
+          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ 'report.firstResponseRate' | translate }}</div>
         </mat-card-content>
       </mat-card>
       <mat-card appearance="outlined">
         <mat-card-content style="padding: 20px; text-align: center;">
           <div style="font-size: 32px; font-weight: 700; color: var(--mat-sys-primary);">{{ report()!.resolutionComplianceRate }}%</div>
-          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">Resolution Rate</div>
+          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ 'report.resolutionRate' | translate }}</div>
         </mat-card-content>
       </mat-card>
       <mat-card appearance="outlined">
         <mat-card-content style="padding: 20px; text-align: center;">
           <div style="font-size: 32px; font-weight: 700; color: var(--mat-sys-primary);">{{ report()!.avgFirstResponseMinutes }}</div>
-          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">Avg First Response (min)</div>
+          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ 'report.avgFirstResponse' | translate }}</div>
         </mat-card-content>
       </mat-card>
       <mat-card appearance="outlined">
         <mat-card-content style="padding: 20px; text-align: center;">
           <div style="font-size: 32px; font-weight: 700; color: var(--mat-sys-primary);">{{ report()!.avgResolutionMinutes }}</div>
-          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">Avg Resolution (min)</div>
+          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ 'report.avgResolution' | translate }}</div>
         </mat-card-content>
       </mat-card>
     </div>
 
     <!-- By Priority -->
-    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 12px;">By Priority</h2>
+    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 12px;">{{ 'report.byPriority' | translate }}</h2>
     <mat-card appearance="outlined" style="margin-bottom: 24px;">
       <mat-table [dataSource]="byPriorityRows(report()!)">
         <ng-container matColumnDef="priority">
-          <mat-header-cell *matHeaderCellDef>Priority</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'common.priority' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.priority }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="frRate">
-          <mat-header-cell *matHeaderCellDef>First Response %</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.firstResponsePct' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.frRate }}%</mat-cell>
         </ng-container>
         <ng-container matColumnDef="resRate">
-          <mat-header-cell *matHeaderCellDef>Resolution %</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.resolutionPct' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.resRate }}%</mat-cell>
         </ng-container>
         <ng-container matColumnDef="total">
-          <mat-header-cell *matHeaderCellDef>Total Tickets</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.totalTickets' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.total }}</mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="byPriorityColumns"></mat-header-row>
@@ -88,24 +88,24 @@
     </mat-card>
 
     <!-- Breach Reasons -->
-    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 12px;">Breach Severity</h2>
+    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 12px;">{{ 'report.breachSeverity' | translate }}</h2>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
       <mat-card appearance="outlined">
         <mat-card-content style="padding: 20px; text-align: center;">
           <div style="font-size: 28px; font-weight: 700; color: #f59e0b;">{{ report()!.breachReasons.warningCount }}</div>
-          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">Warning</div>
+          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ 'report.warning' | translate }}</div>
         </mat-card-content>
       </mat-card>
       <mat-card appearance="outlined">
         <mat-card-content style="padding: 20px; text-align: center;">
           <div style="font-size: 28px; font-weight: 700; color: #ef4444;">{{ report()!.breachReasons.breachCount }}</div>
-          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">Breach</div>
+          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ 'report.breach' | translate }}</div>
         </mat-card-content>
       </mat-card>
       <mat-card appearance="outlined">
         <mat-card-content style="padding: 20px; text-align: center;">
           <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">{{ report()!.breachReasons.criticalBreachCount }}</div>
-          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">Critical Breach</div>
+          <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ 'report.criticalBreach' | translate }}</div>
         </mat-card-content>
       </mat-card>
     </div>

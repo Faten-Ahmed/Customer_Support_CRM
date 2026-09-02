@@ -1,6 +1,6 @@
 <div style="padding: 24px;">
 
-  <h1 style="margin: 0 0 20px; font-size: 22px; font-weight: 600;">Ticket Volume Report</h1>
+  <h1 style="margin: 0 0 20px; font-size: 22px; font-weight: 600;">{{ 'report.ticketVolume' | translate }}</h1>
 
   <!-- Filter bar -->
   <mat-card appearance="outlined" style="margin-bottom: 24px;">
@@ -8,21 +8,21 @@
       <form [formGroup]="filterForm" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
 
         <mat-form-field appearance="outline">
-          <mat-label>From</mat-label>
+          <mat-label>{{ 'report.dateFrom' | translate }}</mat-label>
           <input matInput [matDatepicker]="pickerFrom" formControlName="dateFrom" readonly />
           <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
           <mat-datepicker #pickerFrom></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>To</mat-label>
+          <mat-label>{{ 'report.dateTo' | translate }}</mat-label>
           <input matInput [matDatepicker]="pickerTo" formControlName="dateTo" readonly />
           <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
           <mat-datepicker #pickerTo></mat-datepicker>
         </mat-form-field>
 
         <button mat-raised-button color="primary" type="button" (click)="applyFilter()">
-          <mat-icon>search</mat-icon> Apply
+          <mat-icon>search</mat-icon> {{ 'report.apply' | translate }}
         </button>
       </form>
     </mat-card-content>
@@ -30,21 +30,21 @@
 
   <!-- Loading / error -->
   @if (loading()) {
-    <p style="text-align: center; padding: 40px; color: var(--mat-sys-on-surface-variant);">Loading…</p>
+    <p style="text-align: center; padding: 40px; color: var(--mat-sys-on-surface-variant);">{{ 'common.loading' | translate }}</p>
   } @else if (error()) {
     <div style="text-align: center; padding: 40px;">
-      <p style="margin-bottom: 12px;">Failed to load report. Please try again.</p>
-      <button mat-raised-button color="primary" (click)="load()">Retry</button>
+      <p style="margin-bottom: 12px;">{{ 'report.loadError' | translate }}</p>
+      <button mat-raised-button color="primary" (click)="load()">{{ 'report.retry' | translate }}</button>
     </div>
   } @else if (report()) {
 
     <!-- Summary cards -->
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
-      @for (card of summaryCards(report()!); track card.label) {
+      @for (card of summaryCards(report()!); track card.labelKey) {
         <mat-card appearance="outlined">
           <mat-card-content style="padding: 20px; text-align: center;">
             <div style="font-size: 32px; font-weight: 700; color: var(--mat-sys-primary);">{{ card.value }}</div>
-            <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ card.label }}</div>
+            <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">{{ card.labelKey | translate }}</div>
           </mat-card-content>
         </mat-card>
       }
@@ -54,14 +54,14 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
 
       <mat-card appearance="outlined">
-        <mat-card-header><mat-card-title style="font-size: 15px;">By Status</mat-card-title></mat-card-header>
+        <mat-card-header><mat-card-title style="font-size: 15px;">{{ 'report.byStatus' | translate }}</mat-card-title></mat-card-header>
         <mat-table [dataSource]="dictToRows(report()!.byStatus)">
           <ng-container matColumnDef="key">
-            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef>{{ 'common.status' | translate }}</mat-header-cell>
             <mat-cell *matCellDef="let r">{{ r.key }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="value">
-            <mat-header-cell *matHeaderCellDef>Count</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef>{{ 'report.count' | translate }}</mat-header-cell>
             <mat-cell *matCellDef="let r">{{ r.value }}</mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="['key','value']"></mat-header-row>
@@ -70,14 +70,14 @@
       </mat-card>
 
       <mat-card appearance="outlined">
-        <mat-card-header><mat-card-title style="font-size: 15px;">By Priority</mat-card-title></mat-card-header>
+        <mat-card-header><mat-card-title style="font-size: 15px;">{{ 'report.byPriority' | translate }}</mat-card-title></mat-card-header>
         <mat-table [dataSource]="dictToRows(report()!.byPriority)">
           <ng-container matColumnDef="key">
-            <mat-header-cell *matHeaderCellDef>Priority</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef>{{ 'common.priority' | translate }}</mat-header-cell>
             <mat-cell *matCellDef="let r">{{ r.key }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="value">
-            <mat-header-cell *matHeaderCellDef>Count</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef>{{ 'report.count' | translate }}</mat-header-cell>
             <mat-cell *matCellDef="let r">{{ r.value }}</mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="['key','value']"></mat-header-row>
@@ -89,14 +89,14 @@
 
     <!-- By Channel -->
     <mat-card appearance="outlined" style="margin-bottom: 24px;">
-      <mat-card-header><mat-card-title style="font-size: 15px;">By Channel</mat-card-title></mat-card-header>
+      <mat-card-header><mat-card-title style="font-size: 15px;">{{ 'report.byChannel' | translate }}</mat-card-title></mat-card-header>
       <mat-table [dataSource]="dictToRows(report()!.byChannel)">
         <ng-container matColumnDef="key">
-          <mat-header-cell *matHeaderCellDef>Channel</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.channel' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.key }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="value">
-          <mat-header-cell *matHeaderCellDef>Count</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.count' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.value }}</mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="['key','value']"></mat-header-row>
@@ -106,18 +106,18 @@
 
     <!-- Trend -->
     <mat-card appearance="outlined">
-      <mat-card-header><mat-card-title style="font-size: 15px;">Trend</mat-card-title></mat-card-header>
+      <mat-card-header><mat-card-title style="font-size: 15px;">{{ 'report.trend' | translate }}</mat-card-title></mat-card-header>
       <mat-table [dataSource]="report()!.trend">
         <ng-container matColumnDef="date">
-          <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'common.date' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.date }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="created">
-          <mat-header-cell *matHeaderCellDef>Created</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.trendCreated' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.created }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="resolved">
-          <mat-header-cell *matHeaderCellDef>Resolved</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>{{ 'report.trendResolved' | translate }}</mat-header-cell>
           <mat-cell *matCellDef="let r">{{ r.resolved }}</mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="trendColumns"></mat-header-row>

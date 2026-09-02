@@ -39,7 +39,7 @@ mat-sidenav {
   color: white;
   transition: width 0.2s ease;
   overflow: hidden;
-  border-right: none !important;
+  border-inline-end: none !important;
 }
 
 .sidenav-nav {
@@ -146,6 +146,6 @@ mat-sidenav {
 .ai-panel {
   width: 320px;
   flex-shrink: 0;
-  border-left: 1px solid var(--mat-sys-outline-variant);
+  border-inline-start: 1px solid var(--mat-sys-outline-variant);
   overflow: hidden;
 }

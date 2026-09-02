@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { CsatReport, ReportFilter, ReportService } from '../report.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-csat-report',
@@ -23,6 +24,7 @@ import { CsatReport, ReportFilter, ReportService } from '../report.service';
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    TranslatePipe,
   ],
   templateUrl: './csat-report.component.html',
 })

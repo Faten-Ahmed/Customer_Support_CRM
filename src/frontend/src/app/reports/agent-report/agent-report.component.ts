@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { AgentPerformanceRow, ReportFilter, ReportService } from '../report.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-agent-report',
@@ -25,6 +26,7 @@ import { AgentPerformanceRow, ReportFilter, ReportService } from '../report.serv
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    TranslatePipe,
   ],
   templateUrl: './agent-report.component.html',
 })

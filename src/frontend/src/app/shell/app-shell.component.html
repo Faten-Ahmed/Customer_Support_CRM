@@ -45,7 +45,7 @@
           <button class="nav-link nav-group-btn"
                   [class.group-active]="hasActiveChild(item.children)"
                   [matTooltip]="collapsed() ? (item.labelKey | translate) : ''"
-                  matTooltipPosition="right"
+                  matTooltipPosition="after"
                   (click)="collapsed() ? null : toggleGroup(item.route)">
             <mat-icon>{{ item.icon }}</mat-icon>
             @if (!collapsed()) {
@@ -77,7 +77,7 @@
                  routerLinkActive="active-link"
                  class="nav-link"
                  [matTooltip]="child.labelKey | translate"
-                 matTooltipPosition="right">
+                 matTooltipPosition="after">
                 <mat-icon>{{ child.icon }}</mat-icon>
               </a>
             }
@@ -86,7 +86,7 @@
         } @else {
           <a [routerLink]="item.route" routerLinkActive="active-link"
              class="nav-link"
-             [matTooltip]="collapsed() ? (item.labelKey | translate) : ''" matTooltipPosition="right">
+             [matTooltip]="collapsed() ? (item.labelKey | translate) : ''" matTooltipPosition="after">
             <mat-icon
               [matBadge]="pendingChatCount()"
               matBadgeColor="warn"
