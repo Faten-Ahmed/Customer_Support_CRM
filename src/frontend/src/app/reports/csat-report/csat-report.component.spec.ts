@@ -7,10 +7,11 @@ import { CsatReportComponent } from './csat-report.component';
 import { CsatReport, ReportService } from '../report.service';
 
 const mockReport: CsatReport = {
-  avgRating: 4.2,
-  distribution: [{ rating: 5, count: 63 }, { rating: 4, count: 40 }],
-  byDepartment: [{ department: 'Support', avg: 4.1 }],
-  comments: [{ content: 'Great service', rating: 5, agentName: 'Alice', date: '2025-01-15' }],
+  overall: { avgRating: 4.2, totalSent: 150, totalSubmitted: 120, responseRate: 80.0 },
+  distribution: { 5: 63, 4: 40 },
+  byDepartment: [{ departmentId: '1', departmentName: 'Support', avgRating: 4.1, totalSubmitted: 100 }],
+  byAgent: [{ agentId: '1', agentName: 'Alice', avgRating: 4.3, totalSubmitted: 50 }],
+  recentComments: ['Great service'],
 };
 
 describe('CsatReportComponent', () => {

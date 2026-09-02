@@ -33,7 +33,7 @@
       <button mat-raised-button color="primary" (click)="load()">Retry</button>
     </div>
   } @else if (report()) {
-    @if (report()!.overall.totalResponses === 0) {
+    @if (report()!.overall.totalSubmitted === 0) {
       <mat-card appearance="outlined">
         <mat-card-content style="padding: 48px; text-align: center; color: var(--mat-sys-on-surface-variant);">
           <mat-icon style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 16px;">star_outline</mat-icon>
@@ -47,7 +47,7 @@
         <mat-card appearance="outlined">
           <mat-card-content style="padding: 20px; text-align: center;">
             <div style="font-size: 32px; font-weight: 700; color: var(--mat-sys-primary);">
-              {{ report()!.overall.avgScore ?? '—' }}
+              {{ report()!.overall.avgRating ?? '—' }}
             </div>
             <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">Avg Score</div>
           </mat-card-content>
@@ -55,7 +55,7 @@
         <mat-card appearance="outlined">
           <mat-card-content style="padding: 20px; text-align: center;">
             <div style="font-size: 32px; font-weight: 700; color: var(--mat-sys-primary);">
-              {{ report()!.overall.totalResponses }}
+              {{ report()!.overall.totalSubmitted }}
             </div>
             <div style="font-size: 13px; margin-top: 6px; color: var(--mat-sys-on-surface-variant);">Responses</div>
           </mat-card-content>

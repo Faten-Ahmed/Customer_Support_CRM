@@ -66,10 +66,10 @@ export interface AgentPerformanceRow {
 }
 
 export interface CsatReport {
-  overall: { avgScore?: number; totalResponses: number; totalSent: number; responseRate: number };
+  overall: { avgRating?: number; totalSent: number; totalSubmitted: number; responseRate: number };
   distribution: Record<number, number>;
-  byDepartment: { departmentId: string; departmentName: string; avgScore: number; totalResponses: number }[];
-  byAgent: { agentId: string; agentName: string; avgScore: number; totalResponses: number }[];
+  byDepartment: { departmentId: string; departmentName: string; avgRating?: number; totalSubmitted: number }[];
+  byAgent: { agentId: string; agentName: string; avgRating?: number; totalSubmitted: number }[];
   recentComments: string[];
 }
 
