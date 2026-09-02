@@ -26,21 +26,26 @@ public class GetUnreadCountQueryHandler : IRequestHandler<GetUnreadCountQuery, i
     public async Task<int> Handle(GetUnreadCountQuery query, CancellationToken ct)
     {
         var key = CacheKey(query.RequestingUserId);
-        var cached = await _cache.GetAsync(key, ct);
 
-        if (cached is not null)
-            return int.Parse(Encoding.UTF8.GetString(cached));
+        try
+        {
+            var cached = await _cache.GetAsync(key, ct);
+            if (cached is not null)
+                return int.Parse(Encoding.UTF8.GetString(cached));
+        }
+        catch { /* Redis unavailable — fall through to DB */ }
 
         var count = await _notifications.GetUnreadCountAsync(query.RequestingUserId, ct);
 
-        await _cache.SetAsync(
-            key,
-            Encoding.UTF8.GetBytes(count.ToString()),
-            new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = Ttl
-            },
-            ct);
+        try
+        {
+            await _cache.SetAsync(
+                key,
+                Encoding.UTF8.GetBytes(count.ToString()),
+                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = Ttl },
+                ct);
+        }
+        catch { /* Redis unavailable — skip caching */ }
 
         return count;
     }

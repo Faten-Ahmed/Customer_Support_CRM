@@ -50,6 +50,10 @@ import { NotificationService } from '../../notifications/notification.service';
             <mat-icon matListItemIcon>menu_book</mat-icon>
             <span matListItemTitle i18n="@@portal.nav.kb">Knowledge Base</span>
           </a>
+          <a mat-list-item routerLink="/portal/live-chat" routerLinkActive="nav-active">
+            <mat-icon matListItemIcon>chat</mat-icon>
+            <span matListItemTitle i18n="@@portal.nav.liveChat">Live Chat</span>
+          </a>
           <a mat-list-item routerLink="/portal/profile" routerLinkActive="nav-active">
             <mat-icon matListItemIcon>person</mat-icon>
             <span matListItemTitle i18n="@@portal.nav.profile">My Profile</span>

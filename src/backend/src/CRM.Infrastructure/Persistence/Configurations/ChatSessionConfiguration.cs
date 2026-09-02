@@ -12,6 +12,8 @@ public class ChatSessionConfiguration : IEntityTypeConfiguration<ChatSession>
         builder.Property(e => e.CustomerName).HasMaxLength(200).IsRequired();
         builder.Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
 
+        builder.Navigation(e => e.Messages).HasField("_messages");
+
         builder.HasMany(e => e.Messages)
                .WithOne()
                .HasForeignKey(m => m.SessionId)

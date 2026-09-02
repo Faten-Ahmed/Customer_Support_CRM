@@ -29,18 +29,19 @@ export class ChatHubService {
   private readonly router = inject(Router);
 
   private connection: signalR.HubConnection | null = null;
+  private startPromise: Promise<void> | null = null;
 
   readonly message$ = new Subject<ChatMessage>();
   readonly handoffAccepted$ = new Subject<HandoffAcceptedEvent>();
   readonly sessionClosed$ = new Subject<SessionClosedEvent>();
   readonly agentTyping$ = new Subject<void>();
 
-  connect(): void {
-    if (this.connection) return;
+  connect(): Promise<void> {
+    if (this.connection) return this.startPromise ?? Promise.resolve();
 
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl('/hubs/chat', {
-        accessTokenFactory: () => this.authStore.token() ?? '',
+        accessTokenFactory: () => this.authStore.getToken() ?? '',
       })
       .withAutomaticReconnect()
       .build();
@@ -50,7 +51,8 @@ export class ChatHubService {
     this.connection.on('SessionClosed', (evt: SessionClosedEvent) => this.sessionClosed$.next(evt));
     this.connection.on('AgentTyping', () => this.agentTyping$.next());
 
-    this.connection.start().catch(err => console.error('ChatHub connection failed:', err));
+    this.startPromise = this.connection.start();
+    return this.startPromise;
   }
 
   async startSession(departmentId?: string): Promise<string> {
@@ -77,6 +79,7 @@ export class ChatHubService {
   disconnect(): void {
     this.connection?.stop();
     this.connection = null;
+    this.startPromise = null;
   }
 
   private ensureConnected(): void {

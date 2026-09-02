@@ -71,6 +71,11 @@ export const routes: Routes = [
           import('./profile/profile.component').then(m => m.ProfileComponent),
       },
       {
+        path: 'live-chat',
+        loadComponent: () =>
+          import('./live-chat/live-chat-inbox.component').then(m => m.LiveChatInboxComponent),
+      },
+      {
         path: 'admin',
         loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
       },

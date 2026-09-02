@@ -14,7 +14,9 @@ public class AdminTemplatesController : ControllerBase
 {
     private readonly IMediator _mediator;
     private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        Guid.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")!.Value);
 
     public AdminTemplatesController(IMediator mediator) => _mediator = mediator;
 

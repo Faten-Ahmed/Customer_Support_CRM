@@ -15,7 +15,9 @@ public class DashboardController : ControllerBase
     private readonly IMediator _mediator;
 
     private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        Guid.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")!.Value);
 
     private UserRole CurrentUserRole
     {

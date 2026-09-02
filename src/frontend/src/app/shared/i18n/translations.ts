@@ -66,6 +66,7 @@ export const TRANSLATIONS: TranslationMap = {
   'nav.reports.csat':        { en: 'CSAT',               ar: 'رضا العملاء' },
   'nav.templates':      { en: 'Templates',      ar: 'القوالب' },
   'nav.tasks':          { en: 'My Tasks',       ar: 'مهامي' },
+  'nav.liveChat':       { en: 'Live Chat',      ar: 'الدردشة المباشرة' },
   'nav.admin':          { en: 'Admin',          ar: 'الإدارة' },
 
   // ── App Shell ──────────────────────────────────────────────────────────

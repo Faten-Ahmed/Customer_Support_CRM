@@ -1,6 +1,7 @@
 import {
   Component, OnInit, OnDestroy, inject, signal, computed, ElementRef, ViewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -44,16 +45,15 @@ export class LiveChatComponent implements OnInit, OnDestroy {
   readonly connecting = signal(true);
   readonly closed = signal(false);
 
-  readonly inputControl = new FormControl('');
-  readonly canSend = computed(() => !this.waitingForAgent() && !this.closed() && !!this.inputControl.value?.trim());
+  readonly inputControl = new FormControl({ value: '', disabled: true });
+  private readonly inputValue = toSignal(this.inputControl.valueChanges, { initialValue: '' });
+  readonly canSend = computed(() => !this.waitingForAgent() && !this.closed() && !!this.inputValue()?.trim());
 
   private subs = new Subscription();
   private handoffTimer: ReturnType<typeof setTimeout> | null = null;
   private typingTimer: ReturnType<typeof setTimeout> | null = null;
 
   async ngOnInit(): Promise<void> {
-    this.hub.connect();
-
     this.subs.add(this.hub.message$.subscribe(msg => {
       this.messages.update(m => [...m, msg]);
       this.scrollToBottom();
@@ -63,11 +63,13 @@ export class LiveChatComponent implements OnInit, OnDestroy {
       this.clearHandoffTimer();
       this.waitingForAgent.set(false);
       this.agentName.set(evt.agentName);
+      this.inputControl.enable();
       this.addSystemMessage(`${evt.agentName} joined the chat.`);
     }));
 
     this.subs.add(this.hub.sessionClosed$.subscribe(() => {
       this.closed.set(true);
+      this.inputControl.disable();
       this.addSystemMessage('Chat session ended.');
     }));
 
@@ -78,6 +80,7 @@ export class LiveChatComponent implements OnInit, OnDestroy {
     }));
 
     try {
+      await this.hub.connect();
       const id = await this.hub.startSession();
       this.sessionId.set(id);
       this.connecting.set(false);

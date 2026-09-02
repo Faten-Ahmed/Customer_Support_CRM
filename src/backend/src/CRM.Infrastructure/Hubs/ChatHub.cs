@@ -17,7 +17,9 @@ public class ChatHub : Hub
     public ChatHub(IMediator mediator) => _mediator = mediator;
 
     private Guid CurrentUserId =>
-        Guid.Parse(Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        Guid.Parse(
+            Context.User!.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? Context.User!.FindFirst("sub")!.Value);
 
     private string CurrentUserName =>
         Context.User!.FindFirst(ClaimTypes.Name)?.Value

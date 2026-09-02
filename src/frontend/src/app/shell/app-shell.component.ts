@@ -47,6 +47,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   { labelKey: 'nav.templates', icon: 'library_books', route: '/app/settings/templates', roles: ['Admin', 'Manager', 'Agent'] },
   { labelKey: 'nav.tasks', icon: 'checklist', route: '/app/settings/tasks', roles: ['Agent', 'Manager'] },
+  { labelKey: 'nav.liveChat', icon: 'support_agent', route: '/app/live-chat', roles: ['Agent', 'Manager'] },
   { labelKey: 'nav.admin', icon: 'admin_panel_settings', route: '/app/admin', roles: ['Admin'] },
 ];
 

@@ -33,6 +33,7 @@ public class SendChatMessageCommandHandler : IRequestHandler<SendChatMessageComm
             throw new InvalidOperationException("Cannot send a message to a closed session.");
 
         var msg = session.AddMessage(req.SenderRole, req.SenderId, req.Body);
+        await _repo.AddMessageAsync(msg, ct);
         await _repo.SaveAsync(ct);
 
         if (session.LinkedTicketId.HasValue)

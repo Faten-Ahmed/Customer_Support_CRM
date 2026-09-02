@@ -18,6 +18,9 @@ public class ChatSessionRepository : IChatSessionRepository
     public async Task AddAsync(ChatSession session, CancellationToken ct = default) =>
         await _db.ChatSessions.AddAsync(session, ct);
 
+    public async Task AddMessageAsync(ChatSessionMessage message, CancellationToken ct = default) =>
+        await _db.ChatSessionMessages.AddAsync(message, ct);
+
     public Task SaveAsync(CancellationToken ct = default) =>
         _db.SaveChangesAsync(ct);
 }

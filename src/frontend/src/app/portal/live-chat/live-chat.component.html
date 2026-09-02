@@ -68,8 +68,7 @@
         <mat-label>Type a message…</mat-label>
         <textarea matInput [formControl]="inputControl"
                   rows="2"
-                  (keydown)="onKeyDown($event)"
-                  [disabled]="waitingForAgent() || connecting()"></textarea>
+                  (keydown)="onKeyDown($event)"></textarea>
       </mat-form-field>
       <button mat-fab color="primary"
               (click)="sendMessage()"
