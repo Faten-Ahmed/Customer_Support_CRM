@@ -25,6 +25,7 @@ const PORTAL_ROUTES: Record<string, string> = {
   ticket: '/portal/tickets',
   article: '/portal/kb',
   chat: '/portal/chats',
+  CsatSurvey: '/portal/surveys',
 };
 
 const TYPE_ICONS: Record<string, string> = {
@@ -35,6 +36,7 @@ const TYPE_ICONS: Record<string, string> = {
   NewChatMessage: 'chat',
   ArticleApproved: 'check_circle',
   ArticleRejected: 'cancel',
+  SurveyAvailable: 'star_rate',
   default: 'notifications',
 };
 
