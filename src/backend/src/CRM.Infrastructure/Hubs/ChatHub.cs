@@ -27,10 +27,19 @@ public class ChatHub : Hub
             Context.User!.FindFirst(ClaimTypes.NameIdentifier)?.Value
             ?? Context.User!.FindFirst("sub")!.Value);
 
-    private string CurrentUserName =>
-        Context.User!.FindFirst(ClaimTypes.Name)?.Value
-        ?? Context.User!.FindFirst("name")?.Value
-        ?? "Unknown";
+    private string CurrentUserName
+    {
+        get
+        {
+            var u = Context.User!;
+            // Customer tokens use "fullName"; staff tokens use "firstName"+"lastName"
+            if (u.FindFirst("fullName")?.Value is { Length: > 0 } full) return full;
+            var first = u.FindFirst("firstName")?.Value ?? "";
+            var last  = u.FindFirst("lastName")?.Value  ?? "";
+            var combined = $"{first} {last}".Trim();
+            return combined.Length > 0 ? combined : "Unknown";
+        }
+    }
 
     private bool IsCustomer =>
         Context.User!.FindFirst(ClaimTypes.Role)?.Value == "Customer";
