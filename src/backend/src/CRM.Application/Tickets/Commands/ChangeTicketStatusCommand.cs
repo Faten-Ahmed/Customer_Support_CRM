@@ -5,6 +5,7 @@ using CRM.Domain.Notifications;
 using CRM.Domain.Sla;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
+using CRM.Domain.Tickets.Events;
 using MediatR;
 
 namespace CRM.Application.Tickets.Commands;
@@ -81,5 +82,11 @@ public class ChangeTicketStatusCommandHandler : IRequestHandler<ChangeTicketStat
 
         await _mediator.Send(new CreateNotificationCommand(
             ticket.CustomerId, type, title, body, "ticket", ticket.Id), ct);
+
+        if (cmd.NewStatus == TicketStatus.Closed)
+            await _mediator.Publish(new TicketClosedEvent(
+                ticket.Id,
+                cmd.ChangedByUserId,
+                ticket.DepartmentId ?? Guid.Empty), ct);
     }
 }
