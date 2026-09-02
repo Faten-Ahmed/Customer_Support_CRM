@@ -262,6 +262,7 @@ describe('AuthService — changePassword', () => {
     const req = httpMock.expectOne('/api/v1/auth/change-password-first-login');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
+      email: 'user@example.com',
       currentPassword: 'OldPass1!',
       newPassword: 'NewPass2@',
       confirmPassword: 'NewPass2@',
@@ -326,7 +327,7 @@ describe('AuthService — password reset methods', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
       token: 'reset-token-abc',
-      password: 'NewPassword1!',
+      newPassword: 'NewPassword1!',
       confirmPassword: 'NewPassword1!',
     });
     req.flush({ message: 'Password reset successfully.' });

@@ -125,16 +125,21 @@ export class SlaIndicatorComponent implements OnInit {
       catchError(() => of(null))
     );
 
-    const poll$ = this.mode === 'detail'
-      ? timer(0, 60_000).pipe(switchMap(() => fetch$))
-      : fetch$;
+    fetch$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.applyData(data));
 
-    poll$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      if (data) {
-        this.sla.set(data);
-        this.colour.set(slaColour(data.firstResponse.elapsedPercent));
-      }
-    });
+    if (this.mode === 'detail') {
+      timer(60_000, 60_000).pipe(
+        switchMap(() => fetch$),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(data => this.applyData(data));
+    }
+  }
+
+  private applyData(data: SlaStatus | null): void {
+    if (data) {
+      this.sla.set(data);
+      this.colour.set(slaColour(data.firstResponse.elapsedPercent));
+    }
   }
 
   clampedPercent(value: number): number {

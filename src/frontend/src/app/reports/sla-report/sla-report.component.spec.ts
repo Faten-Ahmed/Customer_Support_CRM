@@ -4,12 +4,17 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { SlaReportComponent } from './sla-report.component';
-import { ReportService, SlaReport } from '../report.service';
+import { ReportService, SlaComplianceReport } from '../report.service';
 
-const mockReport: SlaReport = {
-  complianceRate: 90,
-  byPriority: [{ priority: 'High', compliant: 80, breached: 20 }],
-  breachReasons: [{ reason: 'No response', count: 5 }],
+const mockReport: SlaComplianceReport = {
+  firstResponseComplianceRate: 90,
+  resolutionComplianceRate: 85,
+  avgFirstResponseMinutes: 15,
+  avgResolutionMinutes: 120,
+  byPriority: {
+    High: { firstResponseComplianceRate: 80, resolutionComplianceRate: 75, totalTickets: 20 },
+  },
+  breachReasons: { warningCount: 3, breachCount: 5, criticalBreachCount: 1 },
 };
 
 describe('SlaReportComponent', () => {
@@ -48,7 +53,7 @@ describe('SlaReportComponent', () => {
   });
 
   it('should reload on filter change', () => {
-    component.filterForm.patchValue({ dateFrom: '2025-01-01', dateTo: '2025-01-31' });
+    component.filterForm.patchValue({ dateFrom: new Date('2025-01-01'), dateTo: new Date('2025-01-31') });
     component.applyFilter();
     expect(reportService.getSlaReport).toHaveBeenCalledTimes(2);
   });

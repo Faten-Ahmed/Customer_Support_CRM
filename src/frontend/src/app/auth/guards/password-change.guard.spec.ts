@@ -1,39 +1,37 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { provideRouter } from '@angular/router';
 import { PasswordChangeGuard } from './password-change.guard';
 import { AuthService } from '../auth.service';
 import { vi } from 'vitest';
 
 describe('PasswordChangeGuard', () => {
   let guard: PasswordChangeGuard;
-  let router: Router;
-  let navigateSpy: ReturnType<typeof vi.fn>;
+  let routerMock: { navigate: ReturnType<typeof vi.fn> };
 
-  function setup(passwordMustChange: boolean) {
-    const mockUser = passwordMustChange
-      ? { id: '1', email: 'a@b.com', role: 'Agent' as const, passwordMustChange }
+  function setup(requiresPasswordChange: boolean) {
+    routerMock = { navigate: vi.fn().mockResolvedValue(true) };
+
+    const mockUser = requiresPasswordChange
+      ? { id: '1', email: 'a@b.com', role: 'Agent' as const, requiresPasswordChange }
       : null;
 
     const authServiceStub = {
       currentUser: () => mockUser,
     };
 
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
-        provideRouter([]),
         PasswordChangeGuard,
+        { provide: Router, useValue: routerMock },
         { provide: AuthService, useValue: authServiceStub },
       ],
     });
 
     guard = TestBed.inject(PasswordChangeGuard);
-    router = TestBed.inject(Router);
-    navigateSpy = vi.spyOn(router, 'navigate') as unknown as ReturnType<typeof vi.fn>;
-    navigateSpy.mockResolvedValue(true);
   }
 
-  it('should allow activation when passwordMustChange is false', () => {
+  it('should allow activation when requiresPasswordChange is false', () => {
     setup(false);
     expect(guard.canActivate()).toBe(true);
   });
@@ -43,10 +41,10 @@ describe('PasswordChangeGuard', () => {
     expect(guard.canActivate()).toBe(true);
   });
 
-  it('should redirect to /change-password when passwordMustChange is true', () => {
+  it('should redirect to /change-password when requiresPasswordChange is true', () => {
     setup(true);
     const result = guard.canActivate();
     expect(result).toBe(false);
-    expect(navigateSpy).toHaveBeenCalledWith(['/change-password']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/change-password']);
   });
 });

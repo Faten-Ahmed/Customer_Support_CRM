@@ -21,19 +21,19 @@ describe('DashboardService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('getKpis() should GET /api/v1/reports/dashboard', () => {
+  it('getKpis() should GET /api/v1/dashboard/kpis', () => {
     service.getKpis().subscribe(data => {
       expect(data.openTickets).toBeDefined();
     });
-    const req = httpMock.expectOne('/api/v1/reports/dashboard');
+    const req = httpMock.expectOne('/api/v1/dashboard/kpis');
     expect(req.request.method).toBe('GET');
-    req.flush({ openTickets: 12, slaBreachRate: 5, avgFirstResponse: 30, escalationRate: 2 });
+    req.flush({ data: { openTickets: 12, slaBreachRate: 5, avgFirstResponseMinutes7Day: 30, escalationRate: 2 } });
   });
 
   it('getKpis() should include departmentId param when provided', () => {
     service.getKpis('d1').subscribe();
-    const req = httpMock.expectOne(r => r.url === '/api/v1/reports/dashboard');
+    const req = httpMock.expectOne(r => r.url === '/api/v1/dashboard/kpis');
     expect(req.request.params.get('departmentId')).toBe('d1');
-    req.flush({});
+    req.flush({ data: {} });
   });
 });

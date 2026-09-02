@@ -72,8 +72,6 @@ describe('CreateCustomerFormComponent', () => {
       email: 'alice@example.com',
       phone: '',
       companyName: '',
-      country: '',
-      city: '',
     });
 
     component.onSubmit();
@@ -91,7 +89,7 @@ describe('CreateCustomerFormComponent', () => {
 
     component.form.setValue({
       fullName: 'Carol', fullNameAr: 'كارول', email: 'carol@example.com',
-      phone: '', companyName: '', country: '', city: '',
+      phone: '', companyName: '',
     });
     component.onSubmit();
     await fixture.whenStable();

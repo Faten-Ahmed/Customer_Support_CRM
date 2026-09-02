@@ -34,7 +34,7 @@ describe('PortalSurveyService', () => {
 
       const req = httpMock.expectOne('/api/v1/portal/surveys/survey-abc');
       expect(req.request.method).toBe('GET');
-      req.flush(mockSurvey);
+      req.flush({ data: mockSurvey });
 
       expect(result).toEqual(mockSurvey);
     });

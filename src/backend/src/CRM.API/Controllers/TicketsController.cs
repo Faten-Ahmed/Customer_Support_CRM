@@ -174,7 +174,7 @@ public class TicketsController : ControllerBase
             return NoContent();
         }
         catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
-        catch (InvalidOperationException ex) { return UnprocessableEntity(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
     }
 
     public record EscalateTicketRequest(string Reason);

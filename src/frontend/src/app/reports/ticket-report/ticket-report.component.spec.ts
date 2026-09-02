@@ -4,13 +4,14 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { TicketReportComponent } from './ticket-report.component';
-import { ReportService, TicketReport } from '../report.service';
+import { ReportService, TicketVolumeReport } from '../report.service';
 
-const mockReport: TicketReport = {
-  summary: { total: 120, open: 20 },
-  byStatus: [{ status: 'New', count: 10 }, { status: 'Resolved', count: 50 }],
-  byPriority: [{ priority: 'High', count: 30 }],
-  trend: [{ date: '2025-01-01', count: 5 }],
+const mockReport: TicketVolumeReport = {
+  summary: { totalCreated: 120, totalResolved: 80, totalClosed: 30, openAtEndOfPeriod: 10 },
+  byStatus: { New: 10, InProgress: 20, Resolved: 80, Closed: 30 },
+  byPriority: { High: 30, Medium: 60, Low: 30 },
+  byChannel: { Email: 70, Portal: 50 },
+  trend: [{ date: '2025-01-01', created: 5, resolved: 3 }],
 };
 
 describe('TicketReportComponent', () => {
@@ -49,7 +50,7 @@ describe('TicketReportComponent', () => {
   });
 
   it('should reload on filter change', () => {
-    component.filterForm.patchValue({ dateFrom: '2025-01-01', dateTo: '2025-01-31' });
+    component.filterForm.patchValue({ dateFrom: new Date('2025-01-01'), dateTo: new Date('2025-01-31') });
     component.applyFilter();
     expect(reportService.getTicketReport).toHaveBeenCalledTimes(2);
   });

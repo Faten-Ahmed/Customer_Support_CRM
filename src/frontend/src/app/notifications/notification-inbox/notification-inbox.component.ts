@@ -263,6 +263,10 @@ export class NotificationInboxComponent implements OnInit {
     this.closePanel.emit();
   }
 
+  truncate(body: string, max = 80): string {
+    return body.length > max ? body.slice(0, max) + '…' : body;
+  }
+
   iconFor(type: string): string {
     return TYPE_ICONS[type] ?? TYPE_ICONS['default'];
   }

@@ -4,10 +4,14 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AgentReportComponent } from './agent-report.component';
-import { AgentReportRow, ReportService } from '../report.service';
+import { AgentPerformanceRow, ReportService } from '../report.service';
 
-const mockReport: AgentReportRow[] = [
-  { agentId: 'a1', agentName: 'Alice', ticketsHandled: 45, avgResponseTime: 15, slaComplianceRate: 93, csatAvg: 4.2 },
+const mockReport: AgentPerformanceRow[] = [
+  {
+    agentId: 'a1', agentName: 'Alice', ticketsHandled: 45, ticketsResolved: 40,
+    avgFirstResponseMinutes: 15, avgResolutionMinutes: 120, slaComplianceRate: 93,
+    csatScore: 4.2, csatResponseCount: 10, escalationRate: 2,
+  },
 ];
 
 describe('AgentReportComponent', () => {
@@ -46,7 +50,7 @@ describe('AgentReportComponent', () => {
   });
 
   it('should reload on filter change', () => {
-    component.filterForm.patchValue({ dateFrom: '2025-01-01', dateTo: '2025-01-31' });
+    component.filterForm.patchValue({ dateFrom: new Date('2025-01-01'), dateTo: new Date('2025-01-31') });
     component.applyFilter();
     expect(reportService.getAgentReport).toHaveBeenCalledTimes(2);
   });

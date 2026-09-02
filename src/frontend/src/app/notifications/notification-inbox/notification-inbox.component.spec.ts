@@ -36,7 +36,7 @@ describe('NotificationInboxComponent', () => {
     unreadCount: unreadSig.asReadonly(),
   };
 
-  const routerMock = { navigate: vi.fn() };
+  const routerMock = { navigate: vi.fn(), url: '/app/tickets' };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -84,7 +84,7 @@ describe('NotificationInboxComponent', () => {
     component.onNotificationClick(notif);
     await fixture.whenStable();
     expect(notifService.markRead).toHaveBeenCalledWith('n1');
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/tickets', '42']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/app/tickets', '42']);
   });
 
   it('onMarkAllRead() should call markAllRead()', () => {
@@ -120,8 +120,8 @@ describe('NotificationInboxComponent', () => {
   });
 
   it('should return correct navigation route for each entity type', () => {
-    expect(component.entityRoute('ticket', '5')).toEqual(['/tickets', '5']);
-    expect(component.entityRoute('article', '9')).toEqual(['/kb/articles', '9']);
-    expect(component.entityRoute('chat', '3')).toEqual(['/chats', '3']);
+    expect(component.entityRoute('ticket', '5')).toEqual(['/app/tickets', '5']);
+    expect(component.entityRoute('article', '9')).toEqual(['/app/kb/articles', '9']);
+    expect(component.entityRoute('chat', '3')).toEqual(['/app/chats', '3']);
   });
 });

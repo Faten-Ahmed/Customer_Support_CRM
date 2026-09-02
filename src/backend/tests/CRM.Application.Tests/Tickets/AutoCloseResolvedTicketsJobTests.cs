@@ -1,6 +1,7 @@
 using CRM.Application.Tickets.Jobs;
 using CRM.Domain.Tickets;
 using CRM.Domain.Tickets.Enums;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -9,11 +10,12 @@ namespace CRM.Application.Tests.Tickets;
 public class AutoCloseResolvedTicketsJobTests
 {
     private readonly Mock<ITicketRepository> _repo = new();
+    private readonly Mock<IPublisher> _publisher = new();
     private readonly AutoCloseResolvedTicketsJob _job;
 
     public AutoCloseResolvedTicketsJobTests()
     {
-        _job = new AutoCloseResolvedTicketsJob(_repo.Object);
+        _job = new AutoCloseResolvedTicketsJob(_repo.Object, _publisher.Object);
     }
 
     [Fact]

@@ -1,9 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { EMPTY, of } from 'rxjs';
+import { signal } from '@angular/core';
 import { vi } from 'vitest';
 import { AppShellComponent } from './app-shell.component';
 import { AuthStore } from '../auth/auth.store';
+import { SignalRService } from '../core/signalr.service';
+import { NotificationService } from '../notifications/notification.service';
 
 describe('AppShellComponent', () => {
   let fixture: ComponentFixture<AppShellComponent>;
@@ -15,6 +19,30 @@ describe('AppShellComponent', () => {
     clearToken: vi.fn(),
   };
 
+  const mockSignalRService = {
+    connect: vi.fn(),
+    disconnectAll: vi.fn(),
+    notification$: EMPTY,
+    unreadCountUpdated$: EMPTY,
+    liveChatHandoff$: EMPTY,
+  };
+
+  const _unreadCount = signal(0);
+  const _notifications = signal<any[]>([]);
+  const _loading = signal(false);
+
+  const mockNotificationService = {
+    pushNotification: vi.fn(),
+    setUnreadCount: vi.fn(),
+    unreadCount: _unreadCount.asReadonly(),
+    notifications: _notifications.asReadonly(),
+    loading: _loading.asReadonly(),
+    getUnreadCount: vi.fn().mockReturnValue(of({ count: 0 })),
+    list: vi.fn().mockReturnValue(of({ items: [], totalCount: 0, page: 1, pageSize: 20 })),
+    markRead: vi.fn().mockReturnValue(of({})),
+    markAllRead: vi.fn().mockReturnValue(of({})),
+  };
+
   beforeEach(async () => {
     localStorage.removeItem('sidenav_collapsed');
     vi.clearAllMocks();
@@ -24,6 +52,8 @@ describe('AppShellComponent', () => {
       providers: [
         provideRouter([]),
         { provide: AuthStore, useValue: mockAuthStore },
+        { provide: SignalRService, useValue: mockSignalRService },
+        { provide: NotificationService, useValue: mockNotificationService },
       ],
     }).compileComponents();
 

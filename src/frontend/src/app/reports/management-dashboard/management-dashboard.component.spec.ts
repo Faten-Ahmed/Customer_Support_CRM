@@ -3,23 +3,21 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { ManagementDashboardComponent } from './management-dashboard.component';
-import { DashboardService, KpiData, AgentWorkload } from '../dashboard.service';
+import { DashboardService, KpiData } from '../dashboard.service';
+import { DepartmentService } from '../../admin/departments/department.service';
 import { SignalRService } from '../../shared/services/signalr.service';
 import { AuthStore } from '../../auth/auth.store';
 
 const mockKpi: KpiData = {
-  openTickets: 12, slaBreachRate: 5, avgFirstResponse: 30, escalationRate: 2,
-  unassignedTickets: 4, csatScore: 87, agentUtilization: 72, createdToday: 8, resolvedToday: 6,
+  openTickets: 12, slaBreachRate: 5, avgFirstResponseMinutes7Day: 30, escalationRate: 2,
+  unassignedTickets: 4, csatScore30Day: 87, agentUtilization: 72,
+  ticketsTodayCreated: 8, ticketsTodayResolved: 6,
 };
-
-const mockWorkload: AgentWorkload[] = [
-  { agentId: 'a1', agentName: 'Omar', openTickets: 5, availabilityStatus: 'Available' },
-];
 
 describe('ManagementDashboardComponent', () => {
   let fixture: ComponentFixture<ManagementDashboardComponent>;
   let component: ManagementDashboardComponent;
-  let dashboardService: { getKpis: ReturnType<typeof vi.fn>; getAgentWorkload: ReturnType<typeof vi.fn> };
+  let dashboardService: { getKpis: ReturnType<typeof vi.fn> };
   let signalRService: { getConnection: ReturnType<typeof vi.fn> };
   let mockConnection: { start: ReturnType<typeof vi.fn>; on: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn> };
 
@@ -32,7 +30,6 @@ describe('ManagementDashboardComponent', () => {
 
     dashboardService = {
       getKpis: vi.fn().mockReturnValue(of(mockKpi)),
-      getAgentWorkload: vi.fn().mockReturnValue(of(mockWorkload)),
     };
 
     signalRService = {
@@ -43,6 +40,7 @@ describe('ManagementDashboardComponent', () => {
       imports: [ManagementDashboardComponent, NoopAnimationsModule],
       providers: [
         { provide: DashboardService, useValue: dashboardService },
+        { provide: DepartmentService, useValue: { list: vi.fn().mockReturnValue(of({ data: [] })) } },
         { provide: SignalRService, useValue: signalRService },
         { provide: AuthStore, useValue: { user: () => ({ role: 'Admin' }) } },
       ],

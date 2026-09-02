@@ -42,7 +42,7 @@ export class NotificationService {
     let httpParams = new HttpParams();
     if (params.page != null) httpParams = httpParams.set('page', params.page);
     if (params.pageSize != null) httpParams = httpParams.set('pageSize', params.pageSize);
-    if (params.unreadOnly === true) httpParams = httpParams.set('isRead', 'false');
+    if (params.unreadOnly === true) httpParams = httpParams.set('unreadOnly', 'true');
 
     this._loading.set(true);
     return this.http

@@ -119,7 +119,20 @@ export class CategoryTreeComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.categoryService.list().subscribe({
-      next: res => { this.categories.set(res.data ?? []); this.loading.set(false); },
+      next: res => {
+        const flat = res.data ?? [];
+        const map = new Map(flat.map(c => [c.id, { ...c, children: [] as Category[] }]));
+        const roots: Category[] = [];
+        map.forEach(cat => {
+          if (cat.parentCategoryId) {
+            map.get(cat.parentCategoryId)?.children?.push(cat);
+          } else {
+            roots.push(cat);
+          }
+        });
+        this.categories.set(roots);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }

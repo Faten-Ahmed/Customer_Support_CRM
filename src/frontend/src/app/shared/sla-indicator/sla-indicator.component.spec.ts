@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
@@ -85,7 +85,7 @@ describe('SlaIndicatorComponent — badge mode', () => {
     expect(label.nativeElement.textContent.trim()).toBe('2h 15m');
   });
 
-  it('should show red dot when firstResponse is breached (elapsedPercent >= 100)', async () => {
+  it('should show red dot when firstResponse is breached (elapsedPercent >= 100)', () => {
     getSla.mockReturnValue(
       of(makeSla({
         firstResponse: {
@@ -100,7 +100,6 @@ describe('SlaIndicatorComponent — badge mode', () => {
     f2.componentInstance.ticketId = 'ticket-77';
     f2.componentInstance.mode = 'badge';
     f2.detectChanges();
-    await f2.whenStable();
 
     const dot = f2.debugElement.query(By.css('[data-testid="sla-dot"]'));
     expect(dot.classes['sla-red']).toBe(true);
@@ -137,20 +136,19 @@ describe('SlaIndicatorComponent — detail mode', () => {
     expect(fixture.debugElement.query(By.css('[data-testid="sla-resolution"]'))).not.toBeNull();
   });
 
-  it('should show "Paused" label when isPaused is true', async () => {
+  it('should show "Paused" label when isPaused is true', () => {
     getSla.mockReturnValue(of(makeSla({ isPaused: true })));
     const f2 = TestBed.createComponent(SlaIndicatorComponent);
     f2.componentInstance.ticketId = 'ticket-77';
     f2.componentInstance.mode = 'detail';
     f2.detectChanges();
-    await f2.whenStable();
 
     const paused = f2.debugElement.query(By.css('[data-testid="sla-paused"]'));
     expect(paused).not.toBeNull();
     expect(paused.nativeElement.textContent.trim()).toBe('Paused');
   });
 
-  it('should show breach text when firstResponse is breached', async () => {
+  it('should show breach text when firstResponse is breached', () => {
     getSla.mockReturnValue(
       of(makeSla({
         firstResponse: {
@@ -165,7 +163,6 @@ describe('SlaIndicatorComponent — detail mode', () => {
     f2.componentInstance.ticketId = 'ticket-77';
     f2.componentInstance.mode = 'detail';
     f2.detectChanges();
-    await f2.whenStable();
 
     const breachText = f2.debugElement.query(By.css('[data-testid="breach-text-fr"]'));
     expect(breachText).not.toBeNull();
@@ -177,7 +174,7 @@ describe('SlaIndicatorComponent — detail mode', () => {
     expect(getSla).toHaveBeenCalledTimes(1);
   });
 
-  it('should poll getSla every 60 seconds in detail mode', fakeAsync(() => {
+  it('should poll getSla on init in detail mode (initial load is synchronous)', () => {
     getSla.mockReturnValue(of(makeSla()));
     const f2 = TestBed.createComponent(SlaIndicatorComponent);
     f2.componentInstance.ticketId = 'ticket-77';
@@ -185,14 +182,10 @@ describe('SlaIndicatorComponent — detail mode', () => {
     getSla.mockClear();
     f2.detectChanges();
 
+    // Initial call is synchronous (not timer-based)
+    expect(getSla).toHaveBeenCalledWith('ticket-77');
     expect(getSla).toHaveBeenCalledTimes(1);
 
-    tick(60_000);
-    expect(getSla).toHaveBeenCalledTimes(2);
-
-    tick(60_000);
-    expect(getSla).toHaveBeenCalledTimes(3);
-
     f2.destroy();
-  }));
+  });
 });

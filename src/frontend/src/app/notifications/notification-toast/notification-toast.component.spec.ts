@@ -23,7 +23,7 @@ describe('NotificationToastComponent', () => {
   let fixture: ComponentFixture<NotificationToastComponent>;
   let component: NotificationToastComponent;
   let notificationSubject: Subject<Notification>;
-  const routerMock = { navigate: vi.fn() };
+  const routerMock = { navigate: vi.fn(), url: '/app/tickets' };
 
   beforeEach(async () => {
     notificationSubject = new Subject<Notification>();
@@ -58,11 +58,11 @@ describe('NotificationToastComponent', () => {
     expect(component.toasts().length).toBe(1);
   });
 
-  it('should auto-dismiss after 3000ms for non-persistent type', () => {
+  it('should auto-dismiss after 7000ms for non-persistent type', () => {
     vi.useFakeTimers();
     notificationSubject.next(makeNotif({ type: 'TicketAssigned' }));
     expect(component.toasts().length).toBe(1);
-    vi.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(7000);
     expect(component.toasts().length).toBe(0);
   });
 
@@ -100,7 +100,7 @@ describe('NotificationToastComponent', () => {
     notificationSubject.next(makeNotif({ id: 'y', entityType: 'ticket', entityId: '7' }));
     const toast = component.toasts()[0];
     component.viewEntity(toast);
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/tickets', '7']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/app/tickets', '7']);
     expect(component.toasts().length).toBe(0);
   });
 

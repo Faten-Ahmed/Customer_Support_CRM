@@ -15,14 +15,13 @@ describe('PortalLoginComponent', () => {
   let component: PortalLoginComponent;
   let fixture: ComponentFixture<PortalLoginComponent>;
   let authServiceMock: { portalLogin: ReturnType<typeof vi.fn>; resendVerificationEmail: ReturnType<typeof vi.fn> };
-  let routerMock: { navigate: ReturnType<typeof vi.fn> };
+  let navigateSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     authServiceMock = {
       portalLogin: vi.fn(),
       resendVerificationEmail: vi.fn(),
     };
-    routerMock = { navigate: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -36,9 +35,11 @@ describe('PortalLoginComponent', () => {
       providers: [
         provideRouter([]),
         { provide: AuthService, useValue: authServiceMock },
-        { provide: Router, useValue: routerMock },
       ],
     }).compileComponents();
+
+    navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate') as unknown as ReturnType<typeof vi.fn>;
+    navigateSpy.mockResolvedValue(true);
 
     fixture = TestBed.createComponent(PortalLoginComponent);
     component = fixture.componentInstance;
@@ -70,7 +71,7 @@ describe('PortalLoginComponent', () => {
 
   it('should call portalLogin on valid submit and navigate to /portal/dashboard', async () => {
     authServiceMock.portalLogin.mockReturnValue(
-      of({ accessToken: 'tok', user: { id: '2', email: 'c@c.com', role: 'PortalUser', passwordMustChange: false } })
+      of({ accessToken: 'tok', role: 'Customer' })
     );
 
     component.loginForm.setValue({ email: 'customer@example.com', password: 'Password1!' });
@@ -78,7 +79,7 @@ describe('PortalLoginComponent', () => {
     await fixture.whenStable();
 
     expect(authServiceMock.portalLogin).toHaveBeenCalledWith('customer@example.com', 'Password1!');
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/portal/dashboard']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/portal/dashboard']);
   });
 
   it('should show EMAIL_NOT_VERIFIED message on 401 with that code', async () => {

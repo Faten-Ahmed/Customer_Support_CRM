@@ -140,11 +140,11 @@ describe('TicketService', () => {
       req.flush({});
     });
 
-    it('transfer() should PATCH /api/v1/tickets/{id}/transfer', () => {
+    it('transfer() should POST /api/v1/tickets/{id}/transfer', () => {
       service.transfer('t1', 'd2', 'Needs billing').subscribe();
       const req = httpMock.expectOne('/api/v1/tickets/t1/transfer');
-      expect(req.request.method).toBe('PATCH');
-      expect(req.request.body).toEqual({ targetAgentId: 'd2', reason: 'Needs billing' });
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ departmentId: 'd2', transferNote: 'Needs billing' });
       req.flush({});
     });
 

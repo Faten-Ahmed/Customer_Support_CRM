@@ -46,9 +46,9 @@ public class TicketsControllerTransferTests
                  .Returns(Task.CompletedTask);
         var client = BuildClient();
 
-        var response = await client.PatchAsJsonAsync(
+        var response = await client.PostAsJsonAsync(
             $"/api/v1/tickets/{Guid.NewGuid()}/transfer",
-            new { targetDepartmentId = Guid.NewGuid(), reason = "Specialist needed" });
+            new { departmentId = Guid.NewGuid(), transferNote = "Needs specialist handling" });
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
@@ -60,9 +60,9 @@ public class TicketsControllerTransferTests
                  .ThrowsAsync(new InvalidOperationException("Cannot transfer closed ticket."));
         var client = BuildClient();
 
-        var response = await client.PatchAsJsonAsync(
+        var response = await client.PostAsJsonAsync(
             $"/api/v1/tickets/{Guid.NewGuid()}/transfer",
-            new { targetDepartmentId = Guid.NewGuid(), reason = "reason" });
+            new { departmentId = Guid.NewGuid(), transferNote = "Long enough reason here" });
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }

@@ -28,9 +28,9 @@ describe('TemplateService', () => {
     req.flush({ items: [], totalCount: 0 });
   });
 
-  it('render() should POST /api/v1/templates/{id}/render with ticketId', () => {
+  it('render() should POST /api/v1/admin/templates/{id}/render with ticketId', () => {
     service.render('tpl-1', 't1').subscribe();
-    const req = httpMock.expectOne('/api/v1/templates/tpl-1/render');
+    const req = httpMock.expectOne('/api/v1/admin/templates/tpl-1/render');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ ticketId: 't1' });
     req.flush({ content: 'Dear customer, ...' });

@@ -50,7 +50,7 @@ describe('CsatReportComponent', () => {
   });
 
   it('should reload on filter change', () => {
-    component.filterForm.patchValue({ dateFrom: '2025-01-01', dateTo: '2025-01-31' });
+    component.filterForm.patchValue({ dateFrom: new Date('2025-01-01'), dateTo: new Date('2025-01-31') });
     component.applyFilter();
     expect(reportService.getCsatReport).toHaveBeenCalledTimes(2);
   });

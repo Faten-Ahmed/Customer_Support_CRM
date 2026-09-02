@@ -8,6 +8,8 @@ import { CreateTicketFormComponent } from './create-ticket-form.component';
 import { TicketService } from '../ticket.service';
 import { FieldDefinitionService } from '../field-definition.service';
 import { CustomerService } from '../../customers/services/customer.service';
+import { DepartmentService } from '../../admin/departments/department.service';
+import { CategoryService } from '../../admin/categories/category.service';
 
 describe('CreateTicketFormComponent', () => {
   let fixture: ComponentFixture<CreateTicketFormComponent>;
@@ -16,6 +18,8 @@ describe('CreateTicketFormComponent', () => {
   const mockTicketService = { create: vi.fn() };
   const mockFieldDefService = { list: vi.fn() };
   const mockCustomerService = { list: vi.fn() };
+  const mockDepartmentService = { list: vi.fn() };
+  const mockCategoryService = { list: vi.fn() };
   const mockRouter = { navigate: vi.fn() };
 
   const emptyCustomerPage = { items: [], meta: { page: 1, pageSize: 10, totalCount: 0, totalPages: 0 } };
@@ -25,6 +29,8 @@ describe('CreateTicketFormComponent', () => {
     mockTicketService.create.mockReturnValue(of({ id: 'new-t', subject: 'S' }));
     mockFieldDefService.list.mockReturnValue(of([]));
     mockCustomerService.list.mockReturnValue(of(emptyCustomerPage));
+    mockDepartmentService.list.mockReturnValue(of({ data: [] }));
+    mockCategoryService.list.mockReturnValue(of({ data: [] }));
 
     await TestBed.configureTestingModule({
       imports: [CreateTicketFormComponent, ReactiveFormsModule, NoopAnimationsModule],
@@ -33,6 +39,8 @@ describe('CreateTicketFormComponent', () => {
         { provide: TicketService, useValue: mockTicketService },
         { provide: FieldDefinitionService, useValue: mockFieldDefService },
         { provide: CustomerService, useValue: mockCustomerService },
+        { provide: DepartmentService, useValue: mockDepartmentService },
+        { provide: CategoryService, useValue: mockCategoryService },
       ],
     }).compileComponents();
 
@@ -62,7 +70,9 @@ describe('CreateTicketFormComponent', () => {
       customerId: 'c1',
       departmentId: 'd1',
       subject: 'Need help',
+      subjectAr: 'مساعدة',
       description: 'Details here',
+      descriptionAr: 'تفاصيل',
       priority: 'Medium',
     });
     component.onSubmit();

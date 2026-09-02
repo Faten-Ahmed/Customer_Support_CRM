@@ -39,6 +39,11 @@ describe('TicketDetailComponent', () => {
     deleteAttachment: vi.fn().mockReturnValue(of(null)),
     getAgents: vi.fn().mockReturnValue(of([])),
     list: vi.fn().mockReturnValue(of(emptyPage)),
+    getSla: vi.fn().mockReturnValue(of({
+      isPaused: false,
+      firstResponse: { dueAt: '', elapsedPercent: 0, breached: false, remainingLabel: '' },
+      resolution: { dueAt: '', elapsedPercent: 0, breached: false, remainingLabel: '' },
+    })),
   };
 
   const mockHubConnection = {
