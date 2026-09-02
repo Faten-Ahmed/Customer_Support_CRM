@@ -1,4 +1,5 @@
 using CRM.Application.Admin.Users.Commands;
+using CRM.Application.CSAT.Jobs;
 using CRM.Application.Common;
 using CRM.Domain.Chat;
 using CRM.Application.Reports.Services;
@@ -16,6 +17,7 @@ using CRM.Domain.Departments;
 using CRM.Domain.KnowledgeBase;
 using CRM.Domain.Reports;
 using CRM.Domain.Sla;
+using CRM.Domain.Surveys;
 using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
 using CRM.Domain.Users;
@@ -116,6 +118,11 @@ public static class DependencyInjection
 
         // Agent task repository
         services.AddScoped<IAgentTaskRepository, AgentTaskRepository>();
+
+        // CSAT
+        services.AddScoped<ICsatSurveyRepository, CsatSurveyRepository>();
+        services.AddScoped<SendCsatSurveyJob>();
+        services.AddScoped<ExpireCsatSurveysJob>();
 
         services.AddScoped<INotificationService, SlaNotificationService>();
         // Notification repository (Feature 05)

@@ -8,6 +8,7 @@ using CRM.Application.Notifications;
 using CRM.Application.Sla.Jobs;
 using CRM.Application.Tickets.Jobs;
 using CRM.Infrastructure;
+using CRM.Infrastructure.Jobs;
 using CRM.Infrastructure.Dashboard;
 using CRM.Infrastructure.Hubs;
 using CRM.Infrastructure.Persistence.Seed;
@@ -148,6 +149,10 @@ try
             "purge-completed-tasks",
             job => job.Execute(CancellationToken.None),
             "0 2 * * *");
+        recurringJobs.AddOrUpdate<ExpireCsatSurveysJob>(
+            "expire-csat-surveys",
+            job => job.ExecuteAsync(),
+            "5 0 * * *");
     }
 
     app.Run();

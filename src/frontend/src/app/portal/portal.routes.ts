@@ -62,6 +62,11 @@ export const PORTAL_ROUTES: Routes = [
         loadComponent: () =>
           import('./live-chat/live-chat.component').then(m => m.LiveChatComponent),
       },
+      {
+        path: 'surveys/:id',
+        loadComponent: () =>
+          import('./survey/portal-survey/portal-survey.component').then(m => m.PortalSurveyComponent),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

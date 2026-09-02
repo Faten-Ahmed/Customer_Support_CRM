@@ -8,6 +8,7 @@ using CRM.Domain.Customers;
 using CRM.Domain.Departments;
 using CRM.Domain.KnowledgeBase;
 using CRM.Domain.Sla;
+using CRM.Domain.Surveys;
 using CRM.Domain.Templates;
 using CRM.Domain.Tickets;
 using CRM.Domain.Users;
@@ -45,6 +46,7 @@ public class AppDbContext : DbContext
     public DbSet<AgentTask> AgentTasks => Set<AgentTask>();
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatSessionMessage> ChatSessionMessages => Set<ChatSessionMessage>();
+    public DbSet<CsatSurvey> CsatSurveys => Set<CsatSurvey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
