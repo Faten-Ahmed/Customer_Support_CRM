@@ -25,7 +25,7 @@ A full-featured, enterprise-grade Customer Support CRM built for Arabic and Engl
 | State management | Angular Signals (NgRx where justified) |
 | Forms | Angular Reactive Forms |
 | i18n | Angular `@angular/localize` — Arabic (RTL) + English |
-| Frontend tests | Jasmine / Vitest + Playwright |
+| Frontend tests | Vitest + Angular TestBed |
 | Infrastructure | Docker + Docker Compose |
 
 Full justifications and version specifications: [`specs/architecture/technology-stack.md`](specs/architecture/technology-stack.md)
@@ -108,17 +108,38 @@ Architecture Decision Records (ADRs) for any significant technical decisions are
 
 ## Getting Started
 
-> Prerequisites and setup instructions will be added in Phase 2 once the backend solution and Docker Compose configuration are scaffolded.
+**Prerequisites:** .NET 10 SDK, Node.js 22 LTS, Docker Desktop
 
-**Planned setup steps:**
-1. Install prerequisites: .NET 10 SDK, Node.js 22 LTS, Docker Desktop
-2. Clone the repository
-3. Copy `.env.example` to `.env` and configure secrets
-4. Run `docker compose up -d` to start SQL Server, Redis, MinIO, and Seq
-5. Run database migrations: `dotnet ef database update`
-6. Start the API: `dotnet run --project src/backend/CRM.API`
-7. Start the frontend: `cd src/frontend && npm install && ng serve`
-8. Open `http://localhost:4200`
+```bash
+# 1. Clone the repository
+git clone https://github.com/Faten-Ahmed/Customer_Support_CRM.git
+cd Customer_Support_CRM
+
+# 2. Start infrastructure (SQL Server, Redis, MinIO, Seq)
+docker compose up -d
+
+# 3. Apply database migrations
+cd src/backend
+dotnet ef database update --project CRM.Infrastructure
+
+# 4. Start the API (http://localhost:5000)
+dotnet run --project CRM.API
+
+# 5. Start the frontend (http://localhost:4200)
+cd ../frontend
+npm install
+npx @angular/cli@21 serve
+```
+
+### Running Tests
+
+```bash
+# Backend (461 tests)
+cd src/backend && dotnet test
+
+# Frontend (487 tests across 80 spec files)
+cd src/frontend && npx @angular/cli@21 test --watch=false
+```
 
 ---
 
@@ -126,11 +147,26 @@ Architecture Decision Records (ADRs) for any significant technical decisions are
 
 | Phase | Status |
 |-------|--------|
-| Phase 1 — Requirements & Specs | In Progress |
-| Phase 2 — Domain Model & Architecture | Pending |
-| Phase 3 — API Design | Pending |
-| Phase 4 — Feature Specifications | Pending |
-| Phase 5 — Implementation | Pending |
-| Phase 6 — Testing | Pending |
+| Phase 1 — Requirements & Specs | Complete |
+| Phase 2 — Domain Model & Architecture | Complete |
+| Phase 3 — API Design | Complete |
+| Phase 4 — Feature Specifications | Complete |
+| Phase 5 — Implementation | Complete (11 of 13 features — AI features skipped) |
+| Phase 6 — Testing | Complete — 461 backend + 487 frontend tests, all passing |
 
-Open questions that must be answered before Phase 2: [`specs/requirements/open-questions.md`](specs/requirements/open-questions.md)
+### Implemented Features
+
+| # | Feature | Backend | Frontend |
+|---|---------|---------|---------|
+| 00 | Auth & Login | BE-001–008, BE-094 | FE-001–005, FE-042 |
+| 01 | Customer Management | BE-009–018, BE-096 | FE-006–008 |
+| 02 | Ticket Management | BE-019–032, BE-037 | FE-009–016 |
+| 03 | SLA Management | BE-033, BE-038–044 | FE-017, FE-029 |
+| 04 | Knowledge Base | BE-045–052 | FE-024–025, FE-035 |
+| 05 | Notifications | BE-053–057 | FE-022–023 |
+| 06 | Agent Dashboard | BE-034–036, BE-058–062 | FE-018–021 |
+| 07 | Admin Configuration | BE-063–072 | FE-026–028 |
+| 08 | Reports & Dashboard | BE-073–079 | FE-030–031 |
+| 09 | Customer Portal | BE-080–081 | FE-032–034, FE-037 |
+| 11 | Communication Channels | BE-088–091 | FE-039 |
+| 12 | CSAT Surveys | BE-082, BE-092–093, BE-095 | FE-036 |
