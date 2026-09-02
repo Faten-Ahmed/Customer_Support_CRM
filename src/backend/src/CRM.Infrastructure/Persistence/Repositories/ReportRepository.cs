@@ -260,8 +260,9 @@ public class ReportRepository : IReportRepository
         IReadOnlyList<Guid>? departmentIds,
         CancellationToken ct = default)
     {
+        var endOfDay = dateTo.Date.AddDays(1);
         var query = _db.CsatSurveys
-            .Where(s => s.SentAt >= dateFrom && s.SentAt <= dateTo);
+            .Where(s => s.SentAt >= dateFrom && s.SentAt < endOfDay);
 
         if (departmentIds?.Count > 0)
             query = query.Where(s => departmentIds.Contains(s.DepartmentId));
