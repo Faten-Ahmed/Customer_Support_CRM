@@ -1,27 +1,27 @@
 <div class="user-list-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-  <h2 style="margin: 0; flex: 1;">Users</h2>
+  <h2 style="margin: 0; flex: 1;">{{ 'admin.users' | translate }}</h2>
   <button mat-flat-button color="primary" (click)="openNewUserDialog()">
-    <mat-icon>add</mat-icon> New User
+    <mat-icon>add</mat-icon> {{ 'admin.newUser' | translate }}
   </button>
 </div>
 
 <div class="filters" style="display: flex; gap: 16px; margin-bottom: 16px;">
   <mat-form-field>
-    <mat-label>Role</mat-label>
+    <mat-label>{{ 'admin.roleFilter' | translate }}</mat-label>
     <mat-select [(ngModel)]="selectedRole" (ngModelChange)="loadUsers()">
-      <mat-option value="">All Roles</mat-option>
-      <mat-option value="Admin">Admin</mat-option>
-      <mat-option value="Manager">Manager</mat-option>
-      <mat-option value="Agent">Agent</mat-option>
+      <mat-option value="">{{ 'admin.allRoles' | translate }}</mat-option>
+      <mat-option value="Admin">{{ 'admin.roleAdmin' | translate }}</mat-option>
+      <mat-option value="Manager">{{ 'admin.roleManager' | translate }}</mat-option>
+      <mat-option value="Agent">{{ 'admin.roleAgent' | translate }}</mat-option>
     </mat-select>
   </mat-form-field>
 
   <mat-form-field>
-    <mat-label>Status</mat-label>
+    <mat-label>{{ 'admin.statusFilter' | translate }}</mat-label>
     <mat-select [(ngModel)]="selectedActive" (ngModelChange)="loadUsers()">
-      <mat-option value="">All</mat-option>
-      <mat-option value="true">Active</mat-option>
-      <mat-option value="false">Inactive</mat-option>
+      <mat-option value="">{{ 'admin.allStatus' | translate }}</mat-option>
+      <mat-option value="true">{{ 'common.active' | translate }}</mat-option>
+      <mat-option value="false">{{ 'common.inactive' | translate }}</mat-option>
     </mat-select>
   </mat-form-field>
 </div>
@@ -33,42 +33,42 @@
 } @else {
   <table mat-table [dataSource]="users()" class="mat-elevation-z2" style="width: 100%;">
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'admin.colName' | translate }}</th>
       <td mat-cell *matCellDef="let user">{{ user.firstName }} {{ user.lastName }}</td>
     </ng-container>
 
     <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef>Email</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'admin.colEmail' | translate }}</th>
       <td mat-cell *matCellDef="let user">{{ user.email }}</td>
     </ng-container>
 
     <ng-container matColumnDef="role">
-      <th mat-header-cell *matHeaderCellDef>Role</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'admin.colRole' | translate }}</th>
       <td mat-cell *matCellDef="let user">{{ user.role }}</td>
     </ng-container>
 
     <ng-container matColumnDef="department">
-      <th mat-header-cell *matHeaderCellDef>Department</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'admin.colDepartment' | translate }}</th>
       <td mat-cell *matCellDef="let user">{{ user.primaryDepartmentName ?? '—' }}</td>
     </ng-container>
 
     <ng-container matColumnDef="isActive">
-      <th mat-header-cell *matHeaderCellDef>Active</th>
-      <td mat-cell *matCellDef="let user">{{ user.isActive ? 'Yes' : 'No' }}</td>
+      <th mat-header-cell *matHeaderCellDef>{{ 'admin.colActive' | translate }}</th>
+      <td mat-cell *matCellDef="let user">{{ user.isActive ? ('admin.yes' | translate) : ('admin.no' | translate) }}</td>
     </ng-container>
 
     <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'admin.colActions' | translate }}</th>
       <td mat-cell *matCellDef="let user">
-        <button mat-icon-button color="primary" (click)="openEditDialog(user)" title="Edit">
+        <button mat-icon-button color="primary" (click)="openEditDialog(user)" [title]="'admin.editTooltip' | translate">
           <mat-icon>edit</mat-icon>
         </button>
         @if (user.isActive) {
-          <button mat-icon-button color="warn" (click)="deactivate(user)" title="Deactivate">
+          <button mat-icon-button color="warn" (click)="deactivate(user)" [title]="'admin.deactivateTooltip' | translate">
             <mat-icon>block</mat-icon>
           </button>
         } @else {
-          <button mat-icon-button color="primary" (click)="reactivate(user)" title="Reactivate">
+          <button mat-icon-button color="primary" (click)="reactivate(user)" [title]="'admin.reactivateTooltip' | translate">
             <mat-icon>check_circle</mat-icon>
           </button>
         }

@@ -2,7 +2,7 @@
   <button mat-icon-button (click)="toggleSidenav()">
     <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
   </button>
-  <span>Admin Configuration</span>
+  <span>{{ 'admin.title' | translate }}</span>
 </mat-toolbar>
 
 <mat-sidenav-container style="height: calc(100vh - 128px)">

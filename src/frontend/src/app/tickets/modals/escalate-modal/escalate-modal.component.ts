@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { TicketService } from '../../ticket.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface EscalateModalData {
   ticketId: string;
@@ -13,15 +14,15 @@ export interface EscalateModalData {
 @Component({
   selector: 'app-escalate-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, TranslatePipe],
   template: `
-    <h2 mat-dialog-title>Escalate Ticket</h2>
+    <h2 mat-dialog-title>{{ 'modal.escalateTitle' | translate }}</h2>
     <mat-dialog-content>
       <form [formGroup]="form" style="padding-top:8px;min-width:400px">
         <mat-form-field appearance="outline" style="width:100%">
-          <mat-label>Escalation Reason</mat-label>
-          <textarea matInput formControlName="reason" rows="4" placeholder="Describe why this ticket needs escalation"></textarea>
-          <mat-error>Reason is required</mat-error>
+          <mat-label>{{ 'modal.escalateReason' | translate }}</mat-label>
+          <textarea matInput formControlName="reason" rows="4" [placeholder]="'modal.escalatePlaceholder' | translate"></textarea>
+          <mat-error>{{ 'modal.reasonRequired' | translate }}</mat-error>
         </mat-form-field>
         @if (errorMessage) {
           <p style="color:#c62828;font-size:13px;margin:8px 0 0">{{ errorMessage }}</p>
@@ -29,9 +30,9 @@ export interface EscalateModalData {
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
       <button mat-flat-button color="warn" [disabled]="form.invalid || saving" (click)="onSubmit()">
-        {{ saving ? 'Escalating…' : 'Escalate' }}
+        {{ saving ? ('modal.escalating' | translate) : ('modal.escalate' | translate) }}
       </button>
     </mat-dialog-actions>
   `,

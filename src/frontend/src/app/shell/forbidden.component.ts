@@ -2,18 +2,19 @@ import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslatePipe } from '../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-forbidden',
   standalone: true,
-  imports: [RouterModule, MatButtonModule, MatIconModule],
+  imports: [RouterModule, MatButtonModule, MatIconModule, TranslatePipe],
   template: `
     <div class="error-page">
       <mat-icon class="error-icon">block</mat-icon>
       <h1 class="error-code">403</h1>
-      <p class="error-title">Access Denied</p>
-      <p class="error-desc">You don't have permission to view this page.</p>
-      <a mat-raised-button color="warn" routerLink="/app">Go to Dashboard</a>
+      <p class="error-title">{{ 'error.forbidden' | translate }}</p>
+      <p class="error-desc">{{ 'error.forbiddenDesc' | translate }}</p>
+      <a mat-raised-button color="warn" routerLink="/app">{{ 'error.goToDashboard' | translate }}</a>
     </div>
   `,
   styles: [`

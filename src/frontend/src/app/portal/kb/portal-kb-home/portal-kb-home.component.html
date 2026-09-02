@@ -20,7 +20,7 @@
     <div class="category-filter-bar">
       <mat-icon>folder_open</mat-icon>
       <span>{{ activeCategoryName() }}</span>
-      <button mat-icon-button (click)="clearCategory()" class="clear-btn" title="Clear filter">
+      <button mat-icon-button (click)="clearCategory()" class="clear-btn" [title]="'kb.clearFilter' | translate">
         <mat-icon>close</mat-icon>
       </button>
     </div>

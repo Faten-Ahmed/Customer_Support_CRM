@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
 import { PortalTicketService, PortalTicketPage } from '../services/portal-ticket.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-portal-ticket-list',
@@ -20,27 +21,28 @@ import { PortalTicketService, PortalTicketPage } from '../services/portal-ticket
     MatCardModule, MatButtonModule, MatIconModule,
     MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule,
     MatChipsModule, MatTableModule,
+    TranslatePipe,
   ],
   template: `
     <div class="list-wrap">
       <div class="list-header">
-        <h1>My Tickets</h1>
+        <h1>{{ 'portal.myTickets' | translate }}</h1>
         <a mat-flat-button color="primary" routerLink="/portal/tickets/new">
-          <mat-icon>add</mat-icon> Submit New Ticket
+          <mat-icon>add</mat-icon> {{ 'portal.submitNewTicket' | translate }}
         </a>
       </div>
 
       <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Filter by status</mat-label>
+        <mat-label>{{ 'portal.filterByStatus' | translate }}</mat-label>
         <mat-select [formControl]="statusFilter">
-          <mat-option value="">All</mat-option>
-          <mat-option value="New">New</mat-option>
-          <mat-option value="Assigned">Assigned</mat-option>
-          <mat-option value="InProgress">In Progress</mat-option>
-          <mat-option value="OnHold">On Hold</mat-option>
-          <mat-option value="Resolved">Resolved</mat-option>
-          <mat-option value="Reopened">Reopened</mat-option>
-          <mat-option value="Closed">Closed</mat-option>
+          <mat-option value="">{{ 'common.all' | translate }}</mat-option>
+          <mat-option value="New">{{ 'status.new' | translate }}</mat-option>
+          <mat-option value="Assigned">{{ 'status.assigned' | translate }}</mat-option>
+          <mat-option value="InProgress">{{ 'status.inProgress' | translate }}</mat-option>
+          <mat-option value="OnHold">{{ 'status.onHold' | translate }}</mat-option>
+          <mat-option value="Resolved">{{ 'status.resolved' | translate }}</mat-option>
+          <mat-option value="Reopened">{{ 'status.reopened' | translate }}</mat-option>
+          <mat-option value="Closed">{{ 'status.closed' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -50,7 +52,7 @@ import { PortalTicketService, PortalTicketPage } from '../services/portal-ticket
         <mat-card class="empty-card">
           <mat-card-content>
             <mat-icon class="empty-icon">confirmation_number</mat-icon>
-            <p>No tickets found. Click <strong>Submit New Ticket</strong> to get started.</p>
+            <p>{{ 'portal.noTickets' | translate }}</p>
           </mat-card-content>
         </mat-card>
       } @else {
@@ -58,29 +60,29 @@ import { PortalTicketService, PortalTicketPage } from '../services/portal-ticket
           <table mat-table [dataSource]="tickets()" class="full-width">
 
             <ng-container matColumnDef="ticketNumber">
-              <th mat-header-cell *matHeaderCellDef>Ticket #</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'portal.colTicketNum' | translate }}</th>
               <td mat-cell *matCellDef="let t">{{ t.ticketNumber }}</td>
             </ng-container>
 
             <ng-container matColumnDef="subject">
-              <th mat-header-cell *matHeaderCellDef>Subject</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'portal.colSubject' | translate }}</th>
               <td mat-cell *matCellDef="let t">{{ t.subject }}</td>
             </ng-container>
 
             <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'portal.colStatus' | translate }}</th>
               <td mat-cell *matCellDef="let t">
                 <mat-chip [class]="'chip-' + t.status.toLowerCase()">{{ t.status }}</mat-chip>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="priority">
-              <th mat-header-cell *matHeaderCellDef>Priority</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'portal.colPriority' | translate }}</th>
               <td mat-cell *matCellDef="let t">{{ t.priority }}</td>
             </ng-container>
 
             <ng-container matColumnDef="createdAt">
-              <th mat-header-cell *matHeaderCellDef>Submitted</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'portal.colSubmitted' | translate }}</th>
               <td mat-cell *matCellDef="let t">{{ t.createdAt | date:'mediumDate' }}</td>
             </ng-container>
 

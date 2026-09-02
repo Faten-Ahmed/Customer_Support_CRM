@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { TicketService } from '../../ticket.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface AssignModalData {
   ticketId: string;
@@ -14,13 +15,13 @@ export interface AssignModalData {
 @Component({
   selector: 'app-assign-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatSelectModule, MatButtonModule],
+  imports: [ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatSelectModule, MatButtonModule, TranslatePipe],
   template: `
-    <h2 mat-dialog-title>Assign Ticket</h2>
+    <h2 mat-dialog-title>{{ 'modal.assignTitle' | translate }}</h2>
     <mat-dialog-content>
       <form [formGroup]="form">
         <mat-form-field appearance="outline" style="width:100%">
-          <mat-label>Agent</mat-label>
+          <mat-label>{{ 'modal.agentLabel' | translate }}</mat-label>
           <mat-select formControlName="agentId">
             @for (a of data.agents; track a.id) {
               <mat-option [value]="a.id">{{ a.name }}</mat-option>
@@ -30,8 +31,8 @@ export interface AssignModalData {
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">Assign</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
+      <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">{{ 'modal.assign' | translate }}</button>
     </mat-dialog-actions>
   `,
 })

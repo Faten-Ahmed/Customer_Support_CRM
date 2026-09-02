@@ -7,30 +7,31 @@ import { MatIconModule } from '@angular/material/icon';
 import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../auth/auth.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-verify-email',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule, MatProgressSpinnerModule, MatIconModule],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatProgressSpinnerModule, MatIconModule, TranslatePipe],
   template: `
     <div class="verify-container">
       <div class="card">
-        <div class="brand">AZM CRM</div>
-        <p class="subtitle">Customer Support Portal</p>
+        <div class="brand">{{ 'portal.brand' | translate }}</div>
+        <p class="subtitle">{{ 'portal.subtitle' | translate }}</p>
 
         @if (verified()) {
           <div class="success-state">
             <mat-icon class="success-icon">check_circle</mat-icon>
-            <h2>Email verified!</h2>
-            <p>Your account is active. You can now sign in.</p>
-            <a mat-raised-button color="primary" routerLink="/portal/login">Go to Sign In</a>
+            <h2>{{ 'verify.verified' | translate }}</h2>
+            <p>{{ 'verify.accountActive' | translate }}</p>
+            <a mat-raised-button color="primary" routerLink="/portal/login">{{ 'verify.goToSignIn' | translate }}</a>
           </div>
         } @else {
-          <h2 class="title">Verify your email</h2>
+          <h2 class="title">{{ 'verify.title' | translate }}</h2>
           @if (email()) {
             <p class="hint">We sent a 6-digit code to <strong>{{ email() }}</strong></p>
           } @else {
-            <p class="hint">Enter the 6-digit code from your verification email.</p>
+            <p class="hint">{{ 'verify.hint' | translate }}</p>
           }
 
           <div class="otp-row" (paste)="onPaste($event)">
@@ -63,14 +64,14 @@ import { AuthService } from '../../../auth/auth.service';
             @if (loading()) {
               <mat-spinner diameter="20" />
             } @else {
-              Verify
+              {{ 'verify.verify' | translate }}
             }
           </button>
 
           <div class="resend-row">
-            Didn't receive it?
+            {{ 'verify.noCode' | translate }}
             <button mat-button color="primary" [disabled]="resendLoading()" (click)="resend()">
-              Resend code
+              {{ 'verify.resend' | translate }}
             </button>
           </div>
         }

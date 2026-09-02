@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { of } from 'rxjs';
 import { DepartmentService, Department } from './department.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-department-form-dialog',
@@ -21,28 +22,29 @@ import { DepartmentService, Department } from './department.service';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    TranslatePipe,
   ],
   template: `
-    <h2 mat-dialog-title>New Department</h2>
+    <h2 mat-dialog-title>{{ 'admin.newDepartment' | translate }}</h2>
     <mat-dialog-content>
       <form [formGroup]="form" style="display: flex; flex-direction: column; gap: 12px; min-width: 280px; padding-top: 8px;">
         <mat-form-field>
-          <mat-label>Name</mat-label>
+          <mat-label>{{ 'admin.colName' | translate }}</mat-label>
           <input matInput formControlName="name" />
         </mat-form-field>
         <mat-form-field>
-          <mat-label>Name (Arabic)</mat-label>
+          <mat-label>{{ 'admin.colNameAr' | translate }}</mat-label>
           <input matInput formControlName="nameAr" dir="rtl" />
         </mat-form-field>
         <mat-form-field>
-          <mat-label>Description</mat-label>
+          <mat-label>{{ 'common.description' | translate }}</mat-label>
           <textarea matInput formControlName="description" rows="3"></textarea>
         </mat-form-field>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">Create</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
+      <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">{{ 'userForm.create' | translate }}</button>
     </mat-dialog-actions>
   `,
 })
@@ -79,6 +81,7 @@ export class DepartmentFormDialogComponent {
     MatIconModule,
     MatDialogModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   templateUrl: './department-list.component.html',
 })

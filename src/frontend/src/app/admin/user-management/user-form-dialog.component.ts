@@ -12,6 +12,7 @@ import { map, startWith } from 'rxjs/operators';
 import { signal } from '@angular/core';
 import { UserService } from './user.service';
 import { DepartmentService, Department } from '../departments/department.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-user-form-dialog',
@@ -25,43 +26,44 @@ import { DepartmentService, Department } from '../departments/department.service
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   template: `
-    <h2 mat-dialog-title>New User</h2>
+    <h2 mat-dialog-title>{{ 'userForm.newUser' | translate }}</h2>
     <mat-dialog-content>
       <form [formGroup]="form" style="display: flex; flex-direction: column; gap: 12px; min-width: 360px; padding-top: 8px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <mat-form-field>
-            <mat-label>First Name</mat-label>
+            <mat-label>{{ 'userForm.firstName' | translate }}</mat-label>
             <input matInput formControlName="firstName" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>Last Name</mat-label>
+            <mat-label>{{ 'userForm.lastName' | translate }}</mat-label>
             <input matInput formControlName="lastName" />
           </mat-form-field>
         </div>
         <mat-form-field>
-          <mat-label>Email</mat-label>
+          <mat-label>{{ 'common.email' | translate }}</mat-label>
           <input matInput formControlName="email" type="email" />
         </mat-form-field>
         <mat-form-field>
-          <mat-label>Role</mat-label>
+          <mat-label>{{ 'admin.colRole' | translate }}</mat-label>
           <mat-select formControlName="role">
-            <mat-option value="Admin">Admin</mat-option>
-            <mat-option value="Manager">Manager</mat-option>
-            <mat-option value="Agent">Agent</mat-option>
+            <mat-option value="Admin">{{ 'admin.roleAdmin' | translate }}</mat-option>
+            <mat-option value="Manager">{{ 'admin.roleManager' | translate }}</mat-option>
+            <mat-option value="Agent">{{ 'admin.roleAgent' | translate }}</mat-option>
           </mat-select>
         </mat-form-field>
         <mat-form-field>
-          <mat-label>Temporary Password</mat-label>
+          <mat-label>{{ 'userForm.tempPassword' | translate }}</mat-label>
           <input matInput formControlName="tempPassword" type="password" />
         </mat-form-field>
         @if (!isAdmin()) {
           <mat-form-field>
-            <mat-label>Primary Department</mat-label>
+            <mat-label>{{ 'userForm.primaryDept' | translate }}</mat-label>
             <mat-select formControlName="primaryDepartmentId">
               @if (loadingDepts()) {
-                <mat-option disabled>Loading…</mat-option>
+                <mat-option disabled>{{ 'common.loading' | translate }}</mat-option>
               } @else {
                 @for (dept of departments(); track dept.id) {
                   <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
@@ -73,8 +75,8 @@ import { DepartmentService, Department } from '../departments/department.service
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">Create</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
+      <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">{{ 'userForm.create' | translate }}</button>
     </mat-dialog-actions>
   `,
 })

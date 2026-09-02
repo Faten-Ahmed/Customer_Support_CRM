@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { PortalProfileService, PortalProfile } from '../services/portal-profile.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-portal-profile',
@@ -17,15 +18,18 @@ import { PortalProfileService, PortalProfile } from '../services/portal-profile.
     CommonModule, ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatButtonModule,
     MatIconModule, MatTooltipModule, MatProgressSpinnerModule, MatCardModule,
+    TranslatePipe,
   ],
   template: `
     <div class="profile-wrap">
       <mat-card>
         <mat-card-content>
           <div class="profile-header">
-            <h1>My Profile</h1>
+            <h1>{{ 'profile.title' | translate }}</h1>
             @if (!editMode()) {
-              <button mat-icon-button (click)="enterEditMode()" matTooltip="Edit profile" aria-label="Edit profile">
+              <button mat-icon-button (click)="enterEditMode()"
+                [matTooltip]="'profile.editTooltip' | translate"
+                [attr.aria-label]="'profile.editTooltip' | translate">
                 <mat-icon>edit</mat-icon>
               </button>
             }
@@ -37,40 +41,40 @@ import { PortalProfileService, PortalProfile } from '../services/portal-profile.
             <form [formGroup]="form" class="profile-form">
 
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Full Name</mat-label>
+                <mat-label>{{ 'profile.fullNameLabel' | translate }}</mat-label>
                 <input matInput formControlName="fullName" />
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>الاسم الكامل (Arabic)</mat-label>
+                <mat-label>{{ 'profile.fullNameArLabel' | translate }}</mat-label>
                 <input matInput formControlName="fullNameAr" dir="rtl" />
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Email</mat-label>
+                <mat-label>{{ 'profile.emailLabel' | translate }}</mat-label>
                 <input matInput formControlName="email" />
                 <mat-icon matSuffix
-                  matTooltip="Email cannot be changed here. Contact support to update your email.">
+                  [matTooltip]="'profile.emailTooltip' | translate">
                   lock
                 </mat-icon>
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Phone</mat-label>
+                <mat-label>{{ 'profile.phoneLabel' | translate }}</mat-label>
                 <input matInput formControlName="phone" />
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Company</mat-label>
+                <mat-label>{{ 'profile.companyLabel' | translate }}</mat-label>
                 <input matInput formControlName="companyName" />
               </mat-form-field>
 
               @if (editMode()) {
                 <div class="form-actions">
-                  <button mat-stroked-button type="button" (click)="cancelEdit()">Cancel</button>
+                  <button mat-stroked-button type="button" (click)="cancelEdit()">{{ 'common.cancel' | translate }}</button>
                   <button mat-flat-button color="primary" type="button"
                           (click)="save()" [disabled]="saving()">
-                    @if (saving()) { <mat-spinner diameter="18" /> } @else { Save Changes }
+                    @if (saving()) { <mat-spinner diameter="18" /> } @else { {{ 'profile.saveChanges' | translate }} }
                   </button>
                 </div>
               }

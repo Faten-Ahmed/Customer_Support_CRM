@@ -11,6 +11,7 @@ import { forkJoin, of } from 'rxjs';
 import { UserService, UserSummary } from './user.service';
 import { DepartmentService, Department } from '../departments/department.service';
 import { CategoryService, Category } from '../categories/category.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-user-edit-dialog',
@@ -24,9 +25,10 @@ import { CategoryService, Category } from '../categories/category.service';
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   template: `
-    <h2 mat-dialog-title>Edit User</h2>
+    <h2 mat-dialog-title>{{ 'userForm.editUser' | translate }}</h2>
 
     @if (loading()) {
       <mat-dialog-content style="min-width:400px;display:flex;justify-content:center;padding:40px;">
@@ -37,27 +39,27 @@ import { CategoryService, Category } from '../categories/category.service';
         <form [formGroup]="form" style="display:flex;flex-direction:column;gap:12px;min-width:360px;padding-top:8px;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <mat-form-field>
-              <mat-label>First Name</mat-label>
+              <mat-label>{{ 'userForm.firstName' | translate }}</mat-label>
               <input matInput formControlName="firstName" />
             </mat-form-field>
             <mat-form-field>
-              <mat-label>Last Name</mat-label>
+              <mat-label>{{ 'userForm.lastName' | translate }}</mat-label>
               <input matInput formControlName="lastName" />
             </mat-form-field>
           </div>
           <mat-form-field>
-            <mat-label>Email</mat-label>
+            <mat-label>{{ 'common.email' | translate }}</mat-label>
             <input matInput formControlName="email" readonly />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>Role</mat-label>
+            <mat-label>{{ 'admin.colRole' | translate }}</mat-label>
             <input matInput formControlName="role" readonly />
           </mat-form-field>
           @if (!isAdmin()) {
             <mat-form-field>
-              <mat-label>Primary Department</mat-label>
+              <mat-label>{{ 'userForm.primaryDept' | translate }}</mat-label>
               <mat-select formControlName="primaryDepartmentId">
-                <mat-option value="">— None —</mat-option>
+                <mat-option value="">{{ 'userForm.none' | translate }}</mat-option>
                 @for (dept of departments(); track dept.id) {
                   <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
                 }
@@ -65,7 +67,7 @@ import { CategoryService, Category } from '../categories/category.service';
             </mat-form-field>
 
             <mat-form-field>
-              <mat-label>Skills (Ticket Categories)</mat-label>
+              <mat-label>{{ 'userForm.skills' | translate }}</mat-label>
               <mat-select formControlName="skillCategoryIds" multiple>
                 @for (cat of categories(); track cat.id) {
                   <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
@@ -78,9 +80,9 @@ import { CategoryService, Category } from '../categories/category.service';
     }
 
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
       <button mat-flat-button color="primary"
-              (click)="submit()" [disabled]="form.invalid || loading()">Save</button>
+              (click)="submit()" [disabled]="form.invalid || loading()">{{ 'userForm.save' | translate }}</button>
     </mat-dialog-actions>
   `,
 })

@@ -10,6 +10,7 @@ import { forkJoin } from 'rxjs';
 import { TicketService, TicketDetail } from '../../ticket.service';
 import { Department, DepartmentService } from '../../../admin/departments/department.service';
 import { Category, CategoryService } from '../../../admin/categories/category.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface EditTicketModalData {
   ticket: TicketDetail;
@@ -26,9 +27,10 @@ export interface EditTicketModalData {
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   template: `
-    <h2 mat-dialog-title>Edit Ticket</h2>
+    <h2 mat-dialog-title>{{ 'modal.editTicketTitle' | translate }}</h2>
     <mat-dialog-content>
       @if (loading()) {
         <div style="display:flex;justify-content:center;padding:40px">
@@ -39,44 +41,44 @@ export interface EditTicketModalData {
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <mat-form-field appearance="outline">
-              <mat-label>Subject</mat-label>
+              <mat-label>{{ 'modal.subjectLabel' | translate }}</mat-label>
               <input matInput formControlName="subject" />
-              <mat-error>Subject is required</mat-error>
+              <mat-error>{{ 'modal.subjectRequired' | translate }}</mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline">
-              <mat-label>Subject (Arabic)</mat-label>
+              <mat-label>{{ 'modal.subjectArLabel' | translate }}</mat-label>
               <input matInput formControlName="subjectAr" dir="rtl" />
-              <mat-error>Arabic subject is required</mat-error>
+              <mat-error>{{ 'modal.subjectArRequired' | translate }}</mat-error>
             </mat-form-field>
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <mat-form-field appearance="outline">
-              <mat-label>Description</mat-label>
+              <mat-label>{{ 'modal.descriptionLabel' | translate }}</mat-label>
               <textarea matInput formControlName="description" rows="4"></textarea>
-              <mat-error>Description is required</mat-error>
+              <mat-error>{{ 'modal.descriptionRequired' | translate }}</mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline">
-              <mat-label>Description (Arabic)</mat-label>
+              <mat-label>{{ 'modal.descriptionArLabel' | translate }}</mat-label>
               <textarea matInput formControlName="descriptionAr" rows="4" dir="rtl"></textarea>
-              <mat-error>Arabic description is required</mat-error>
+              <mat-error>{{ 'modal.descriptionArRequired' | translate }}</mat-error>
             </mat-form-field>
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <mat-form-field appearance="outline">
-              <mat-label>Department</mat-label>
+              <mat-label>{{ 'common.department' | translate }}</mat-label>
               <mat-select formControlName="departmentId">
-                <mat-option value="">— None —</mat-option>
+                <mat-option value="">{{ 'modal.deptNone' | translate }}</mat-option>
                 @for (d of departments; track d.id) {
                   <mat-option [value]="d.id">{{ d.name }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
             <mat-form-field appearance="outline">
-              <mat-label>Category</mat-label>
+              <mat-label>{{ 'modal.categoryLabel' | translate }}</mat-label>
               <mat-select formControlName="categoryId">
-                <mat-option value="">— None —</mat-option>
+                <mat-option value="">{{ 'modal.deptNone' | translate }}</mat-option>
                 @for (c of categories; track c.id) {
                   <mat-option [value]="c.id">{{ c.name }}</mat-option>
                 }
@@ -85,12 +87,12 @@ export interface EditTicketModalData {
           </div>
 
           <mat-form-field appearance="outline">
-            <mat-label>Priority</mat-label>
+            <mat-label>{{ 'modal.priorityLabel' | translate }}</mat-label>
             <mat-select formControlName="priority">
-              <mat-option value="Low">Low</mat-option>
-              <mat-option value="Medium">Medium</mat-option>
-              <mat-option value="High">High</mat-option>
-              <mat-option value="Critical">Critical</mat-option>
+              <mat-option value="Low">{{ 'ticket.priorityLow' | translate }}</mat-option>
+              <mat-option value="Medium">{{ 'ticket.priorityMedium' | translate }}</mat-option>
+              <mat-option value="High">{{ 'ticket.priorityHigh' | translate }}</mat-option>
+              <mat-option value="Critical">{{ 'ticket.priorityCritical' | translate }}</mat-option>
             </mat-select>
           </mat-form-field>
 
@@ -98,9 +100,9 @@ export interface EditTicketModalData {
       }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
       <button mat-flat-button color="primary" [disabled]="form.invalid || saving() || loading()" (click)="onSubmit()">
-        {{ saving() ? 'Saving…' : 'Save Changes' }}
+        {{ saving() ? ('modal.saving' | translate) : ('modal.saveChanges' | translate) }}
       </button>
     </mat-dialog-actions>
   `,

@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthStore } from '../../auth/auth.store';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 interface AdminNavItem {
   label: string;
@@ -36,6 +37,7 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     MatIconModule,
     MatButtonModule,
     MatToolbarModule,
+    TranslatePipe,
   ],
   templateUrl: './admin-shell.component.html',
 })

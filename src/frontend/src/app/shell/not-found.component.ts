@@ -2,18 +2,19 @@ import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslatePipe } from '../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-not-found',
   standalone: true,
-  imports: [RouterModule, MatButtonModule, MatIconModule],
+  imports: [RouterModule, MatButtonModule, MatIconModule, TranslatePipe],
   template: `
     <div class="error-page">
       <mat-icon class="error-icon">search_off</mat-icon>
       <h1 class="error-code">404</h1>
-      <p class="error-title">Page not found</p>
-      <p class="error-desc">The page you're looking for doesn't exist or has been moved.</p>
-      <a mat-raised-button color="primary" routerLink="/app">Go to Dashboard</a>
+      <p class="error-title">{{ 'error.notFound' | translate }}</p>
+      <p class="error-desc">{{ 'error.notFoundDesc' | translate }}</p>
+      <a mat-raised-button color="primary" routerLink="/app">{{ 'error.goToDashboard' | translate }}</a>
     </div>
   `,
   styles: [`

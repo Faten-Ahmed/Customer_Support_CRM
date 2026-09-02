@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SignalRService } from '../../core/signalr.service';
 import { Notification } from '../notification.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 export interface ToastItem {
   id: string;
@@ -38,7 +39,7 @@ const PORTAL_ROUTES: Record<string, string> = {
 @Component({
   selector: 'app-notification-toast',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, TranslatePipe],
   styles: [`
     .toast-container {
       position: fixed;
@@ -78,7 +79,7 @@ const PORTAL_ROUTES: Record<string, string> = {
             <div class="toast-text">{{ toast.notification.body }}</div>
             <div class="toast-actions">
               <button mat-button style="color:#90caf9;font-size:12px;padding:0 4px;" (click)="viewEntity(toast)">
-                View
+                {{ 'notif.view' | translate }}
               </button>
               <button mat-icon-button style="width:24px;height:24px;line-height:24px;" (click)="dismiss(toast.id)">
                 <mat-icon style="font-size:16px;width:16px;height:16px;">close</mat-icon>

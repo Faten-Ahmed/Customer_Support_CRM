@@ -18,19 +18,20 @@ import {
   PortalTicketMessage,
   PortalAttachment,
 } from '../services/portal-ticket.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-confirm-close-dialog',
   standalone: true,
-  imports: [MatButtonModule, MatDialogModule],
+  imports: [MatButtonModule, MatDialogModule, TranslatePipe],
   template: `
-    <h2 mat-dialog-title>Close Ticket</h2>
+    <h2 mat-dialog-title>{{ 'portal.closeTicketTitle' | translate }}</h2>
     <mat-dialog-content>
-      <p>Are you sure you want to close this ticket? You won't be able to reply to it afterwards.</p>
+      <p>{{ 'portal.closeTicketConfirm' | translate }}</p>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="warn" [mat-dialog-close]="true">Close Ticket</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
+      <button mat-flat-button color="warn" [mat-dialog-close]="true">{{ 'portal.closeTicketTitle' | translate }}</button>
     </mat-dialog-actions>
   `,
 })
@@ -44,11 +45,12 @@ export class ConfirmCloseDialogComponent {}
     MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule,
     MatProgressSpinnerModule, MatCardModule, MatChipsModule, MatTooltipModule,
     MatDialogModule, MatSnackBarModule,
+    TranslatePipe,
   ],
   template: `
     <div class="detail-wrap">
       <a mat-button routerLink="/portal/tickets">
-        <mat-icon>arrow_back</mat-icon> Back to My Tickets
+        <mat-icon>arrow_back</mat-icon> {{ 'portal.backToTickets' | translate }}
       </a>
 
       @if (loading()) {
@@ -59,7 +61,7 @@ export class ConfirmCloseDialogComponent {}
             <span class="ticket-num">{{ ticket()!.ticketNumber }}</span>
             <h1>{{ ticket()!.subject }}</h1>
             @if (ticket()!.assignedAgentName) {
-              <span class="agent-name">Agent: {{ ticket()!.assignedAgentName }}</span>
+              <span class="agent-name">{{ 'portal.agentLabel' | translate }}: {{ ticket()!.assignedAgentName }}</span>
             }
           </div>
           <div class="meta">
@@ -67,7 +69,7 @@ export class ConfirmCloseDialogComponent {}
             <span class="priority">{{ ticket()!.priority }}</span>
             @if (!ticket()!.closedAt) {
               <button mat-stroked-button color="warn" (click)="closeTicket()">
-                <mat-icon>close</mat-icon> Close Ticket
+                <mat-icon>close</mat-icon> {{ 'portal.closeTicketTitle' | translate }}
               </button>
             }
           </div>
@@ -76,7 +78,7 @@ export class ConfirmCloseDialogComponent {}
         @if (ticket()!.description) {
           <mat-card class="desc-card">
             <mat-card-content>
-              <p class="desc-label">Description</p>
+              <p class="desc-label">{{ 'portal.descriptionLabel' | translate }}</p>
               <p>{{ ticket()!.description }}</p>
             </mat-card-content>
           </mat-card>
@@ -85,12 +87,12 @@ export class ConfirmCloseDialogComponent {}
         <!-- Message thread -->
         <div class="thread" data-testid="message-thread">
           @if (messages().length === 0) {
-            <p class="no-messages">No messages yet.</p>
+            <p class="no-messages">{{ 'portal.noMessages' | translate }}</p>
           }
           @for (msg of messages(); track msg.id) {
             <div class="msg-row" [class.outbound]="msg.authorCustomerId != null" data-testid="message-row">
               <div class="bubble" [class.bubble-out]="msg.authorCustomerId != null" [class.bubble-in]="msg.authorUserId != null">
-                <span class="msg-author">{{ msg.authorName ?? 'Support' }}</span>
+                <span class="msg-author">{{ msg.authorName ?? ('portal.supportFallback' | translate) }}</span>
                 <p class="msg-body">{{ msg.body }}</p>
                 <span class="msg-time">{{ msg.createdAt | date:'short' }}</span>
               </div>
@@ -102,7 +104,7 @@ export class ConfirmCloseDialogComponent {}
         @if (ticket()!.closedAt) {
           <div class="closed-banner" data-testid="closed-banner">
             <mat-icon>lock</mat-icon>
-            <span>Ticket Closed — this ticket is no longer accepting replies.</span>
+            <span>{{ 'portal.ticketClosed' | translate }}</span>
           </div>
         } @else {
           <mat-card class="reply-card">
@@ -115,11 +117,11 @@ export class ConfirmCloseDialogComponent {}
               }
 
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Write a reply</mat-label>
+                <mat-label>{{ 'portal.writeReply' | translate }}</mat-label>
                 <textarea matInput [formControl]="replyControl" rows="4"
-                  placeholder="Describe your follow-up or provide additional information..."></textarea>
+                  [placeholder]="'portal.replyPlaceholder' | translate"></textarea>
                 @if (replyControl.hasError('required') && replyControl.touched) {
-                  <mat-error>Reply cannot be empty</mat-error>
+                  <mat-error>{{ 'portal.replyRequired' | translate }}</mat-error>
                 }
               </mat-form-field>
 
@@ -134,7 +136,7 @@ export class ConfirmCloseDialogComponent {}
                   @if (sending()) {
                     <mat-spinner diameter="18" />
                   } @else {
-                    Send Reply
+                    {{ 'portal.sendReply' | translate }}
                   }
                 </button>
               </div>
@@ -146,7 +148,7 @@ export class ConfirmCloseDialogComponent {}
         <mat-card class="attachments-card">
           <mat-card-content>
             <div class="attachments-header">
-              <span class="section-label">Attachments ({{ attachments().length }})</span>
+              <span class="section-label">{{ 'portal.attachmentsLabel' | translate }} ({{ attachments().length }})</span>
               @if (!ticket()!.closedAt) {
                 <button mat-stroked-button [disabled]="uploading()" (click)="fileInput.click()">
                   @if (uploading()) {
@@ -154,7 +156,7 @@ export class ConfirmCloseDialogComponent {}
                   } @else {
                     <mat-icon>attach_file</mat-icon>
                   }
-                  Attach File
+                  {{ 'portal.attachFile' | translate }}
                 </button>
               }
               <input #fileInput type="file" hidden (change)="onFileSelected(fileInput)" />
@@ -165,14 +167,14 @@ export class ConfirmCloseDialogComponent {}
             }
 
             @if (attachments().length === 0) {
-              <p class="no-attachments">No attachments yet.</p>
+              <p class="no-attachments">{{ 'portal.noAttachments' | translate }}</p>
             } @else {
               <div class="attachment-grid">
                 @for (a of attachments(); track a.id) {
                   <div class="att-card" data-testid="attachment-row">
                     <!-- Thumbnail or icon -->
                     @if (isImage(a.contentType) && a.presignedUrl) {
-                      <a [href]="a.presignedUrl" target="_blank" class="att-thumb-link" matTooltip="Click to preview">
+                      <a [href]="a.presignedUrl" target="_blank" class="att-thumb-link" [matTooltip]="'portal.previewTooltip' | translate">
                         <img [src]="a.presignedUrl" [alt]="a.fileName" class="att-thumb" />
                       </a>
                     } @else {
@@ -184,7 +186,7 @@ export class ConfirmCloseDialogComponent {}
                     <!-- Info + actions -->
                     <div class="att-body">
                       <span class="att-name" [matTooltip]="a.fileName">{{ a.fileName }}</span>
-                      <span class="att-meta">{{ formatSize(a.fileSize) }} · {{ a.uploaderName ?? 'Unknown' }}</span>
+                      <span class="att-meta">{{ formatSize(a.fileSize) }} · {{ a.uploaderName ?? ('portal.unknownUploader' | translate) }}</span>
                       <span class="att-meta">{{ a.uploadedAt | date:'shortDate' }}</span>
                     </div>
                     <div class="att-actions">

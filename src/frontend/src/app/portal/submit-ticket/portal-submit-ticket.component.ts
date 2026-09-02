@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PortalTicketService } from '../services/portal-ticket.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 interface FilePreview {
   file: File;
@@ -29,13 +30,14 @@ interface FilePreview {
     MatFormFieldModule, MatInputModule, MatSelectModule,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule,
     MatCardModule, MatTooltipModule,
+    TranslatePipe,
   ],
   template: `
     <div class="page-header">
       <a mat-button routerLink="/portal/tickets">
-        <mat-icon>arrow_back</mat-icon> Back
+        <mat-icon>arrow_back</mat-icon> {{ 'portal.back' | translate }}
       </a>
-      <h1>Submit a Support Ticket</h1>
+      <h1>{{ 'portal.submitTitle' | translate }}</h1>
     </div>
 
     <mat-card>
@@ -44,9 +46,9 @@ interface FilePreview {
           <div class="success-banner">
             <mat-icon>check_circle</mat-icon>
             <div>
-              <strong>Ticket submitted successfully.</strong>
+              <strong>{{ 'portal.ticketSubmitted' | translate }}</strong>
               <p>
-                <a [routerLink]="['/portal/tickets', successTicketId()]">View your ticket</a>
+                <a [routerLink]="['/portal/tickets', successTicketId()]">{{ 'portal.viewTicket' | translate }}</a>
               </p>
             </div>
           </div>
@@ -57,10 +59,10 @@ interface FilePreview {
             }
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Subject</mat-label>
-              <input matInput formControlName="subject" placeholder="Briefly describe the issue" />
+              <mat-label>{{ 'portal.subjectLabel' | translate }}</mat-label>
+              <input matInput formControlName="subject" [placeholder]="'portal.subjectPlaceholder' | translate" />
               @if (form.get('subject')?.hasError('required') && form.get('subject')?.touched) {
-                <mat-error>Subject is required</mat-error>
+                <mat-error>{{ 'portal.subjectRequired' | translate }}</mat-error>
               }
             </mat-form-field>
 
@@ -73,21 +75,21 @@ interface FilePreview {
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Priority</mat-label>
+              <mat-label>{{ 'portal.priorityLabel' | translate }}</mat-label>
               <mat-select formControlName="priority">
-                <mat-option value="Low">Low</mat-option>
-                <mat-option value="Medium">Medium</mat-option>
-                <mat-option value="High">High</mat-option>
-                <mat-option value="Critical">Critical</mat-option>
+                <mat-option value="Low">{{ 'ticket.priorityLow' | translate }}</mat-option>
+                <mat-option value="Medium">{{ 'ticket.priorityMedium' | translate }}</mat-option>
+                <mat-option value="High">{{ 'ticket.priorityHigh' | translate }}</mat-option>
+                <mat-option value="Critical">{{ 'ticket.priorityCritical' | translate }}</mat-option>
               </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
+              <mat-label>{{ 'portal.descriptionLabel' | translate }}</mat-label>
               <textarea matInput formControlName="description" rows="6"
-                placeholder="Please describe your issue in detail"></textarea>
+                [placeholder]="'portal.descriptionPlaceholder' | translate"></textarea>
               @if (form.get('description')?.hasError('required') && form.get('description')?.touched) {
-                <mat-error>Description is required</mat-error>
+                <mat-error>{{ 'ticket.descriptionRequired' | translate }}</mat-error>
               }
             </mat-form-field>
 
@@ -103,14 +105,14 @@ interface FilePreview {
             <!-- Attachment picker -->
             <div class="attachment-section">
               <div class="attachment-header">
-                <span class="attachment-label">Attachments</span>
+                <span class="attachment-label">{{ 'portal.attachmentsLabel' | translate }}</span>
                 <button type="button" mat-stroked-button (click)="fileInput.click()">
-                  <mat-icon>attach_file</mat-icon> Add Files
+                  <mat-icon>attach_file</mat-icon> {{ 'portal.addFiles' | translate }}
                 </button>
                 <input #fileInput type="file" multiple hidden (change)="onFilesSelected(fileInput)" />
               </div>
 
-              <p class="attachment-hint">Max 5 MB per file. Images will be previewed below.</p>
+              <p class="attachment-hint">{{ 'portal.fileSizeHint' | translate }}</p>
 
               @if (filePreviews().length > 0) {
                 <div class="preview-grid">
@@ -143,7 +145,7 @@ interface FilePreview {
                   <mat-spinner diameter="18" />
                   {{ uploadProgress() }}
                 } @else {
-                  Submit Ticket
+                  {{ 'portal.submitTicketBtn' | translate }}
                 }
               </button>
             </div>
@@ -285,7 +287,6 @@ export class PortalSubmitTicketComponent {
         }
 
         this.uploadProgress.set(`Uploading 0 / ${files.length}…`);
-        let done = 0;
 
         const uploads = files.map(fp =>
           this.ticketService.uploadAttachment(ticket.id, fp.file).pipe(

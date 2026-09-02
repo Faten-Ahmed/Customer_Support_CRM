@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
 import { ChatHubService, ChatMessage } from '../services/chat-hub.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 const HANDOFF_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
 
@@ -28,6 +29,7 @@ const HANDOFF_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   templateUrl: './live-chat.component.html',
 })

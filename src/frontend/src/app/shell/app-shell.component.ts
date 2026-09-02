@@ -19,6 +19,7 @@ import { AuthStore } from '../auth/auth.store';
 import { AgentAiAssistantComponent } from '../shared/agent-ai-assistant/agent-ai-assistant.component';
 import { I18nService } from '../shared/services/i18n.service';
 import { TranslatePipe } from '../shared/pipes/translate.pipe';
+import { TRANSLATIONS } from '../shared/i18n/translations';
 import { NotificationBellComponent } from '../notifications/notification-bell/notification-bell.component';
 import { SignalRService, HubName } from '../core/signalr.service';
 import { NotificationService } from '../notifications/notification.service';
@@ -157,8 +158,8 @@ export class AppShellComponent implements OnInit, OnDestroy {
         if (!this.router.url.startsWith('/app/live-chat')) {
           this.pendingChatCount.update(n => n + 1);
           const ref = this.snackBar.open(
-            `Customer waiting: ${evt.customerName}`,
-            'Go to Live Chat',
+            `${TRANSLATIONS['notif.customerWaiting']?.[this.i18n.lang()] ?? 'Customer waiting'}: ${evt.customerName}`,
+            TRANSLATIONS['notif.goToChat']?.[this.i18n.lang()] ?? 'Go to Live Chat',
             { duration: 8000, panelClass: 'live-chat-snack' },
           );
           ref.onAction().subscribe(() => this.router.navigate(['/app/live-chat']));

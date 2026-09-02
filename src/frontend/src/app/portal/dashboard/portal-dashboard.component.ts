@@ -3,31 +3,32 @@ import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthStore } from '../../auth/auth.store';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-portal-dashboard',
   standalone: true,
-  imports: [RouterLink, MatButtonModule, MatIconModule],
+  imports: [RouterLink, MatButtonModule, MatIconModule, TranslatePipe],
   template: `
     <div class="welcome-wrap">
-      <h1 class="welcome-title">Welcome, {{ user()?.fullName ?? 'Customer' }}</h1>
-      <p class="welcome-sub">How can we help you today?</p>
+      <h1 class="welcome-title">{{ 'portal.welcome' | translate }}, {{ user()?.fullName ?? ('portal.customerFallback' | translate) }}</h1>
+      <p class="welcome-sub">{{ 'portal.helpToday' | translate }}</p>
 
       <div class="quick-actions">
         <a class="action-card" routerLink="/portal/tickets/new">
           <mat-icon class="action-icon">add_circle_outline</mat-icon>
-          <span class="action-label">Submit a Ticket</span>
-          <span class="action-desc">Report an issue or request support</span>
+          <span class="action-label">{{ 'portal.submitTicket' | translate }}</span>
+          <span class="action-desc">{{ 'portal.submitTicketDesc' | translate }}</span>
         </a>
         <a class="action-card" routerLink="/portal/tickets">
           <mat-icon class="action-icon">confirmation_number</mat-icon>
-          <span class="action-label">My Tickets</span>
-          <span class="action-desc">View and manage your support tickets</span>
+          <span class="action-label">{{ 'portal.myTickets' | translate }}</span>
+          <span class="action-desc">{{ 'portal.myTicketsDesc' | translate }}</span>
         </a>
         <a class="action-card" routerLink="/portal/kb">
           <mat-icon class="action-icon">menu_book</mat-icon>
-          <span class="action-label">Knowledge Base</span>
-          <span class="action-desc">Browse articles and find answers</span>
+          <span class="action-label">{{ 'portal.knowledgeBase' | translate }}</span>
+          <span class="action-desc">{{ 'portal.kbDesc' | translate }}</span>
         </a>
       </div>
     </div>

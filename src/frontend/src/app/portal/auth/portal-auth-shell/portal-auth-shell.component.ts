@@ -2,22 +2,23 @@ import { Component, signal, HostBinding } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { PortalLoginComponent } from '../portal-login/portal-login.component';
 import { PortalRegisterComponent } from '../portal-register/portal-register.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-portal-auth-shell',
   standalone: true,
-  imports: [MatTabsModule, PortalLoginComponent, PortalRegisterComponent],
+  imports: [MatTabsModule, PortalLoginComponent, PortalRegisterComponent, TranslatePipe],
   template: `
     <div class="portal-auth-container">
-      <div class="brand">AZM CRM</div>
-      <p class="subtitle">Customer Support Portal</p>
+      <div class="brand">{{ 'portal.brand' | translate }}</div>
+      <p class="subtitle">{{ 'portal.subtitle' | translate }}</p>
       <mat-tab-group animationDuration="200ms">
-        <mat-tab label="Sign In">
+        <mat-tab [label]="'portal.tabSignIn' | translate">
           <div class="tab-content">
             <app-portal-login />
           </div>
         </mat-tab>
-        <mat-tab label="Create Account">
+        <mat-tab [label]="'portal.tabCreateAccount' | translate">
           <div class="tab-content">
             <app-portal-register />
           </div>

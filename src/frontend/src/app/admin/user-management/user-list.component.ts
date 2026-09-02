@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { UserService, UserSummary } from './user.service';
 import { UserFormDialogComponent } from './user-form-dialog.component';
 import { UserEditDialogComponent } from './user-edit-dialog.component';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-user-list',
@@ -25,6 +26,7 @@ import { UserEditDialogComponent } from './user-edit-dialog.component';
     MatFormFieldModule,
     MatDialogModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   templateUrl: './user-list.component.html',
 })

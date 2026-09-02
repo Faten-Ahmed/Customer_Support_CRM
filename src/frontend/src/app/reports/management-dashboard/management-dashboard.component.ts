@@ -12,6 +12,7 @@ import { Department, DepartmentService } from '../../admin/departments/departmen
 import { SignalRService } from '../../shared/services/signalr.service';
 import { AuthStore } from '../../auth/auth.store';
 import * as signalR from '@microsoft/signalr';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 interface KpiCard { label: string; key: keyof KpiData; suffix?: string; }
 
@@ -38,6 +39,7 @@ const KPI_CARDS: KpiCard[] = [
     MatIconModule,
     MatSelectModule,
     MatFormFieldModule,
+    TranslatePipe,
   ],
   templateUrl: './management-dashboard.component.html',
 })

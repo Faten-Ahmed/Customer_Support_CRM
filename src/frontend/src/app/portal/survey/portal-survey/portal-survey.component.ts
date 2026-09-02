@@ -22,6 +22,7 @@ import { MatCardModule } from '@angular/material/card';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { PortalSurveyService, SurveyDetail } from '../portal-survey.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-portal-survey',
@@ -37,6 +38,7 @@ import { PortalSurveyService, SurveyDetail } from '../portal-survey.service';
     MatInputModule,
     MatProgressSpinnerModule,
     MatCardModule,
+    TranslatePipe,
   ],
   template: `
     <div class="survey-container">
@@ -44,32 +46,32 @@ import { PortalSurveyService, SurveyDetail } from '../portal-survey.service';
         <mat-card data-testid="expired-msg" class="status-card">
           <mat-card-content>
             <mat-icon color="warn">schedule</mat-icon>
-            <p>This survey has expired</p>
+            <p>{{ 'survey.expired' | translate }}</p>
           </mat-card-content>
         </mat-card>
       } @else if (errorCode() === 'SURVEY_ALREADY_SUBMITTED') {
         <mat-card data-testid="already-submitted-msg" class="status-card">
           <mat-card-content>
             <mat-icon color="primary">check_circle</mat-icon>
-            <p>Thank you — you already submitted feedback</p>
+            <p>{{ 'survey.alreadySubmitted' | translate }}</p>
           </mat-card-content>
         </mat-card>
       } @else if (submitted()) {
         <mat-card data-testid="thank-you" class="status-card">
           <mat-card-content>
             <mat-icon color="primary">sentiment_satisfied</mat-icon>
-            <h2>Thank you for your feedback!</h2>
+            <h2>{{ 'survey.thankYou' | translate }}</h2>
             <a data-testid="view-tickets-link" routerLink="/portal/tickets" mat-stroked-button color="primary">
-              View my tickets
+              {{ 'survey.viewTickets' | translate }}
             </a>
           </mat-card-content>
         </mat-card>
       } @else if (survey()) {
         <mat-card data-testid="survey-form">
           <mat-card-header>
-            <mat-card-title>How did we do?</mat-card-title>
+            <mat-card-title>{{ 'survey.howDidWeDo' | translate }}</mat-card-title>
             <mat-card-subtitle>
-              Ticket #{{ survey()!.ticketNumber }} — {{ survey()!.ticketSubject }}
+              {{ 'survey.ticketLabel' | translate }}{{ survey()!.ticketNumber }} — {{ survey()!.ticketSubject }}
             </mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
@@ -82,27 +84,27 @@ import { PortalSurveyService, SurveyDetail } from '../portal-survey.service';
                     data-testid="star-btn"
                     [color]="(surveyForm.get('rating')!.value ?? 0) >= star ? 'accent' : ''"
                     (click)="selectRating(star)"
-                    [attr.aria-label]="star + ' star'">
+                    [attr.aria-label]="star + ' ' + ('survey.starLabel' | translate)">
                     <mat-icon>{{ (surveyForm.get('rating')!.value ?? 0) >= star ? 'star' : 'star_border' }}</mat-icon>
                   </button>
                 }
               </div>
 
               <mat-form-field appearance="outline" class="comment-field">
-                <mat-label>Comments (optional)</mat-label>
+                <mat-label>{{ 'survey.commentsLabel' | translate }}</mat-label>
                 <textarea
                   matInput
                   formControlName="comment"
                   rows="4"
                   maxlength="1000"
-                  placeholder="Tell us more about your experience…"></textarea>
+                  [placeholder]="'survey.commentsPlaceholder' | translate"></textarea>
                 <mat-hint align="end">
                   <span data-testid="char-counter">
                     {{ (surveyForm.get('comment')!.value?.length ?? 0) }}/1000
                   </span>
                 </mat-hint>
                 @if (surveyForm.get('comment')!.hasError('maxlength')) {
-                  <mat-error>Comment cannot exceed 1000 characters.</mat-error>
+                  <mat-error>{{ 'survey.commentsMaxError' | translate }}</mat-error>
                 }
               </mat-form-field>
 
@@ -115,7 +117,7 @@ import { PortalSurveyService, SurveyDetail } from '../portal-survey.service';
                   @if (submitting()) {
                     <mat-spinner data-testid="submit-spinner" diameter="20"></mat-spinner>
                   } @else {
-                    Submit Feedback
+                    {{ 'survey.submitBtn' | translate }}
                   }
                 </button>
               </div>

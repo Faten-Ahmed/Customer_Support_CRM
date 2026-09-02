@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PortalKbService, PortalKbCategory, PortalKbArticleSummary } from '../../services/portal-kb.service';
 import { I18nService } from '../../../shared/services/i18n.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-portal-kb-home',
@@ -22,6 +23,7 @@ import { I18nService } from '../../../shared/services/i18n.service';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   templateUrl: './portal-kb-home.component.html',
   styleUrl: './portal-kb-home.component.scss',

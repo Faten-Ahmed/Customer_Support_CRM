@@ -44,7 +44,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
           <mat-label>{{ 'dashboard.availability' | translate }}</mat-label>
           <mat-select [(ngModel)]="selectedAvailability" (ngModelChange)="onAvailabilityChange($event)">
             @for (opt of availabilityOptions; track opt.value) {
-              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              <mat-option [value]="opt.value">{{ opt.labelKey | translate }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -260,11 +260,11 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
 
   readonly displayedColumns = ['ticketNumber', 'subject', 'priority', 'status', 'slaStatus', 'resolutionDue'];
 
-  readonly availabilityOptions: { value: AvailabilityStatus; label: string }[] = [
-    { value: 'Available', label: 'Available' },
-    { value: 'Busy', label: 'Busy' },
-    { value: 'Away', label: 'Away' },
-    { value: 'Offline', label: 'Offline' },
+  readonly availabilityOptions: { value: AvailabilityStatus; labelKey: string }[] = [
+    { value: 'Available', labelKey: 'avail.available' },
+    { value: 'Busy', labelKey: 'avail.busy' },
+    { value: 'Away', labelKey: 'avail.away' },
+    { value: 'Offline', labelKey: 'avail.offline' },
   ];
 
   // Computed stats

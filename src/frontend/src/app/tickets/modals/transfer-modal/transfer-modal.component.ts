@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TicketService } from '../../ticket.service';
 import { Department, DepartmentService } from '../../../admin/departments/department.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface TransferModalData {
   ticketId: string;
@@ -24,9 +25,10 @@ export interface TransferModalData {
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    TranslatePipe,
   ],
   template: `
-    <h2 mat-dialog-title>Transfer Ticket to Department</h2>
+    <h2 mat-dialog-title>{{ 'modal.transferTitle' | translate }}</h2>
     <mat-dialog-content>
       @if (loading()) {
         <div style="display:flex;justify-content:center;padding:40px">
@@ -35,19 +37,19 @@ export interface TransferModalData {
       } @else {
         <form [formGroup]="form" style="display:flex;flex-direction:column;gap:12px;padding-top:8px;min-width:400px">
           <mat-form-field appearance="outline">
-            <mat-label>Target Department</mat-label>
+            <mat-label>{{ 'modal.targetDept' | translate }}</mat-label>
             <mat-select formControlName="departmentId">
-              <mat-option value="">— Select department —</mat-option>
+              <mat-option value="">{{ 'modal.selectDept' | translate }}</mat-option>
               @for (d of departments; track d.id) {
                 <mat-option [value]="d.id">{{ d.name }}</mat-option>
               }
             </mat-select>
-            <mat-error>Department is required</mat-error>
+            <mat-error>{{ 'modal.deptRequired' | translate }}</mat-error>
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Transfer Note</mat-label>
-            <textarea matInput formControlName="transferNote" rows="3" placeholder="Min 10 characters"></textarea>
-            <mat-error>{{ form.get('transferNote')?.hasError('minlength') ? 'Minimum 10 characters' : 'Transfer note is required' }}</mat-error>
+            <mat-label>{{ 'modal.transferNote' | translate }}</mat-label>
+            <textarea matInput formControlName="transferNote" rows="3" [placeholder]="'modal.transferNoteHint' | translate"></textarea>
+            <mat-error>{{ form.get('transferNote')?.hasError('minlength') ? ('modal.transferNoteMin' | translate) : ('modal.transferNoteRequired' | translate) }}</mat-error>
           </mat-form-field>
           @if (errorMessage()) {
             <p style="color:#c62828;font-size:13px;margin:0">{{ errorMessage() }}</p>
@@ -56,9 +58,9 @@ export interface TransferModalData {
       }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
       <button mat-flat-button color="primary" [disabled]="form.invalid || saving() || loading()" (click)="onSubmit()">
-        {{ saving() ? 'Transferring…' : 'Transfer' }}
+        {{ saving() ? ('modal.transferring' | translate) : ('modal.transfer' | translate) }}
       </button>
     </mat-dialog-actions>
   `,
