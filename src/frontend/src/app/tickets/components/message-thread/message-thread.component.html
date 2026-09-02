@@ -1,0 +1,54 @@
+<div class="thread-container">
+
+  @if (hasMore) {
+    <div class="load-more">
+      <button mat-stroked-button (click)="loadMore()" [disabled]="loading()">
+        {{ loading() ? ('common.loading' | translate) : ('ticket.loadEarlier' | translate) }}
+      </button>
+    </div>
+  }
+
+  @if (messages().length === 0 && !loading()) {
+    <p class="empty-thread">{{ 'ticket.noMessages' | translate }}</p>
+  }
+
+  @for (msg of messages(); track msg.id) {
+
+    @if (msg.isInternal) {
+      <!-- Internal note — yellow, full width -->
+      <div class="msg-internal">
+        <div class="msg-internal-header">
+          <span class="internal-label">{{ 'ticket.internalNote' | translate }}</span>
+          <span class="msg-meta">{{ msg.authorName }}</span>
+          <span class="msg-time">{{ msg.createdAt | date:'shortTime' }}</span>
+        </div>
+        <p class="msg-body">{{ msg.body }}</p>
+      </div>
+
+    } @else if (isAgentMessage(msg)) {
+      <!-- Agent reply — right aligned, blue -->
+      <div class="msg-row msg-row-right">
+        <div class="bubble bubble-agent">
+          <div class="msg-header">
+            <span class="msg-meta">{{ msg.authorName }}</span>
+            <span class="msg-time">{{ msg.createdAt | date:'shortTime' }}</span>
+          </div>
+          <p class="msg-body">{{ msg.body }}</p>
+        </div>
+      </div>
+
+    } @else {
+      <!-- Customer message — left aligned, gray -->
+      <div class="msg-row msg-row-left">
+        <div class="bubble bubble-customer">
+          <div class="msg-header">
+            <span class="msg-meta">{{ msg.authorName }}</span>
+            <span class="msg-time">{{ msg.createdAt | date:'shortTime' }}</span>
+          </div>
+          <p class="msg-body">{{ msg.body }}</p>
+        </div>
+      </div>
+    }
+
+  }
+</div>

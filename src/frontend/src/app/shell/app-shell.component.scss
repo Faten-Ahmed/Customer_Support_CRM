@@ -1,0 +1,151 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.toolbar-brand {
+  font-weight: 700;
+  font-size: 1.125rem;
+  flex: 1 1 auto;
+}
+
+.role-badge {
+  font-size: 0.7rem;
+  background: white;
+  color: var(--mat-sys-primary);
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 2px 6px;
+  line-height: 1.4;
+}
+
+mat-sidenav-container {
+  flex: 1;
+  overflow: hidden;
+}
+
+mat-sidenav {
+  background: #1f2937;
+  color: white;
+  transition: width 0.2s ease;
+  overflow: hidden;
+  border-inline-end: none !important;
+}
+
+.sidenav-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0 0;
+  gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100% - 12px);
+}
+
+// Base nav link — shared by leaf links and group button
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin: 0 8px;
+  font-size: 0.875rem;
+  color: #d1d5db;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  width: calc(100% - 16px);
+  box-sizing: border-box;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+
+  &.active-link {
+    background: var(--mat-sys-primary);
+    color: white;
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
+
+// Group toggle button — same look as nav-link but no routerLinkActive
+.nav-group-btn {
+  background: none;
+  border: none;
+  text-align: start;
+
+  .nav-label {
+    flex: 1;
+  }
+
+  .chevron {
+    flex-shrink: 0;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &.group-active {
+    color: white;
+  }
+}
+
+// Children container
+.nav-children {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-bottom: 4px;
+}
+
+// Indented child links
+.nav-child-link {
+  padding-inline-start: 36px;
+  font-size: 0.82rem;
+  margin-inline-start: 8px;
+}
+
+:host ::ng-deep .mat-drawer-content {
+  overflow: hidden;
+}
+
+.content-wrap {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f9fafb;
+}
+
+.ai-panel {
+  width: 320px;
+  flex-shrink: 0;
+  border-inline-start: 1px solid var(--mat-sys-outline-variant);
+  overflow: hidden;
+}

@@ -1,0 +1,73 @@
+import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthStore } from '../auth/auth.store';
+
+const portalAuthGuard = () => {
+  const auth = inject(AuthStore);
+  const router = inject(Router);
+  if (auth.isAuthenticated() && auth.user()?.role === 'Customer') return true;
+  return router.createUrlTree(['/portal/login']);
+};
+
+export const PORTAL_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./portal-shell/portal-shell.component').then(m => m.PortalShellComponent),
+    canActivate: [portalAuthGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./dashboard/portal-dashboard.component').then(m => m.PortalDashboardComponent),
+      },
+      {
+        path: 'tickets',
+        loadComponent: () =>
+          import('./ticket-list/portal-ticket-list.component').then(m => m.PortalTicketListComponent),
+      },
+      {
+        path: 'tickets/new',
+        loadComponent: () =>
+          import('./submit-ticket/portal-submit-ticket.component').then(m => m.PortalSubmitTicketComponent),
+      },
+      {
+        path: 'tickets/:id',
+        loadComponent: () =>
+          import('./ticket-detail/portal-ticket-detail.component').then(m => m.PortalTicketDetailComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./profile/portal-profile.component').then(m => m.PortalProfileComponent),
+      },
+      {
+        path: 'kb',
+        loadComponent: () =>
+          import('./kb/portal-kb-home/portal-kb-home.component').then(m => m.PortalKbHomeComponent),
+      },
+      {
+        path: 'kb/search',
+        loadComponent: () =>
+          import('./kb/portal-kb-search/portal-kb-search.component').then(m => m.PortalKbSearchComponent),
+      },
+      {
+        path: 'kb/:id',
+        loadComponent: () =>
+          import('./kb/portal-kb-article/portal-kb-article.component').then(m => m.PortalKbArticleComponent),
+      },
+      {
+        path: 'live-chat',
+        loadComponent: () =>
+          import('./live-chat/live-chat.component').then(m => m.LiveChatComponent),
+      },
+      {
+        path: 'surveys/:id',
+        loadComponent: () =>
+          import('./survey/portal-survey/portal-survey.component').then(m => m.PortalSurveyComponent),
+      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ],
+  },
+];

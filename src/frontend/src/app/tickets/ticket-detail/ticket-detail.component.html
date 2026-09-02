@@ -1,0 +1,102 @@
+@if (loading()) {
+  <div style="display:flex;justify-content:center;padding:64px 0">
+    <mat-spinner diameter="56" />
+  </div>
+} @else if (ticket()) {
+
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <span class="ticket-number">{{ ticket()!.ticketNumber }}</span>
+    <span class="ticket-subject">{{ ticket()!.subject }}</span>
+    <div class="action-buttons">
+      <button mat-stroked-button (click)="onEdit()">{{ 'ticket.edit' | translate }}</button>
+      <button mat-stroked-button (click)="onAssign()">{{ 'ticket.assign' | translate }}</button>
+      <button mat-stroked-button (click)="onTransfer()">{{ 'ticket.transfer' | translate }}</button>
+      <button mat-stroked-button color="warn" (click)="onEscalate()" [disabled]="ticket()!.status !== 'InProgress'">{{ 'ticket.escalate' | translate }}</button>
+      <button mat-flat-button [matMenuTriggerFor]="statusMenu">{{ 'ticket.changeStatus' | translate }}</button>
+      <mat-menu #statusMenu>
+        @for (s of availableNextStatuses(); track s) {
+          <button mat-menu-item (click)="onChangeStatus(s)">{{ s }}</button>
+        }
+      </mat-menu>
+      <button mat-flat-button color="primary" (click)="onClose()">{{ 'ticket.close' | translate }}</button>
+    </div>
+    <button mat-icon-button (click)="toggleAiPanel()" [matTooltip]="'ticket.aiAssistance' | translate">
+      <mat-icon>auto_awesome</mat-icon>
+    </button>
+  </div>
+
+  <!-- Three-panel layout -->
+  <div class="detail-layout">
+
+    <!-- Left sidebar: Metadata -->
+    <aside class="detail-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">{{ 'common.details' | translate }}</div>
+        <dl class="metadata-grid">
+          <dt>{{ 'common.status' | translate }}</dt>
+          <dd><span class="status-badge">{{ ticket()!.status }}</span></dd>
+          <dt>{{ 'common.priority' | translate }}</dt>
+          <dd>{{ ticket()!.priority }}</dd>
+          <dt>{{ 'ticket.sla' | translate }}</dt>
+          <dd><app-sla-indicator [ticketId]="ticket()!.id" mode="detail" /></dd>
+          <dt>{{ 'common.department' | translate }}</dt>
+          <dd>{{ ticket()!.departmentName ?? '—' }}</dd>
+          <dt>{{ 'common.category' | translate }}</dt>
+          <dd>{{ ticket()!.categoryName ?? '—' }}</dd>
+          <dt>{{ 'common.agent' | translate }}</dt>
+          <dd>{{ ticket()!.assignedToName ?? ('ticket.unassigned' | translate) }}</dd>
+          <dt>{{ 'common.customer' | translate }}</dt>
+          <dd>{{ ticket()!.customerName }}</dd>
+          <dt>{{ 'common.created' | translate }}</dt>
+          <dd>{{ ticket()!.createdAt | date:'shortDate' }}</dd>
+        </dl>
+      </div>
+
+      @if (ticket()!.customFieldValues) {
+        <mat-divider />
+        <div class="sidebar-section" style="margin-top:12px">
+          <div class="sidebar-title">{{ 'ticket.customFields' | translate }}</div>
+          <p style="font-size:13px;margin:0">{{ ticket()!.customFieldValues }}</p>
+        </div>
+      }
+    </aside>
+
+    <!-- Centre: Tabs + Thread -->
+    <main class="detail-main">
+      <mat-tab-group animationDuration="0">
+        <mat-tab [label]="'common.messages' | translate">
+          <div style="padding-top:12px;display:flex;flex-direction:column;gap:12px">
+            <app-message-thread [ticketId]="ticket()!.id" />
+            <app-reply-composer [ticketId]="ticket()!.id" (messageSent)="onMessageSent($event)" />
+          </div>
+        </mat-tab>
+        <mat-tab [label]="'common.history' | translate">
+          <div style="padding-top:12px">
+            <app-ticket-history [ticketId]="ticket()!.id" />
+          </div>
+        </mat-tab>
+        <mat-tab [label]="'common.attachments' | translate">
+          <div style="padding-top:12px">
+            <app-attachment-panel [ticketId]="ticket()!.id" [isAgent]="true" />
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </main>
+
+    <!-- Right: AI Assistance -->
+    @if (aiPanelOpen()) {
+      <aside style="width:200px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+        <div class="sidebar-title">{{ 'ticket.aiAssistance' | translate }}</div>
+        <button mat-stroked-button style="width:100%">{{ 'ticket.summarize' | translate }}</button>
+        <button mat-stroked-button style="width:100%">{{ 'ticket.suggestReply' | translate }}</button>
+        <button mat-stroked-button style="width:100%">{{ 'ticket.suggestArticles' | translate }}</button>
+        <button mat-stroked-button style="width:100%">{{ 'ticket.suggestCategory' | translate }}</button>
+      </aside>
+    }
+
+  </div>
+
+} @else {
+  <p style="padding:24px;color:#666">{{ 'ticket.notFound' | translate }}</p>
+}

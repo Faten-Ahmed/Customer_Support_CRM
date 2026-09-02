@@ -1,0 +1,170 @@
+using CRM.API.Hubs;
+using CRM.API.Middleware;
+using CRM.API.Services;
+using CRM.Application;
+using CRM.Application.Agents.Jobs;
+using CRM.Application.Dashboard.Services;
+using CRM.Application.Notifications;
+using CRM.Application.Sla.Jobs;
+using CRM.Application.Tickets.Jobs;
+using CRM.Infrastructure;
+using CRM.Infrastructure.Jobs;
+using CRM.Infrastructure.Dashboard;
+using CRM.Infrastructure.Hubs;
+using CRM.Infrastructure.Persistence.Seed;
+using FluentValidation.AspNetCore;
+using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using System.Text;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((ctx, lc) => lc
+        .ReadFrom.Configuration(ctx.Configuration)
+        .Enrich.FromLogContext());
+
+    // Application + Infrastructure layers
+    builder.Services.AddApplication();
+    builder.Services.AddInfrastructure(builder.Configuration);
+
+    // JWT Authentication
+    var jwtSection = builder.Configuration.GetSection("Jwt");
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSection["Issuer"],
+                ValidAudience = jwtSection["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtSection["Secret"]!)),
+                ClockSkew = TimeSpan.Zero,
+            };
+            // Allow SignalR connections to pass JWT via query string
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    var token = ctx.Request.Query["access_token"];
+                    if (!string.IsNullOrEmpty(token) &&
+                        ctx.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                    {
+                        ctx.Token = token;
+                    }
+                    return Task.CompletedTask;
+                }
+            };
+        });
+
+    builder.Services.AddAuthorization();
+
+    builder.Services.AddControllers()
+        .AddJsonOptions(opts =>
+            opts.JsonSerializerOptions.Converters.Add(
+                new System.Text.Json.Serialization.JsonStringEnumConverter()));
+    builder.Services.AddFluentValidationAutoValidation();
+
+    // SignalR (hubs mapped after feature implementation)
+    builder.Services.AddSignalR();
+
+    // INotificationPushService — registered here (API project) so NotificationHub type is accessible
+    builder.Services.AddScoped<INotificationPushService>(sp =>
+        new NotificationPushService(
+            sp.GetRequiredService<IHubContext<NotificationHub>>()));
+
+    // IDashboardPusher — registered here (API project) so DashboardHub type is accessible
+    builder.Services.AddSingleton<IDashboardPusher>(sp =>
+        new DashboardPushService(
+            sp.GetRequiredService<IHubContext<DashboardHub>>(),
+            sp.GetRequiredService<CRM.Domain.Dashboard.IDashboardRepository>()));
+
+    // Swagger — dev only (Bearer security definition added once Swashbuckle OpenAPI 2.x API is confirmed)
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    // CORS — Angular dev server + production origins
+    var allowedOrigins = builder.Configuration
+        .GetSection("Cors:AllowedOrigins").Get<string[]>()
+        ?? ["http://localhost:4200"];
+
+    builder.Services.AddCors(options =>
+        options.AddPolicy("AllowAngular", policy => policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()));
+
+    var app = builder.Build();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AZM CRM API v1"));
+    }
+
+    app.UseMiddleware<ExceptionMiddleware>();
+    app.UseSerilogRequestLogging(opts =>
+    {
+        opts.GetLevel = (_, _, ex) =>
+            ex is OperationCanceledException
+                ? Serilog.Events.LogEventLevel.Verbose
+                : Serilog.Events.LogEventLevel.Information;
+    });
+    app.UseCors("AllowAngular");
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    app.MapHub<NotificationHub>("/hubs/notifications");
+    app.MapHub<CRM.Infrastructure.Hubs.ChatHub>("/hubs/chat");
+    app.MapHub<DashboardHub>("/hubs/dashboard");
+
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        await DbSeeder.SeedAsync(app);
+        var recurringJobs = app.Services.GetRequiredService<IRecurringJobManager>();
+        recurringJobs.AddOrUpdate<SlaMonitorJob>(
+            "sla-monitor",
+            job => job.Execute(CancellationToken.None),
+            "*/5 * * * *");
+        recurringJobs.AddOrUpdate<AutoCloseResolvedTicketsJob>(
+            "auto-close-resolved-tickets",
+            job => job.Execute(CancellationToken.None),
+            "*/30 * * * *");
+        recurringJobs.AddOrUpdate<PurgeCompletedTasksJob>(
+            "purge-completed-tasks",
+            job => job.Execute(CancellationToken.None),
+            "0 2 * * *");
+        recurringJobs.AddOrUpdate<ExpireCsatSurveysJob>(
+            "expire-csat-surveys",
+            job => job.ExecuteAsync(),
+            "5 0 * * *");
+    }
+
+    app.Run();
+}
+catch (Exception ex) when (ex is not HostAbortedException)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
+
+// Required for WebApplicationFactory<Program> in integration tests
+public partial class Program { }

@@ -1,0 +1,79 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--mat-sys-surface-container-lowest);
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem 2rem;
+  background: var(--mat-sys-surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+
+  &::before {
+    content: 'AZM CRM';
+    display: block;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--mat-sys-primary);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  &::after {
+    content: 'Sign in to your account';
+    display: block;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin-bottom: 1.75rem;
+  }
+}
+
+.error-banner {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.forgot-link {
+  align-self: flex-end;
+  font-size: 0.8rem;
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+  margin-top: -0.5rem;
+  margin-bottom: 0.75rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.submit-btn {
+  height: 44px;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  margin-top: 0.5rem;
+}
+
+.btn-spinner {
+  display: inline-flex;
+}

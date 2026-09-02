@@ -1,0 +1,12 @@
+version: 1
+project:
+  name: Customer_Support_CRM
+  primaryLanguage: c#,angular
+  projectRoots:
+    - .
+tracker:
+  type: none
+naming:
+  includeTrackerId: false
+  globalSequence: true
+agents: []

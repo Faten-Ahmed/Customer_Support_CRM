@@ -1,0 +1,290 @@
+using CRM.Application.Tickets.Commands;
+using CRM.Application.Tickets.Queries;
+using CRM.Domain.Tickets.Enums;
+using CRM.Domain.Users;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using CRM.Domain.Tickets;
+
+namespace CRM.API.Controllers;
+
+[ApiController]
+[Route("api/v1/tickets")]
+[Authorize(Roles = "Admin,Manager,Agent")]
+public class TicketsController : ControllerBase
+{
+    private readonly IMediator _mediator;
+    public TicketsController(IMediator mediator) => _mediator = mediator;
+
+    private Guid CurrentUserId =>
+        Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")!.Value);
+
+    public record CreateTicketRequest(
+        Guid CustomerId,
+        string Subject,
+        string SubjectAr,
+        string Description,
+        string DescriptionAr,
+        TicketPriority Priority,
+        TicketChannel Channel,
+        Guid? DepartmentId,
+        Guid? CategoryId,
+        string? CustomFieldValues);
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        [FromBody] CreateTicketRequest request, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new CreateTicketInternalCommand(
+                request.CustomerId, request.Subject, request.SubjectAr,
+                request.Description, request.DescriptionAr,
+                request.Priority, request.Channel, CurrentUserId,
+                request.DepartmentId, request.CategoryId, request.CustomFieldValues), ct);
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+    }
+
+    [HttpGet("unassigned")]
+    public async Task<IActionResult> GetUnassigned(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
+        Enum.TryParse<UserRole>(roleClaim, out var role);
+
+        var result = await _mediator.Send(
+            new ListUnassignedTicketsQuery(CurrentUserId, role, page, pageSize), ct);
+        return Ok(result);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> List(
+        [FromQuery] TicketStatus? status,
+        [FromQuery] TicketPriority? priority,
+        [FromQuery] Guid? customerId,
+        [FromQuery] Guid? assignedToUserId,
+        [FromQuery] Guid? categoryId,
+        [FromQuery] string? search,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string sortBy = "createdAt",
+        [FromQuery] bool sortDesc = false,
+        CancellationToken ct = default)
+    {
+        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
+        Enum.TryParse<UserRole>(roleClaim, out var role);
+
+        var result = await _mediator.Send(new ListTicketsQuery(
+            status, priority, customerId, assignedToUserId, categoryId,
+            page, pageSize, sortBy, sortDesc, CurrentUserId, role, search), ct);
+
+        return Ok(result);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetTicketQuery(id), ct);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+    }
+
+    public record UpdateTicketRequest(
+        string Subject, string SubjectAr, string Description, string DescriptionAr,
+        TicketPriority Priority, Guid? CategoryId, Guid? DepartmentId, string? CustomFieldValues);
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(
+        Guid id, [FromBody] UpdateTicketRequest request, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new UpdateTicketCommand(
+                id, request.Subject, request.SubjectAr, request.Description, request.DescriptionAr,
+                request.Priority, request.CategoryId, request.DepartmentId,
+                request.CustomFieldValues, CurrentUserId), ct);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
+    }
+
+    public record AssignTicketRequest(Guid AgentId);
+
+    [HttpPatch("{id:guid}/assign")]
+    public async Task<IActionResult> Assign(
+        Guid id, [FromBody] AssignTicketRequest request, CancellationToken ct)
+    {
+        if (User.IsInRole("Agent") && request.AgentId != CurrentUserId)
+            return Forbid();
+
+        try
+        {
+            await _mediator.Send(new AssignTicketCommand(id, request.AgentId, CurrentUserId), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    public record ChangeStatusRequest(TicketStatus Status);
+
+    [HttpPatch("{id:guid}/status")]
+    public async Task<IActionResult> ChangeStatus(
+        Guid id, [FromBody] ChangeStatusRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(
+                new ChangeTicketStatusCommand(id, request.Status, CurrentUserId), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    public record TransferTicketRequest(Guid DepartmentId, string TransferNote);
+
+    [Authorize(Roles = "Admin,Manager,Agent")]
+    [HttpPost("{id:guid}/transfer")]
+    public async Task<IActionResult> Transfer(
+        Guid id, [FromBody] TransferTicketRequest request, CancellationToken ct)
+    {
+        if (request.DepartmentId == Guid.Empty)
+            return UnprocessableEntity(new { errors = new { DepartmentId = new[] { "DepartmentId is required." } } });
+
+        if (string.IsNullOrWhiteSpace(request.TransferNote) || request.TransferNote.Length < 10)
+            return UnprocessableEntity(new { errors = new { TransferNote = new[] { "TransferNote must be at least 10 characters." } } });
+
+        try
+        {
+            await _mediator.Send(new TransferTicketCommand(
+                id, request.DepartmentId, request.TransferNote, CurrentUserId), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
+    }
+
+    public record EscalateTicketRequest(string Reason);
+
+    [HttpPatch("{id:guid}/escalate")]
+    public async Task<IActionResult> Escalate(
+        Guid id, [FromBody] EscalateTicketRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(new EscalateTicketCommand(id, request.Reason, CurrentUserId), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpGet("{id:guid}/messages")]
+    public async Task<IActionResult> GetMessages(
+        Guid id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(
+            new GetTicketMessagesQuery(id, page, pageSize, IsCallerCustomer: false), ct);
+        return Ok(result);
+    }
+
+    public record AddMessageRequest(string Body, bool IsInternal);
+
+    [HttpPost("{id:guid}/messages")]
+    public async Task<IActionResult> AddMessage(
+        Guid id, [FromBody] AddMessageRequest request, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new AddTicketMessageCommand(
+                id, request.Body, request.IsInternal, CurrentUserId, null), ct);
+            return StatusCode(201, result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
+    }
+
+    [HttpGet("{id:guid}/attachments")]
+    public async Task<IActionResult> GetAttachments(Guid id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetTicketAttachmentsQuery(id), ct);
+        return Ok(result);
+    }
+
+    [HttpPost("{id:guid}/attachments")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadAttachment(
+        Guid id, IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { error = "No file provided." });
+
+        try
+        {
+            var result = await _mediator.Send(new UploadAttachmentCommand(
+                id, file.FileName, file.ContentType, file.Length,
+                file.OpenReadStream(), CurrentUserId), ct);
+            return StatusCode(201, result);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpGet("{id:guid}/history")]
+    public async Task<IActionResult> GetHistory(
+        Guid id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(new GetTicketHistoryQuery(id, page, pageSize), ct);
+        return Ok(result);
+    }
+
+    [HttpDelete("{id:guid}/attachments/{attachmentId:guid}")]
+    public async Task<IActionResult> DeleteAttachment(
+        Guid id, Guid attachmentId, CancellationToken ct)
+    {
+        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
+        Enum.TryParse<UserRole>(roleClaim, out var role);
+
+        try
+        {
+            await _mediator.Send(
+                new DeleteAttachmentCommand(id, attachmentId, CurrentUserId, role), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        catch (UnauthorizedAccessException ex) { return StatusCode(403, new { error = ex.Message }); }
+    }
+
+    [HttpGet("{id:guid}/sla")]
+    public async Task<IActionResult> GetSla(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetTicketSlaQuery(id), ct);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+    }
+}

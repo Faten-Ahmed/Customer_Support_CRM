@@ -1,0 +1,92 @@
+<div style="display: flex; flex-direction: column; height: calc(100vh - 64px); padding: 24px; max-width: 800px; margin: 0 auto; box-sizing: border-box;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+    <div>
+      <h1 style="margin: 0; font-size: 20px; font-weight: 600;">{{ 'chat.title' | translate }}</h1>
+      @if (agentName()) {
+        <p style="margin: 4px 0 0; font-size: 13px; color: var(--mat-sys-on-surface-variant);">
+          You are chatting with {{ agentName() }}
+        </p>
+      } @else if (!closed()) {
+        <p style="margin: 4px 0 0; font-size: 13px; color: var(--mat-sys-on-surface-variant);">
+          {{ 'chat.waitingAgent' | translate }}
+        </p>
+      }
+    </div>
+    @if (!closed()) {
+      <button mat-stroked-button color="warn" (click)="endChat()">
+        <mat-icon>call_end</mat-icon> {{ 'chat.endChat' | translate }}
+      </button>
+    }
+  </div>
+
+  <!-- Message area -->
+  <mat-card appearance="outlined" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 16px;">
+
+    @if (connecting()) {
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px;">
+        <mat-spinner diameter="28"></mat-spinner>
+        <span style="color: var(--mat-sys-on-surface-variant);">{{ 'chat.connecting' | translate }}</span>
+      </div>
+    } @else {
+      <!-- Messages list -->
+      <div #messageList style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        @for (msg of messages(); track msg.id) {
+          @if (msg.senderRole === 'System') {
+            <div style="text-align: center; font-size: 12px; color: var(--mat-sys-on-surface-variant); padding: 4px 0;">
+              {{ msg.body }}
+            </div>
+          } @else {
+            <div [style.align-items]="msg.senderRole === 'Customer' ? 'flex-end' : 'flex-start'"
+                 style="display: flex; flex-direction: column;">
+              <div [style.background]="msg.senderRole === 'Customer' ? 'var(--mat-sys-primary)' : 'var(--mat-sys-surface-variant)'"
+                   [style.color]="msg.senderRole === 'Customer' ? 'white' : 'var(--mat-sys-on-surface)'"
+                   style="max-width: 70%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5;">
+                {{ msg.body }}
+              </div>
+              <span style="font-size: 11px; color: var(--mat-sys-on-surface-variant); margin-top: 2px; padding: 0 4px;">
+                {{ msg.sentAt | date:'HH:mm' }}
+              </span>
+            </div>
+          }
+        }
+
+        @if (agentTyping()) {
+          <div style="display: flex; align-items: center; gap: 6px; color: var(--mat-sys-on-surface-variant); font-size: 13px;">
+            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">more_horiz</mat-icon>
+            {{ agentName() ?? ('chat.agentFallback' | translate) }} {{ 'chat.agentTyping' | translate }}
+          </div>
+        }
+      </div>
+    }
+  </mat-card>
+
+  <!-- Input area -->
+  @if (!closed()) {
+    <div style="display: flex; gap: 8px; align-items: flex-end;">
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>{{ 'chat.typeMessage' | translate }}</mat-label>
+        <textarea matInput [formControl]="inputControl"
+                  rows="2"
+                  (keydown)="onKeyDown($event)"></textarea>
+      </mat-form-field>
+      <button mat-fab color="primary"
+              (click)="sendMessage()"
+              [disabled]="!canSend()"
+              style="margin-bottom: 22px;">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+    @if (waitingForAgent()) {
+      <p style="font-size: 12px; color: var(--mat-sys-on-surface-variant); text-align: center; margin: 0 0 8px;">
+        {{ 'chat.waitForAgent' | translate }}
+      </p>
+    }
+  } @else {
+    <div style="text-align: center; padding: 16px;">
+      <p style="margin: 0 0 12px; color: var(--mat-sys-on-surface-variant);">{{ 'chat.sessionEnded' | translate }}</p>
+      <button mat-raised-button color="primary" (click)="goToTickets()">{{ 'portal.myTickets' | translate }}</button>
+    </div>
+  }
+
+</div>

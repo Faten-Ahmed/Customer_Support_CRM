@@ -1,0 +1,87 @@
+import { Routes } from '@angular/router';
+import { AUTH_ROUTES } from './auth/auth.routes';
+import { AuthGuard } from './auth/guards/auth.guard';
+import { CUSTOMERS_ROUTES } from './customers/customers.routes';
+import { TICKETS_ROUTES } from './tickets/tickets.routes';
+import { KB_ROUTES } from './kb/kb.routes';
+import { PORTAL_ROUTES } from './portal/portal.routes';
+import { REPORTS_ROUTES } from './reports/reports.routes';
+import { NotFoundComponent } from './shell/not-found.component';
+import { ForbiddenComponent } from './shell/forbidden.component';
+
+export const routes: Routes = [
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+
+  ...AUTH_ROUTES,
+
+  {
+    path: 'portal/login',
+    loadComponent: () =>
+      import('./portal/auth/portal-auth-shell/portal-auth-shell.component').then(
+        m => m.PortalAuthShellComponent
+      ),
+  },
+
+  {
+    path: 'portal/verify-email',
+    loadComponent: () =>
+      import('./portal/auth/verify-email/verify-email.component').then(
+        m => m.VerifyEmailComponent
+      ),
+  },
+
+  {
+    path: 'portal',
+    children: PORTAL_ROUTES,
+  },
+
+  {
+    path: 'app',
+    loadComponent: () =>
+      import('./shell/app-shell.component').then(m => m.AppShellComponent),
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./dashboard/agent-dashboard/agent-dashboard.component').then(m => m.AgentDashboardComponent),
+      },
+      { path: 'customers', children: CUSTOMERS_ROUTES },
+      { path: 'tickets', children: TICKETS_ROUTES },
+      { path: 'kb', children: KB_ROUTES },
+      { path: 'reports', children: REPORTS_ROUTES },
+      {
+        path: 'settings',
+        children: [
+          {
+            path: 'templates',
+            loadComponent: () =>
+              import('./settings/templates/template-management.component').then(m => m.TemplateManagementComponent),
+          },
+          {
+            path: 'tasks',
+            loadComponent: () =>
+              import('./settings/tasks/personal-tasks.component').then(m => m.PersonalTasksComponent),
+          },
+        ],
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./profile/profile.component').then(m => m.ProfileComponent),
+      },
+      {
+        path: 'live-chat',
+        loadComponent: () =>
+          import('./live-chat/live-chat-inbox.component').then(m => m.LiveChatInboxComponent),
+      },
+      {
+        path: 'admin',
+        loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
+      },
+    ],
+  },
+
+  { path: '403', component: ForbiddenComponent },
+  { path: '**', component: NotFoundComponent },
+];

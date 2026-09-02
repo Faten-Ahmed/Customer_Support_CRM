@@ -1,0 +1,92 @@
+using CRM.Application.Notifications.Commands;
+using CRM.Application.Sla;
+using CRM.Application.Tickets.Services;
+using CRM.Domain.Notifications;
+using CRM.Domain.Sla;
+using CRM.Domain.Tickets;
+using CRM.Domain.Tickets.Enums;
+using CRM.Domain.Tickets.Events;
+using MediatR;
+
+namespace CRM.Application.Tickets.Commands;
+
+public record ChangeTicketStatusCommand(
+    Guid TicketId,
+    TicketStatus NewStatus,
+    Guid ChangedByUserId) : IRequest;
+
+public class ChangeTicketStatusCommandHandler : IRequestHandler<ChangeTicketStatusCommand>
+{
+    private readonly ITicketRepository _tickets;
+    private readonly ITicketSlaRepository _slaRepo;
+    private readonly IBusinessHoursRepository _businessHours;
+    private readonly IMediator _mediator;
+
+    public ChangeTicketStatusCommandHandler(
+        ITicketRepository tickets,
+        ITicketSlaRepository slaRepo,
+        IBusinessHoursRepository businessHours,
+        IMediator mediator)
+    {
+        _tickets = tickets;
+        _slaRepo = slaRepo;
+        _businessHours = businessHours;
+        _mediator = mediator;
+    }
+
+    public async Task Handle(ChangeTicketStatusCommand cmd, CancellationToken ct)
+    {
+        var ticket = await _tickets.FindByIdDetailedAsync(cmd.TicketId, ct)
+            ?? throw new KeyNotFoundException($"Ticket {cmd.TicketId} not found.");
+
+        if (!TicketStateMachine.IsValidTransition(ticket.Status, cmd.NewStatus))
+            throw new InvalidOperationException(
+                $"Cannot transition from {ticket.Status} to {cmd.NewStatus}.");
+
+        var previousStatus = ticket.Status;
+        ticket.ChangeStatus(cmd.NewStatus, cmd.ChangedByUserId);
+
+        var sla = await _slaRepo.FindByTicketIdAsync(cmd.TicketId, ct);
+        if (sla is not null)
+        {
+            if (cmd.NewStatus == TicketStatus.OnHold)
+            {
+                sla.PauseClock();
+            }
+            else if (previousStatus == TicketStatus.OnHold && sla.ClockPausedAt.HasValue)
+            {
+                BusinessHours? hours = null;
+                if (ticket.DepartmentId.HasValue)
+                    hours = await _businessHours.FindByDepartmentAsync(ticket.DepartmentId.Value, ct);
+                hours ??= await _businessHours.FindGlobalAsync(ct);
+
+                var businessPauseMinutes = hours is not null
+                    ? BusinessTimeCalculator.ElapsedBusinessMinutes(sla.ClockPausedAt.Value, DateTime.UtcNow, hours)
+                    : (int)(DateTime.UtcNow - sla.ClockPausedAt.Value).TotalMinutes;
+
+                sla.ResumeClock(businessPauseMinutes);
+            }
+        }
+
+        await _tickets.SaveChangesAsync(ct);
+        if (sla is not null)
+            await _slaRepo.SaveChangesAsync(ct);
+
+        var (type, title, body) = cmd.NewStatus == TicketStatus.Closed
+            ? (NotificationType.TicketClosed,
+               $"Ticket Closed: #{ticket.TicketNumber}",
+               $"Your ticket #{ticket.TicketNumber} \"{ticket.Subject}\" has been closed.")
+            : (NotificationType.TicketStatusChanged,
+               $"Ticket #{ticket.TicketNumber} Status Updated",
+               $"Your ticket \"{ticket.Subject}\" status changed to {cmd.NewStatus}.");
+
+        await _mediator.Send(new CreateNotificationCommand(
+            ticket.CustomerId, type, title, body, "ticket", ticket.Id), ct);
+
+        if (cmd.NewStatus == TicketStatus.Closed)
+            await _mediator.Publish(new TicketClosedEvent(
+                ticket.Id,
+                cmd.ChangedByUserId,
+                ticket.DepartmentId ?? Guid.Empty), ct);
+    }
+}

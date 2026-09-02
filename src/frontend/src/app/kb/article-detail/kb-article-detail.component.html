@@ -1,0 +1,76 @@
+@if (article()) {
+  <div class="page-container">
+
+    <div class="article-header">
+      <div class="article-meta">
+        <h1 class="page-title">{{ article()!.title }}</h1>
+        @if (article()!.titleAr) {
+          <p class="article-title-ar" dir="rtl">{{ article()!.titleAr }}</p>
+        }
+
+        <div class="meta-chips">
+          <span [class]="'status-badge status-' + article()!.status.toLowerCase()">
+            {{ article()!.status }}
+          </span>
+          <span class="visibility-badge">
+            <mat-icon class="chip-icon">visibility</mat-icon>
+            {{ article()!.visibility }}
+          </span>
+          @if (article()!.categoryName) {
+            <span class="category-badge">
+              <mat-icon class="chip-icon">folder</mat-icon>
+              {{ article()!.categoryName }}
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="article-actions">
+        @if (canEdit) {
+          <button mat-stroked-button [routerLink]="['/app/kb/articles', article()!.id, 'edit']"
+                  i18n="@@kb.detail.edit">
+            <mat-icon>edit</mat-icon> Edit
+          </button>
+        }
+        @if (canReview) {
+          <button mat-raised-button color="primary" (click)="approve()"
+                  i18n="@@kb.detail.approve">
+            <mat-icon>check_circle</mat-icon> Approve
+          </button>
+          <button mat-stroked-button color="warn" (click)="openRejectDialog()"
+                  i18n="@@kb.detail.reject">
+            <mat-icon>cancel</mat-icon> Reject
+          </button>
+        }
+        @if (canArchive) {
+          <button mat-stroked-button (click)="archive()" i18n="@@kb.detail.archive">
+            <mat-icon>archive</mat-icon> Archive
+          </button>
+        }
+        <button mat-button routerLink="/app/kb" i18n="@@kb.detail.back">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+      </div>
+    </div>
+
+    @if (article()!.rejectionNote) {
+      <div class="rejection-note">
+        <strong i18n="@@kb.detail.rejectionNote">Rejection note:</strong>
+        {{ article()!.rejectionNote }}
+      </div>
+    }
+
+    <div class="article-body">
+      <pre class="article-content">{{ article()!.content }}</pre>
+      @if (article()!.contentAr) {
+        <hr class="content-divider" />
+        <pre class="article-content" dir="rtl">{{ article()!.contentAr }}</pre>
+      }
+    </div>
+
+  </div>
+} @else {
+  <div class="spinner-wrap">
+    <span i18n="@@common.loading">Loading…</span>
+  </div>
+}

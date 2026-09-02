@@ -1,0 +1,67 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+  @if (errorCode() === 'EMAIL_NOT_VERIFIED') {
+    <div data-testid="email-not-verified-msg" class="info-banner" role="alert">
+      {{ 'portal.emailNotVerified' | translate }}
+      @if (!resendSent()) {
+        <button mat-button type="button" data-testid="resend-verification-btn" (click)="resendVerification()">
+          {{ 'portal.resendVerification' | translate }}
+        </button>
+      } @else {
+        <span> {{ 'portal.verificationSent' | translate }}</span>
+      }
+    </div>
+  }
+
+  @if (errorCode() === 'STAFF_NOT_ALLOWED') {
+    <div class="error-banner" data-testid="error-banner" role="alert">
+      {{ 'portal.errStaffNotAllowed' | translate }}
+      <a routerLink="/login" style="margin-left:6px;">{{ 'portal.switchToAppLogin' | translate }}</a>
+    </div>
+  }
+  @if (errorCode() && errorCode() !== 'EMAIL_NOT_VERIFIED' && errorCode() !== 'STAFF_NOT_ALLOWED') {
+    <div class="error-banner" data-testid="error-banner" role="alert">
+      {{ 'portal.errInvalidCredentials' | translate }}
+    </div>
+  }
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>{{ 'common.email' | translate }}</mat-label>
+    <input matInput type="email" formControlName="email" autocomplete="email" />
+    @if (loginForm.controls['email'].hasError('required') && loginForm.controls['email'].touched) {
+      <mat-error>{{ 'err.emailRequired' | translate }}</mat-error>
+    }
+    @if (loginForm.controls['email'].hasError('email') && loginForm.controls['email'].touched) {
+      <mat-error>{{ 'err.emailInvalid' | translate }}</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>{{ 'common.password' | translate }}</mat-label>
+    <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" autocomplete="current-password" />
+    <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
+      <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+    </button>
+    @if (loginForm.controls['password'].hasError('required') && loginForm.controls['password'].touched) {
+      <mat-error>{{ 'err.passwordRequired' | translate }}</mat-error>
+    }
+    @if (loginForm.controls['password'].hasError('minlength') && loginForm.controls['password'].touched) {
+      <mat-error>{{ 'err.passwordMin8' | translate }}</mat-error>
+    }
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="loading()">
+    @if (loading()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      {{ 'auth.signIn' | translate }}
+    }
+  </button>
+</form>
+
+<div style="margin-top:24px;text-align:center;font-size:13px;color:#666;">
+  {{ 'portal.isStaff' | translate }}
+  <a routerLink="/login" style="color:#1976d2;font-weight:500;margin-left:4px;">
+    {{ 'portal.switchToAppLogin' | translate }}
+  </a>
+</div>
