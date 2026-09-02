@@ -66,3 +66,14 @@ app-root {
 .mat-mdc-row:hover {
   background: rgba(0, 0, 0, 0.04);
 }
+
+/*
+ * Material Icons ligatures rely on LTR text rendering.
+ * When dir="rtl" is on <html>, it propagates into mat-icon and breaks
+ * the font-ligature engine that maps names like "dashboard" to glyphs.
+ * Force LTR on every mat-icon globally — this is safe because icon
+ * names are always LTR strings regardless of UI direction.
+ */
+mat-icon {
+  direction: ltr !important;
+}
