@@ -29,9 +29,12 @@ export class SignalRService {
 
   private readonly _notification$ = new Subject<Notification>();
   private readonly _unreadCountUpdated$ = new Subject<number>();
+  private readonly _liveChatHandoff$ = new Subject<{ sessionId: string; customerName: string }>();
 
   readonly notification$: Observable<Notification> = this._notification$.asObservable();
   readonly unreadCountUpdated$: Observable<number> = this._unreadCountUpdated$.asObservable();
+  readonly liveChatHandoff$: Observable<{ sessionId: string; customerName: string }> =
+    this._liveChatHandoff$.asObservable();
 
   readonly overallConnected = computed(() => {
     for (const stateSig of this._states.values()) {
@@ -71,6 +74,8 @@ export class SignalRService {
     if (hub === HubName.Notification) {
       conn.on('ReceiveNotification', (payload: Notification) => this._notification$.next(payload));
       conn.on('UnreadCountUpdated', (count: number) => this._unreadCountUpdated$.next(count));
+      conn.on('LiveChatHandoffRequested', (evt: { sessionId: string; customerName: string }) =>
+        this._liveChatHandoff$.next(evt));
     }
 
     conn.start()

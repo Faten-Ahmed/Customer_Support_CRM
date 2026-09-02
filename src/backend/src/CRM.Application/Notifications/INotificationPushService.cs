@@ -8,4 +8,6 @@ public interface INotificationPushService
         CancellationToken ct = default);
     Task PushUnreadCountAsync(Guid userId, int count,
         CancellationToken ct = default);
+    Task NotifyLiveChatHandoffAsync(Guid sessionId, string customerName,
+        CancellationToken ct = default);
 }

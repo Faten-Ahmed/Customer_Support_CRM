@@ -87,7 +87,13 @@
           <a [routerLink]="item.route" routerLinkActive="active-link"
              class="nav-link"
              [matTooltip]="collapsed() ? (item.labelKey | translate) : ''" matTooltipPosition="right">
-            <mat-icon>{{ item.icon }}</mat-icon>
+            <mat-icon
+              [matBadge]="pendingChatCount()"
+              matBadgeColor="warn"
+              matBadgeSize="small"
+              [matBadgeHidden]="item.route !== '/app/live-chat' || pendingChatCount() === 0">
+              {{ item.icon }}
+            </mat-icon>
             @if (!collapsed()) {
               <span>{{ item.labelKey | translate }}</span>
             }

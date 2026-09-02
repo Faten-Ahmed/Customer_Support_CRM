@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { AuthStore } from '../auth/auth.store';
 import { AgentAiAssistantComponent } from '../shared/agent-ai-assistant/agent-ai-assistant.component';
@@ -58,6 +59,7 @@ const NAV_ITEMS: NavItem[] = [
     CommonModule, RouterModule,
     MatSidenavModule, MatToolbarModule, MatButtonModule, MatIconModule,
     MatMenuModule, MatTooltipModule, MatProgressBarModule, MatBadgeModule, MatDividerModule,
+    MatSnackBarModule,
     AgentAiAssistantComponent, TranslatePipe, NotificationBellComponent,
   ],
   templateUrl: './app-shell.component.html',
@@ -69,11 +71,13 @@ export class AppShellComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly signalR = inject(SignalRService);
   private readonly notifService = inject(NotificationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly collapsed = signal(localStorage.getItem('sidenav_collapsed') === 'true');
   readonly aiOpen = signal(false);
   readonly loading = signal(false);
   readonly expandedGroups = signal<Set<string>>(new Set());
+  readonly pendingChatCount = signal(0);
 
   readonly navItems = NAV_ITEMS;
 
@@ -123,6 +127,9 @@ export class AppShellComponent implements OnInit, OnDestroy {
         event instanceof NavigationError
       ) {
         this.loading.set(false);
+        if (event instanceof NavigationEnd && event.urlAfterRedirects.startsWith('/app/live-chat')) {
+          this.pendingChatCount.set(0);
+        }
         // Auto-expand the group containing the newly active child
         this.expandedGroups.update(set => {
           const next = new Set(set);
@@ -142,6 +149,21 @@ export class AppShellComponent implements OnInit, OnDestroy {
     );
     this.signalRSubs.add(
       this.signalR.unreadCountUpdated$.subscribe(count => this.notifService.setUnreadCount(count))
+    );
+    this.signalRSubs.add(
+      this.signalR.liveChatHandoff$.subscribe(evt => {
+        const role = this.user?.role;
+        if (role !== 'Agent' && role !== 'Manager') return;
+        if (!this.router.url.startsWith('/app/live-chat')) {
+          this.pendingChatCount.update(n => n + 1);
+          const ref = this.snackBar.open(
+            `Customer waiting: ${evt.customerName}`,
+            'Go to Live Chat',
+            { duration: 8000, panelClass: 'live-chat-snack' },
+          );
+          ref.onAction().subscribe(() => this.router.navigate(['/app/live-chat']));
+        }
+      })
     );
   }
 

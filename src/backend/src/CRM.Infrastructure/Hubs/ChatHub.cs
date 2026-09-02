@@ -2,6 +2,7 @@ using CRM.Application.Chat.Commands.AcceptHandoff;
 using CRM.Application.Chat.Commands.CloseSession;
 using CRM.Application.Chat.Commands.SendChatMessage;
 using CRM.Application.Chat.Commands.StartChatSession;
+using CRM.Application.Notifications;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -13,8 +14,13 @@ namespace CRM.Infrastructure.Hubs;
 public class ChatHub : Hub
 {
     private readonly IMediator _mediator;
+    private readonly INotificationPushService _notifPush;
 
-    public ChatHub(IMediator mediator) => _mediator = mediator;
+    public ChatHub(IMediator mediator, INotificationPushService notifPush)
+    {
+        _mediator = mediator;
+        _notifPush = notifPush;
+    }
 
     private Guid CurrentUserId =>
         Guid.Parse(
@@ -48,6 +54,8 @@ public class ChatHub : Hub
             CustomerName = CurrentUserName,
             DepartmentId = departmentId,
         });
+
+        await _notifPush.NotifyLiveChatHandoffAsync(sessionId, CurrentUserName);
 
         return sessionId;
     }

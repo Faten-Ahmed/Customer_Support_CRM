@@ -15,6 +15,12 @@ public class ChatSessionRepository : IChatSessionRepository
             .Include(s => s.Messages)
             .FirstOrDefaultAsync(s => s.Id == id, ct);
 
+    public async Task<List<ChatSession>> GetWaitingAsync(CancellationToken ct = default) =>
+        await _db.ChatSessions
+            .Where(s => s.Status == ChatSessionStatus.Waiting)
+            .OrderBy(s => s.CreatedAt)
+            .ToListAsync(ct);
+
     public async Task AddAsync(ChatSession session, CancellationToken ct = default) =>
         await _db.ChatSessions.AddAsync(session, ct);
 

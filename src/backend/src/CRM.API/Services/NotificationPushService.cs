@@ -20,4 +20,10 @@ public class NotificationPushService : INotificationPushService
         CancellationToken ct = default)
         => _hub.Clients.Group($"user-{userId}")
                .SendAsync("UnreadCountUpdated", count, ct);
+
+    public Task NotifyLiveChatHandoffAsync(Guid sessionId, string customerName,
+        CancellationToken ct = default)
+        => _hub.Clients.Group("live-chat-agents")
+               .SendAsync("LiveChatHandoffRequested",
+                   new { SessionId = sessionId, CustomerName = customerName }, ct);
 }

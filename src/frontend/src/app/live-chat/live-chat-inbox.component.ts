@@ -2,6 +2,7 @@ import {
   Component, OnInit, OnDestroy, inject, signal, ElementRef, ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,13 +12,19 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AgentChatHubService, AgentChatMessage, HandoffRequestedEvent } from './agent-chat-hub.service';
 
 interface PendingSession {
   sessionId: string;
   customerName: string;
   receivedAt: Date;
+}
+
+interface WaitingSessionDto {
+  sessionId: string;
+  customerName: string;
+  createdAt: string;
 }
 
 @Component({
@@ -41,6 +48,7 @@ export class LiveChatInboxComponent implements OnInit, OnDestroy {
   @ViewChild('messageList') private messageList!: ElementRef<HTMLDivElement>;
 
   private readonly hub = inject(AgentChatHubService);
+  private readonly http = inject(HttpClient);
 
   readonly pending = signal<PendingSession[]>([]);
   readonly activeSessionId = signal<string | null>(null);
@@ -56,6 +64,16 @@ export class LiveChatInboxComponent implements OnInit, OnDestroy {
   private typingTimer: ReturnType<typeof setTimeout> | null = null;
 
   async ngOnInit(): Promise<void> {
+    // Populate queue with sessions already waiting before this page was opened
+    const waiting = await firstValueFrom(
+      this.http.get<WaitingSessionDto[]>('/api/v1/chat/sessions/waiting')
+    ).catch(() => [] as WaitingSessionDto[]);
+    this.pending.set(waiting.map(s => ({
+      sessionId: s.sessionId,
+      customerName: s.customerName,
+      receivedAt: new Date(s.createdAt),
+    })));
+
     this.subs.add(this.hub.handoffRequested$.subscribe((evt: HandoffRequestedEvent) => {
       this.pending.update(list => [
         ...list.filter(s => s.sessionId !== evt.sessionId),
