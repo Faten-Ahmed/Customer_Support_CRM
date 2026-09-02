@@ -1,5 +1,6 @@
 using CRM.Domain.Reports;
 using CRM.Domain.Sla;
+using CRM.Domain.Surveys;
 using CRM.Domain.Tickets.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -254,17 +255,95 @@ public class ReportRepository : IReportRepository
         }).ToList();
     }
 
-    public Task<CsatReportData> GetCsatReportAsync(
+    public async Task<CsatReportData> GetCsatReportAsync(
         DateTime dateFrom, DateTime dateTo,
         IReadOnlyList<Guid>? departmentIds,
         CancellationToken ct = default)
-        // CSAT tables are added in Feature 12
-        => Task.FromResult(new CsatReportData(
-            new CsatOverallData(null, 0, 0, 0m),
-            new Dictionary<int, int>(),
-            new List<CsatByDepartmentData>(),
-            new List<CsatByAgentData>(),
-            new List<string>()));
+    {
+        var query = _db.CsatSurveys
+            .Where(s => s.SentAt >= dateFrom && s.SentAt <= dateTo);
+
+        if (departmentIds?.Count > 0)
+            query = query.Where(s => departmentIds.Contains(s.DepartmentId));
+
+        var surveys = await query.ToListAsync(ct);
+
+        var totalSent = surveys.Count;
+        var submitted = surveys.Where(s => s.Status == "Submitted").ToList();
+        var totalSubmitted = submitted.Count;
+        var responseRate = totalSent > 0
+            ? Math.Round((decimal)totalSubmitted / totalSent * 100, 1)
+            : 0m;
+        var avgRating = submitted.Count > 0
+            ? Math.Round((decimal)submitted.Average(s => s.Rating!.Value), 2)
+            : (decimal?)null;
+
+        var distribution = submitted
+            .Where(s => s.Rating.HasValue)
+            .GroupBy(s => s.Rating!.Value)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        // By Department
+        var deptIds = surveys.Select(s => s.DepartmentId).Distinct().ToList();
+        var deptNames = await _db.Departments
+            .Where(d => deptIds.Contains(d.Id))
+            .Select(d => new { d.Id, d.Name })
+            .ToDictionaryAsync(d => d.Id, d => d.Name, ct);
+
+        var byDepartment = surveys
+            .GroupBy(s => s.DepartmentId)
+            .Select(g =>
+            {
+                var sub = g.Where(s => s.Status == "Submitted").ToList();
+                var avg = sub.Count > 0
+                    ? Math.Round((decimal)sub.Average(s => s.Rating!.Value), 2)
+                    : (decimal?)null;
+                return new CsatByDepartmentData(
+                    g.Key,
+                    deptNames.GetValueOrDefault(g.Key, g.Key.ToString()),
+                    avg,
+                    sub.Count);
+            })
+            .ToList();
+
+        // By Agent
+        var agentIds = surveys.Select(s => s.AgentId).Where(id => id != Guid.Empty).Distinct().ToList();
+        var agentNames = await _db.Users
+            .Where(u => agentIds.Contains(u.Id))
+            .Select(u => new { u.Id, Name = u.FirstName + " " + u.LastName })
+            .ToDictionaryAsync(u => u.Id, u => u.Name, ct);
+
+        var byAgent = surveys
+            .Where(s => s.AgentId != Guid.Empty)
+            .GroupBy(s => s.AgentId)
+            .Select(g =>
+            {
+                var sub = g.Where(s => s.Status == "Submitted").ToList();
+                var avg = sub.Count > 0
+                    ? Math.Round((decimal)sub.Average(s => s.Rating!.Value), 2)
+                    : (decimal?)null;
+                return new CsatByAgentData(
+                    g.Key,
+                    agentNames.GetValueOrDefault(g.Key, g.Key.ToString()),
+                    avg,
+                    sub.Count);
+            })
+            .ToList();
+
+        var recentComments = submitted
+            .Where(s => !string.IsNullOrWhiteSpace(s.Comment))
+            .OrderByDescending(s => s.SubmittedAt)
+            .Take(10)
+            .Select(s => s.Comment!)
+            .ToList();
+
+        return new CsatReportData(
+            new CsatOverallData(avgRating, totalSent, totalSubmitted, responseRate),
+            distribution,
+            byDepartment,
+            byAgent,
+            recentComments);
+    }
 
     public async Task<int> CountRowsAsync(
         string reportType,
